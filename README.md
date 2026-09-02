@@ -6,6 +6,9 @@ card** you can drop into docs, issues, slides or a tweet.
 
 No server. No upload. Nothing leaves your machine.
 
+**▶ [Try it in your browser](https://aurelio-nakamura.github.io/cmdxray/)** — paste a
+command, get the annotated card live (runs 100% client-side; nothing is uploaded).
+
 ```sh
 npx cmdxray tar -xzvf archive.tar.gz
 ```
