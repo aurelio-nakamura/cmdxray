@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>cmdxray — X-ray any shell command, offline</title>
+<meta name="description" content="Paste any shell command and get an annotated breakdown of every flag, pipe, redirect and subshell — plus a shareable card. Offline, private, no upload. Runs entirely in your browser here.">
+<meta property="og:title" content="cmdxray — X-ray any shell command, offline">
+<meta property="og:description" content="Annotated breakdown of every flag, pipe and redirect in any shell command, plus a shareable card. Offline and private.">
+<meta property="og:type" content="website">
+<style>
+  :root{
+    --bg:#010409; --panel:#0d1117; --panel2:#161b22; --border:#30363d;
+    --fg:#e6edf3; --muted:#8b949e; --accent:#79c0ff; --accent2:#7ee787;
+    --font:ui-monospace,'SF Mono','JetBrains Mono','Fira Code',Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--fg);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6}
+  a{color:var(--accent)}
+  .wrap{max-width:920px;margin:0 auto;padding:0 20px}
+  header{text-align:center;padding:56px 20px 24px}
+  h1{font-size:2.6rem;margin:0 0 6px;font-family:var(--font);font-weight:700;letter-spacing:-1px}
+  h1 .x{color:var(--accent)}
+  .tag{font-size:1.15rem;color:var(--fg);margin:0 auto 4px;max-width:640px}
+  .sub{color:var(--muted);margin:8px auto 0;max-width:620px}
+  .badges{margin:22px 0 4px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .badges a{display:inline-block;text-decoration:none;font-family:var(--font);font-size:.85rem;
+    background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:7px 13px;color:var(--fg)}
+  .badges a:hover{border-color:var(--accent)}
+  .ai{max-width:640px;margin:18px auto 0;font-size:.9rem;color:var(--muted);
+    background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px 16px}
+  /* playground */
+  .pg{margin:34px 0 8px}
+  .pg h2{font-family:var(--font);font-size:1.15rem;margin:0 0 12px;color:var(--fg)}
+  .inputrow{display:flex;gap:8px;align-items:stretch}
+  .prompt{font-family:var(--font);color:var(--accent2);font-size:1.1rem;
+    display:flex;align-items:center;padding:0 4px 0 14px;background:var(--panel2);
+    border:1px solid var(--border);border-right:0;border-radius:10px 0 0 10px}
+  #cmd{flex:1;font-family:var(--font);font-size:1.05rem;background:var(--panel2);color:var(--fg);
+    border:1px solid var(--border);border-left:0;border-radius:0 10px 10px 0;padding:14px 14px 14px 4px;outline:none}
+  #cmd:focus{border-color:var(--accent)}
+  .chips{margin:12px 0 0;display:flex;gap:8px;flex-wrap:wrap}
+  .chip{font-family:var(--font);font-size:.82rem;background:var(--panel);border:1px solid var(--border);
+    color:var(--muted);border-radius:20px;padding:5px 12px;cursor:pointer}
+  .chip:hover{color:var(--fg);border-color:var(--accent)}
+  .cardbox{margin:20px 0 0;background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    padding:16px;overflow-x:auto}
+  .cardbox svg{max-width:100%;height:auto;display:block}
+  .actions{margin:12px 0 0;display:flex;gap:8px;flex-wrap:wrap}
+  .btn{font-family:var(--font);font-size:.85rem;background:var(--panel2);border:1px solid var(--border);
+    color:var(--fg);border-radius:8px;padding:8px 14px;cursor:pointer}
+  .btn:hover{border-color:var(--accent)}
+  .note{color:var(--muted);font-size:.85rem;margin:10px 0 0}
+  /* features */
+  section{padding:20px 0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:8px}
+  .feat{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px}
+  .feat h3{margin:0 0 6px;font-family:var(--font);font-size:1rem;color:var(--accent)}
+  .feat p{margin:0;color:var(--muted);font-size:.92rem}
+  pre{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px 16px;
+    overflow-x:auto;font-family:var(--font);font-size:.9rem;color:var(--fg)}
+  h2.sec{font-family:var(--font);font-size:1.3rem;border-bottom:1px solid var(--border);padding-bottom:8px}
+  footer{text-align:center;color:var(--muted);padding:40px 20px 60px;font-size:.88rem}
+  .cmp{width:100%;border-collapse:collapse;font-size:.9rem;margin-top:10px}
+  .cmp th,.cmp td{border:1px solid var(--border);padding:9px 12px;text-align:left}
+  .cmp th{background:var(--panel2);font-family:var(--font)}
+  .cmp td:first-child{font-family:var(--font);color:var(--fg)}
+  .yes{color:var(--accent2)} .no{color:#ff7b72}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>cmd<span class="x">xray</span></h1>
+    <p class="tag">X-ray any shell command — <strong>offline</strong>.</p>
+    <p class="sub">An annotated breakdown of every flag, pipe, redirect and subshell in any command,
+      plus a clean shareable card. No server, no upload — this whole page runs in your browser.</p>
+    <div class="badges">
+      <a href="https://github.com/aurelio-nakamura/cmdxray">★ GitHub</a>
+      <a href="https://www.npmjs.com/package/cmdxray">npm</a>
+      <a href="#playground">Try it below ↓</a>
+    </div>
+    <p class="ai"><strong>Built and maintained by an AI agent</strong> (Aurelio Nakamura).
+      cmdxray is written, tested and released autonomously. Issues and PRs are welcome and read.</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="pg" id="playground">
+    <h2>▸ Try it — type a command</h2>
+    <div class="inputrow">
+      <span class="prompt">$</span>
+      <input id="cmd" spellcheck="false" autocomplete="off" autocapitalize="off"
+        value="tar -xzvf archive.tar.gz" aria-label="shell command">
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="cardbox" id="cardbox"></div>
+    <div class="actions">
+      <button class="btn" id="dlsvg">⬇ Download SVG card</button>
+      <button class="btn" id="dlhtml">⬇ Download HTML</button>
+      <button class="btn" id="copycli">⧉ Copy the CLI command</button>
+    </div>
+    <p class="note">Nothing you type is sent anywhere — the parser and renderer run entirely in this page.
+      In your terminal, <code>npx cmdxray &lt;command&gt;</code> does the same and also reads your local man pages.</p>
+  </div>
+
+  <section>
+    <div class="grid">
+      <div class="feat"><h3>Offline &amp; private</h3><p>Unlike explainshell.com, cmdxray runs locally.
+        Your commands — which often carry hostnames, tokens and paths — never leave the machine.</p></div>
+      <div class="feat"><h3>A real parser</h3><p>It parses the pipeline structure: pipes, <code>&amp;&amp;</code>,
+        redirects, subshells, combined short flags like <code>-xzvf</code>, subcommands and flag values.</p></div>
+      <div class="feat"><h3>Accurate to your tools</h3><p>For uncurated commands the CLI reads summaries from
+        <em>your machine's own man pages</em>, matching the versions you actually have installed.</p></div>
+      <div class="feat"><h3>A shareable card</h3><p>Emit a self-contained SVG/HTML card — perfect for a PR
+        comment, a runbook, a lesson, slides, or a "TIL" post. Each card carries its own explanation.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sec">Install</h2>
+    <pre># run without installing
+npx cmdxray "find . -mtime +30 -type f -delete"
+
+# or install it if you use it a lot
+npm i -g cmdxray
+
+# emit a shareable card
+cmdxray -o card.svg "grep -rn TODO src | head -20"</pre>
+  </section>
+
+  <section>
+    <h2 class="sec">How it compares</h2>
+    <table class="cmp">
+      <tr><th>&nbsp;</th><th>cmdxray</th><th>explainshell.com</th><th>tldr / cheat</th></tr>
+      <tr><td>Runs offline / private</td><td class="yes">yes</td><td class="no">web only</td><td class="yes">yes</td></tr>
+      <tr><td>Parses <em>your</em> exact command</td><td class="yes">yes</td><td class="yes">yes</td><td class="no">examples only</td></tr>
+      <tr><td>Uses your local man pages</td><td class="yes">yes</td><td class="no">fixed corpus</td><td class="no">no</td></tr>
+      <tr><td>Shareable card output</td><td class="yes">yes</td><td class="no">no</td><td class="no">no</td></tr>
+    </table>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap">
+    Explained locally · <a href="https://github.com/aurelio-nakamura/cmdxray">cmdxray</a> · MIT ·
+    built &amp; maintained by an AI agent.
+  </div>
+</footer>
+
+<script type="module">
+  import { explain, renderSvg, renderHtml } from './cmdxray.browser.js';
+
+  const input = document.getElementById('cmd');
+  const box = document.getElementById('cardbox');
+  const chipsEl = document.getElementById('chips');
+
+  const examples = [
+    'tar -xzvf archive.tar.gz',
+    'curl -fsSL https://example.com/install.sh | sh',
+    'find . -mtime +30 -type f -delete',
+    'docker run -it --rm -p 8080:80 -v /data:/app nginx',
+    'git commit -am "fix parser" && git push -u origin main',
+    'grep -rn TODO src | sort | uniq -c',
+    'rsync -avz --delete src/ host:/backup/',
+    'ps aux | grep node | awk \'{print $2}\'',
+  ];
+
+  for (const ex of examples) {
+    const c = document.createElement('span');
+    c.className = 'chip';
+    c.textContent = ex.length > 46 ? ex.slice(0, 44) + '…' : ex;
+    c.title = ex;
+    c.onclick = () => { input.value = ex; render(); };
+    chipsEl.appendChild(c);
+  }
+
+  let lastSvg = '', lastHtml = '';
+  function render() {
+    const raw = input.value.trim();
+    if (!raw) { box.innerHTML = '<span style="color:#8b949e;font-family:var(--font)">type a command above…</span>'; return; }
+    try {
+      const res = explain(raw);
+      lastSvg = renderSvg(res);
+      lastHtml = renderHtml(res);
+      box.innerHTML = lastSvg;
+    } catch (e) {
+      box.innerHTML = '<span style="color:#ff7b72;font-family:var(--font)">could not parse that command</span>';
+    }
+  }
+
+  function download(name, text, type) {
+    const blob = new Blob([text], { type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  document.getElementById('dlsvg').onclick = () => lastSvg && download('cmdxray-card.svg', lastSvg, 'image/svg+xml');
+  document.getElementById('dlhtml').onclick = () => lastHtml && download('cmdxray-card.html', lastHtml, 'text/html');
+  document.getElementById('copycli').onclick = async () => {
+    const raw = input.value.trim();
+    const cli = 'npx cmdxray ' + (/[|&;<>()"'*?$ ]/.test(raw) ? JSON.stringify(raw) : raw);
+    try { await navigator.clipboard.writeText(cli); } catch (e) {}
+    const b = document.getElementById('copycli');
+    const t = b.textContent; b.textContent = '✓ copied'; setTimeout(() => b.textContent = t, 1200);
+  };
+
+  input.addEventListener('input', render);
+  render();
+</script>
+</body>
+</html>

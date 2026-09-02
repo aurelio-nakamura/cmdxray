@@ -1,0 +1,898 @@
+// src/parse.ts
+var OPERATORS = /* @__PURE__ */ new Set(["&&", "||", ";", "&"]);
+var REDIRECTS = /* @__PURE__ */ new Set([">", ">>", "<", "<<", "2>", "2>>", "&>", ">&", "2>&1"]);
+function lex(raw) {
+  const words = [];
+  let cur = "";
+  let quoted = false;
+  let i = 0;
+  const push = () => {
+    if (cur.length) words.push({ text: cur, quoted });
+    cur = "";
+    quoted = false;
+  };
+  while (i < raw.length) {
+    const c = raw[i];
+    if (c === " " || c === "	" || c === "\n") {
+      push();
+      i++;
+      continue;
+    }
+    if (c === "'" || c === '"') {
+      quoted = true;
+      const q = c;
+      i++;
+      while (i < raw.length && raw[i] !== q) {
+        cur += raw[i++];
+      }
+      i++;
+      continue;
+    }
+    if (c === "$" && raw[i + 1] === "(") {
+      let depth = 1;
+      cur += "$(";
+      i += 2;
+      while (i < raw.length && depth > 0) {
+        if (raw[i] === "(") depth++;
+        else if (raw[i] === ")") depth--;
+        if (depth > 0) cur += raw[i];
+        i++;
+      }
+      cur += ")";
+      continue;
+    }
+    cur += c;
+    i++;
+  }
+  push();
+  return words;
+}
+function classifyWord(word, expectCommand) {
+  const { text, quoted } = word;
+  if (!quoted && text === "|") return { text, kind: "pipe" };
+  if (!quoted && OPERATORS.has(text)) return { text, kind: "operator" };
+  if (!quoted && REDIRECTS.has(text)) return { text, kind: "redirect" };
+  if (!quoted && /^\$\(.*\)$/.test(text)) return { text, kind: "subshell", quoted };
+  if (expectCommand) {
+    if (!quoted && /^[A-Za-z_][A-Za-z0-9_]*=.*/.test(text)) {
+      return { text, kind: "assignment" };
+    }
+    return { text, kind: "command" };
+  }
+  if (!quoted && /^--[A-Za-z0-9][A-Za-z0-9-]*(=.*)?$/.test(text)) {
+    return { text, kind: "longFlag" };
+  }
+  if (!quoted && /^-\d+$/.test(text)) {
+    return { text, kind: "operand" };
+  }
+  if (!quoted && /^-[A-Za-z]+$/.test(text)) {
+    const letters = text.slice(1).split("");
+    return { text, kind: "shortFlag", bundle: letters.length > 1 ? letters : void 0 };
+  }
+  if (!quoted && /^-[A-Za-z]/.test(text)) {
+    return { text, kind: "shortFlag" };
+  }
+  return { text, kind: "operand", quoted };
+}
+function parseCommand(raw) {
+  const words = lex(raw.trim());
+  const tokens = [];
+  const segments = [];
+  let expectCommand = true;
+  let seg = { command: null, tokens: [] };
+  for (const w of words) {
+    const tok = classifyWord(w, expectCommand);
+    tokens.push(tok);
+    if (tok.kind === "pipe" || tok.kind === "operator") {
+      if (seg.tokens.length) segments.push(seg);
+      seg = { command: null, tokens: [] };
+      expectCommand = true;
+      continue;
+    }
+    if (tok.kind === "assignment") {
+      seg.tokens.push(tok);
+      continue;
+    }
+    if (tok.kind === "command") {
+      seg.command = tok.text;
+      expectCommand = false;
+    }
+    seg.tokens.push(tok);
+  }
+  if (seg.tokens.length) segments.push(seg);
+  return { raw, tokens, segments };
+}
+
+// src/db.ts
+var DB = {
+  tar: {
+    summary: "archive utility \u2014 bundle files into (or extract them from) a .tar",
+    takesValue: ["f", "C"],
+    flags: {
+      c: "create a new archive",
+      x: "extract files from an archive",
+      t: "list the contents of an archive",
+      z: "filter the archive through gzip (.gz)",
+      j: "filter the archive through bzip2 (.bz2)",
+      J: "filter the archive through xz (.xz)",
+      v: "verbose \u2014 list each file as it is processed",
+      f: "use the next argument as the archive file name",
+      C: "change to the given directory first",
+      "--create": "create a new archive",
+      "--extract": "extract files from an archive",
+      "--gzip": "filter the archive through gzip",
+      "--verbose": "verbose \u2014 list each file as it is processed",
+      "--file": "use the given archive file"
+    }
+  },
+  grep: {
+    summary: "search input for lines matching a pattern",
+    takesValue: ["e", "f", "A", "B", "C", "m"],
+    flags: {
+      i: "ignore case when matching",
+      v: "invert \u2014 show lines that do NOT match",
+      r: "search directories recursively",
+      R: "search directories recursively, following symlinks",
+      n: "prefix each match with its line number",
+      l: "print only the names of files with matches",
+      c: "print only a count of matching lines",
+      E: "interpret the pattern as an extended regex",
+      F: "match fixed strings, not regexes",
+      o: "print only the matched part of each line",
+      w: "match whole words only",
+      A: "also print N lines after each match",
+      B: "also print N lines before each match",
+      C: "also print N lines of context around each match",
+      e: "use the next argument as the pattern",
+      "--ignore-case": "ignore case when matching",
+      "--invert-match": "show lines that do NOT match",
+      "--recursive": "search directories recursively",
+      "--line-number": "prefix each match with its line number",
+      "--color": "highlight matches in color"
+    }
+  },
+  ls: {
+    summary: "list directory contents",
+    flags: {
+      l: "long format \u2014 permissions, owner, size, date",
+      a: "show hidden entries (dotfiles) too",
+      A: "show hidden entries except . and ..",
+      h: "human-readable sizes (K, M, G)",
+      t: "sort by modification time, newest first",
+      r: "reverse the sort order",
+      S: "sort by file size, largest first",
+      R: "list subdirectories recursively",
+      d: "list directories themselves, not their contents",
+      1: "list one entry per line"
+    }
+  },
+  rm: {
+    summary: "remove files or directories",
+    flags: {
+      r: "recurse into directories (delete their contents)",
+      f: "force \u2014 ignore missing files, never prompt",
+      i: "prompt before every removal",
+      v: "verbose \u2014 explain what is being done",
+      d: "remove empty directories"
+    }
+  },
+  cp: {
+    summary: "copy files or directories",
+    flags: {
+      r: "copy directories recursively",
+      R: "copy directories recursively",
+      f: "force \u2014 overwrite the destination if needed",
+      i: "prompt before overwriting",
+      p: "preserve mode, ownership and timestamps",
+      v: "verbose \u2014 print each file as it is copied",
+      a: "archive \u2014 recursive plus preserve everything",
+      u: "copy only when the source is newer than the destination"
+    }
+  },
+  mv: {
+    summary: "move or rename files and directories",
+    flags: {
+      f: "force \u2014 overwrite the destination without prompting",
+      i: "prompt before overwriting",
+      n: "never overwrite an existing file",
+      v: "verbose \u2014 print each file as it is moved"
+    }
+  },
+  mkdir: {
+    summary: "create directories",
+    flags: {
+      p: "create parent directories as needed, no error if they exist",
+      v: "print a message for each created directory",
+      m: "set the permission mode of the new directory"
+    }
+  },
+  curl: {
+    summary: "transfer data to or from a URL",
+    takesValue: ["o", "X", "H", "d", "u", "A", "b", "c", "e"],
+    flags: {
+      s: "silent \u2014 hide the progress meter and errors",
+      S: "with -s, still show errors",
+      L: "follow HTTP redirects",
+      o: "write output to the given file",
+      O: "save output using the remote file name",
+      X: "set the HTTP request method (e.g. POST)",
+      H: "add a request header",
+      d: "send the given data in a POST body",
+      F: "send a multipart/form-data field",
+      f: "fail silently on server errors (no error page)",
+      k: "allow insecure TLS connections",
+      i: "include the response headers in the output",
+      I: "fetch only the response headers (HEAD request)",
+      u: "supply user:password credentials",
+      A: "set the User-Agent header",
+      b: "send cookies (string or file)",
+      "--silent": "hide the progress meter",
+      "--location": "follow HTTP redirects",
+      "--output": "write output to the given file",
+      "--header": "add a request header",
+      "--request": "set the HTTP request method",
+      "--data": "send the given data in a POST body",
+      "--fail": "fail silently on server errors"
+    }
+  },
+  wget: {
+    summary: "download files from the web over HTTP/FTP",
+    takesValue: ["O", "P"],
+    flags: {
+      O: "write the download to the given file name",
+      P: "save files into the given directory",
+      c: "continue a partially downloaded file",
+      q: "quiet \u2014 no output",
+      r: "recursive \u2014 download linked pages too",
+      "--no-check-certificate": "skip TLS certificate validation"
+    }
+  },
+  find: {
+    summary: "walk a directory tree looking for files",
+    flags: {
+      "-name": "match files by this name pattern",
+      "-iname": "match by name, case-insensitively",
+      "-path": "match by path pattern",
+      "-type": "match by type (f=file, d=directory, l=symlink)",
+      "-mtime": "match by modification age in days",
+      "-mmin": "match by modification age in minutes",
+      "-size": "match by file size",
+      "-empty": "match empty files and directories",
+      "-exec": "run a command on each match ({} = the file, ; ends it)",
+      "-delete": "delete each matching file",
+      "-maxdepth": "descend at most this many directory levels",
+      "-mindepth": "ignore matches shallower than this many levels",
+      "-print": "print each match (the default action)",
+      "-print0": "print each match separated by NUL (for xargs -0)"
+    }
+  },
+  chmod: {
+    summary: "change file mode (permission) bits",
+    flags: {
+      R: "apply changes recursively",
+      v: "verbose \u2014 report each change",
+      c: "report only files that actually change",
+      f: "suppress error messages"
+    }
+  },
+  chown: {
+    summary: "change file owner and group",
+    flags: {
+      R: "apply changes recursively",
+      v: "verbose \u2014 report each change",
+      h: "affect symlinks themselves, not their targets"
+    }
+  },
+  ssh: {
+    summary: "log in to or run a command on a remote machine",
+    takesValue: ["i", "p", "L", "R", "o"],
+    flags: {
+      i: "use the given private key file",
+      p: "connect to this port",
+      L: "set up local port forwarding",
+      R: "set up remote port forwarding",
+      D: "set up a local SOCKS proxy (dynamic forwarding)",
+      N: "do not run a remote command (forwarding only)",
+      f: "go to the background after authenticating",
+      v: "verbose \u2014 print debugging output",
+      t: "force a pseudo-terminal",
+      o: "set an ssh_config option (e.g. StrictHostKeyChecking=no)"
+    }
+  },
+  scp: {
+    summary: "copy files between hosts over SSH",
+    takesValue: ["i", "P"],
+    flags: {
+      r: "copy directories recursively",
+      P: "connect to this port (capital P, unlike ssh)",
+      i: "use the given private key file",
+      p: "preserve modification times and modes",
+      C: "compress data during transfer"
+    }
+  },
+  rsync: {
+    summary: "efficiently sync files, copying only what changed",
+    takesValue: ["e"],
+    flags: {
+      a: "archive \u2014 recurse and preserve nearly everything",
+      v: "verbose \u2014 list files as they transfer",
+      z: "compress data during transfer",
+      r: "recurse into directories",
+      P: "show progress and keep partial files",
+      n: "dry run \u2014 show what would happen, change nothing",
+      u: "skip files that are newer on the destination",
+      e: "use the given remote shell (e.g. ssh)",
+      "--delete": "delete files on the destination that are gone from the source",
+      "--exclude": "skip files matching this pattern",
+      "--progress": "show a progress bar during transfer",
+      "--dry-run": "show what would happen, change nothing"
+    }
+  },
+  docker: {
+    summary: "build, run and manage containers",
+    takesValue: ["p", "v", "e", "--name", "--network", "-w"],
+    subcommands: {
+      run: "create and start a new container",
+      build: "build an image from a Dockerfile",
+      ps: "list running containers",
+      images: "list local images",
+      exec: "run a command inside a running container",
+      pull: "download an image from a registry",
+      push: "upload an image to a registry",
+      stop: "stop a running container",
+      rm: "remove a container",
+      rmi: "remove an image",
+      logs: "show a container's output",
+      compose: "run multi-container apps from a compose file"
+    },
+    flags: {
+      d: "detached \u2014 run in the background",
+      it: "interactive with a terminal attached",
+      i: "keep STDIN open (interactive)",
+      t: "allocate a pseudo-terminal",
+      p: "publish a container port to the host (host:container)",
+      v: "mount a volume (host path : container path)",
+      e: "set an environment variable",
+      w: "set the working directory inside the container",
+      "--rm": "remove the container when it exits",
+      "--name": "give the container a name",
+      "--network": "connect the container to this network"
+    }
+  },
+  git: {
+    summary: "the distributed version control system",
+    takesValue: ["-C", "m", "b"],
+    subcommands: {
+      clone: "copy a repository to your machine",
+      init: "create a new empty repository here",
+      add: "stage changes for the next commit",
+      commit: "record staged changes as a new commit",
+      status: "show what is staged, modified and untracked",
+      push: "upload your commits to a remote",
+      pull: "fetch from a remote and merge into the current branch",
+      fetch: "download objects and refs from a remote (no merge)",
+      checkout: "switch branches or restore files",
+      switch: "switch to another branch",
+      branch: "list, create or delete branches",
+      merge: "join another branch's history into this one",
+      rebase: "reapply your commits on top of another base",
+      log: "show the commit history",
+      diff: "show changes between commits, branches or the working tree",
+      stash: "shelve uncommitted changes for later",
+      reset: "move the current branch and optionally the index/working tree",
+      revert: "make a new commit that undoes an earlier one",
+      tag: "create, list or delete tags",
+      remote: "manage the set of tracked repositories",
+      cherry: "apply the change introduced by a specific commit",
+      restore: "restore working-tree files"
+    },
+    flags: {
+      m: "use the next argument as the commit message",
+      a: "automatically stage every tracked, modified file",
+      b: "create and switch to a new branch",
+      f: "force the operation",
+      d: "delete (e.g. a branch)",
+      D: "force-delete (e.g. an unmerged branch)",
+      n: "dry run / no-commit, depending on the subcommand",
+      "--amend": "replace the previous commit instead of adding a new one",
+      "--force": "force the operation (e.g. push)",
+      "--all": "operate on everything (all branches / all changes)",
+      "--oneline": "show each commit on a single line",
+      "--graph": "draw an ASCII graph of the branch structure",
+      "-C": "run as if git was started in the given directory"
+    }
+  },
+  npm: {
+    summary: "the Node.js package manager",
+    subcommands: {
+      install: "install dependencies (or a named package)",
+      i: "install dependencies (short for install)",
+      run: "run a script defined in package.json",
+      test: "run the project's test script",
+      start: "run the project's start script",
+      publish: "publish the package to the registry",
+      init: "create a package.json",
+      update: "update packages to newer allowed versions",
+      uninstall: "remove a package",
+      ci: "clean install exactly from the lockfile",
+      exec: "run a package's binary"
+    },
+    flags: {
+      g: "operate globally, not on the local project",
+      D: "save to devDependencies",
+      "--save-dev": "save to devDependencies",
+      "--global": "operate globally",
+      "--production": "skip devDependencies"
+    }
+  },
+  systemctl: {
+    summary: "control the systemd init system and its services",
+    subcommands: {
+      start: "start a service now",
+      stop: "stop a running service now",
+      restart: "stop and start a service",
+      reload: "tell a service to reload its configuration",
+      status: "show whether a service is running, plus recent logs",
+      enable: "start this service automatically at boot",
+      disable: "do not start this service at boot",
+      "daemon-reload": "reload systemd's own unit files after edits",
+      list: "list units",
+      "is-active": "check whether a unit is currently running"
+    },
+    flags: {
+      "--now": "also start/stop immediately (with enable/disable)",
+      "--user": "act on the per-user systemd, not the system one",
+      "--failed": "limit output to failed units"
+    }
+  },
+  kubectl: {
+    summary: "control a Kubernetes cluster",
+    takesValue: ["n", "-n", "o", "-o", "f", "-f", "l", "-l"],
+    subcommands: {
+      get: "list resources of a given type",
+      describe: "show detailed state of a resource",
+      apply: "create or update resources from a file",
+      delete: "remove resources",
+      logs: "print a pod's logs",
+      exec: "run a command inside a pod",
+      create: "create a resource",
+      edit: "edit a live resource in your editor",
+      scale: "change the number of replicas",
+      rollout: "manage a rollout (status, undo, restart)",
+      port: "forward a local port to a pod (port-forward)"
+    },
+    flags: {
+      n: "act in the given namespace",
+      o: "choose the output format (json, yaml, wide)",
+      f: "read the resource definition from this file",
+      l: "select resources by label",
+      w: "watch for changes and stream updates",
+      A: "act across all namespaces",
+      "--all-namespaces": "act across all namespaces",
+      "--namespace": "act in the given namespace"
+    }
+  },
+  apt: {
+    summary: "install and manage Debian/Ubuntu packages",
+    subcommands: {
+      install: "install one or more packages",
+      remove: "remove packages but keep their config",
+      purge: "remove packages and their config",
+      update: "refresh the list of available packages",
+      upgrade: "install newer versions of installed packages",
+      search: "search for packages by keyword",
+      show: "show details about a package",
+      list: "list packages (installed, upgradable, \u2026)",
+      autoremove: "remove packages no longer needed"
+    },
+    flags: {
+      y: "assume yes \u2014 do not prompt for confirmation",
+      "--yes": "assume yes \u2014 do not prompt for confirmation",
+      "--no-install-recommends": "do not install recommended extras"
+    }
+  },
+  sed: {
+    summary: "stream editor \u2014 transform text line by line",
+    takesValue: ["e", "f"],
+    flags: {
+      i: "edit files in place instead of printing to stdout",
+      n: "suppress automatic printing (use with p)",
+      e: "add the next argument as an editing script",
+      E: "use extended regular expressions",
+      r: "use extended regular expressions (GNU)",
+      "--in-place": "edit files in place"
+    }
+  },
+  awk: {
+    summary: "pattern-scanning and text-processing language",
+    takesValue: ["F", "v", "f"],
+    flags: {
+      F: "set the input field separator",
+      v: "assign a variable before the program runs",
+      f: "read the awk program from a file"
+    }
+  },
+  ps: {
+    summary: "report a snapshot of running processes",
+    flags: {
+      a: "show processes for all users",
+      u: "show a user-oriented, detailed format",
+      x: "include processes without a controlling terminal",
+      e: "show every process",
+      f: "full-format listing"
+    }
+  },
+  kill: {
+    summary: "send a signal to a process",
+    flags: {
+      "9": "SIGKILL \u2014 force the process to stop immediately",
+      "15": "SIGTERM \u2014 politely ask the process to stop",
+      l: "list the available signal names",
+      s: "send the named signal"
+    }
+  },
+  xargs: {
+    summary: "build and run command lines from standard input",
+    takesValue: ["n", "I", "P", "d"],
+    flags: {
+      n: "use at most this many arguments per command",
+      I: "replace this token with each input item",
+      "0": "input items are separated by NUL, not whitespace",
+      P: "run this many commands in parallel",
+      r: "do nothing if the input is empty",
+      t: "print each command before running it"
+    }
+  },
+  head: {
+    summary: "print the first part of files",
+    takesValue: ["n", "c"],
+    flags: {
+      n: "print the first N lines",
+      c: "print the first N bytes"
+    }
+  },
+  tail: {
+    summary: "print the last part of files",
+    takesValue: ["n", "c"],
+    flags: {
+      n: "print the last N lines",
+      c: "print the last N bytes",
+      f: "follow \u2014 keep printing new lines as the file grows",
+      F: "follow by name, retrying if the file is rotated"
+    }
+  },
+  sort: {
+    summary: "sort lines of text",
+    takesValue: ["k", "t"],
+    flags: {
+      n: "sort numerically, not alphabetically",
+      r: "reverse the result order",
+      u: "output only the first of equal lines (unique)",
+      h: "sort human-readable sizes (2K, 1G)",
+      k: "sort by the given field/key",
+      t: "use the given field separator",
+      f: "fold case \u2014 treat lower and upper case alike"
+    }
+  },
+  cut: {
+    summary: "extract selected columns from each line",
+    takesValue: ["d", "f", "c"],
+    flags: {
+      d: "use the given delimiter between fields",
+      f: "select these fields",
+      c: "select these character positions"
+    }
+  },
+  tr: {
+    summary: "translate or delete characters",
+    flags: {
+      d: "delete the given characters",
+      s: "squeeze repeats of the given characters into one",
+      c: "use the complement of the given set"
+    }
+  },
+  wc: {
+    summary: "count lines, words and bytes",
+    flags: {
+      l: "count lines",
+      w: "count words",
+      c: "count bytes",
+      m: "count characters"
+    }
+  },
+  cat: {
+    summary: "concatenate files and print them",
+    flags: {
+      n: "number every output line",
+      A: "show non-printing characters, tabs and line ends",
+      b: "number non-blank output lines"
+    }
+  },
+  du: {
+    summary: "estimate file and directory disk usage",
+    takesValue: ["-max-depth"],
+    flags: {
+      h: "human-readable sizes (K, M, G)",
+      s: "show only a total for each argument",
+      a: "show sizes for files too, not just directories",
+      c: "also print a grand total",
+      "-max-depth": "only report directories this many levels deep"
+    }
+  },
+  df: {
+    summary: "report free space on mounted filesystems",
+    flags: {
+      h: "human-readable sizes (K, M, G)",
+      T: "also show each filesystem's type",
+      i: "report inode usage instead of block usage"
+    }
+  },
+  ping: {
+    summary: "test reachability of a host on the network",
+    takesValue: ["c", "i", "W"],
+    flags: {
+      c: "stop after sending this many packets",
+      i: "wait this many seconds between packets",
+      W: "time to wait for a reply, in seconds"
+    }
+  },
+  dd: {
+    summary: "copy and convert data block by block",
+    flags: {
+      "if": "read from this input file",
+      of: "write to this output file",
+      bs: "read and write this many bytes at a time",
+      count: "copy only this many blocks",
+      status: "control how progress is reported"
+    }
+  },
+  make: {
+    summary: "build targets according to a Makefile",
+    takesValue: ["j", "f", "C"],
+    flags: {
+      j: "run this many recipe jobs in parallel",
+      f: "use the given file instead of Makefile",
+      C: "change to this directory first",
+      B: "unconditionally rebuild every target",
+      n: "dry run \u2014 print recipes without running them"
+    }
+  }
+};
+var GENERIC_FLAGS = {
+  h: "usually: show help / human-readable output",
+  v: "usually: verbose output (or print the version)",
+  f: "usually: force, or read from a file",
+  r: "usually: recurse into directories",
+  o: "usually: write output to a file",
+  q: "usually: quiet \u2014 suppress normal output",
+  y: "usually: assume yes to prompts",
+  n: "usually: dry run, or a count",
+  "--help": "show usage information and exit",
+  "--version": "print the version and exit",
+  "--verbose": "produce more detailed output",
+  "--quiet": "suppress normal output",
+  "--force": "proceed without prompting",
+  "--yes": "assume yes to prompts",
+  "--dry-run": "show what would happen without doing it"
+};
+
+// src/explain.ts
+var OPERATOR_GLOSS = {
+  "|": "pipe \u2014 send this command's output into the next command",
+  "&&": "and-then \u2014 run the next command only if this one succeeds",
+  "||": "or-else \u2014 run the next command only if this one fails",
+  ";": "then \u2014 run the next command regardless of the previous result",
+  "&": "run the preceding command in the background",
+  ">": "redirect output into the given file (overwrite)",
+  ">>": "redirect output onto the end of the given file (append)",
+  "<": "read input from the given file",
+  "2>": "redirect error output into the given file",
+  "2>>": "append error output to the given file",
+  "&>": "redirect both normal and error output into the given file",
+  "2>&1": "send error output to the same place as normal output"
+};
+function explain(raw, opts = {}) {
+  const parsed = parseCommand(raw);
+  const lines = [];
+  let color = 0;
+  let info = null;
+  let expectCommand = true;
+  let sawSubcommand = false;
+  let pendingValueFor = null;
+  const add = (token, gloss, ti, source) => {
+    lines.push({ token, gloss, colorIndex: color++, tokenIndex: ti, source });
+  };
+  const takesValue = (info2, key) => !!info2?.takesValue?.includes(key);
+  parsed.tokens.forEach((tok, ti) => {
+    switch (tok.kind) {
+      case "pipe":
+      case "operator":
+        add(tok.text, OPERATOR_GLOSS[tok.text] ?? "shell control operator", ti, "structure");
+        info = null;
+        expectCommand = true;
+        sawSubcommand = false;
+        pendingValueFor = null;
+        break;
+      case "redirect":
+        add(tok.text, OPERATOR_GLOSS[tok.text] ?? "shell redirection", ti, "structure");
+        break;
+      case "assignment": {
+        const [name] = tok.text.split("=");
+        add(tok.text, `set the environment variable ${name} for this command`, ti, "structure");
+        break;
+      }
+      case "command":
+        info = DB[tok.text] ?? opts.manLookup?.(tok.text) ?? null;
+        add(
+          tok.text,
+          info ? info.summary : `run the "${tok.text}" program`,
+          ti,
+          info ? DB[tok.text] ? "db" : "man" : "structure"
+        );
+        expectCommand = false;
+        sawSubcommand = false;
+        break;
+      case "subshell":
+        add(tok.text, "run this inner command first and substitute its output", ti, "structure");
+        break;
+      case "longFlag": {
+        const key = tok.text.split("=")[0];
+        const hasInlineValue = tok.text.includes("=");
+        const gloss = info?.flags[key] ?? GENERIC_FLAGS[key] ?? "a command option";
+        add(tok.text, gloss, ti, info?.flags[key] ? "db" : GENERIC_FLAGS[key] ? "generic" : "structure");
+        if (!hasInlineValue && takesValue(info, key)) pendingValueFor = tok.text;
+        break;
+      }
+      case "shortFlag": {
+        if (info?.flags[tok.text]) {
+          add(tok.text, info.flags[tok.text], ti, "db");
+          if (takesValue(info, tok.text)) pendingValueFor = tok.text;
+          break;
+        }
+        const body = tok.text.replace(/^-/, "");
+        const letters = body.split("");
+        const known = (l) => info?.flags[l] ?? GENERIC_FLAGS[l];
+        if (letters.length > 1 && letters.every((l) => known(l) !== void 0)) {
+          for (const l of letters) {
+            add("-" + l, known(l), ti, info?.flags[l] ? "db" : "generic");
+          }
+          const last = letters[letters.length - 1];
+          if (takesValue(info, last)) pendingValueFor = "-" + last;
+          break;
+        }
+        const first = body.slice(0, 1);
+        const gloss = known(first) ?? "a command option";
+        add(tok.text, gloss, ti, info?.flags[first] ? "db" : GENERIC_FLAGS[first] ? "generic" : "structure");
+        if (body.length === 1 && takesValue(info, first)) pendingValueFor = tok.text;
+        break;
+      }
+      case "operand": {
+        if (pendingValueFor) {
+          add(tok.text, `value for ${pendingValueFor}`, ti, "structure");
+          pendingValueFor = null;
+          break;
+        }
+        if (info?.subcommands && !sawSubcommand && info.subcommands[tok.text]) {
+          add(tok.text, info.subcommands[tok.text], ti, "db");
+          sawSubcommand = true;
+          break;
+        }
+        if (info?.flags[tok.text]) {
+          add(tok.text, info.flags[tok.text], ti, "db");
+        } else if (/^-\d+$/.test(tok.text)) {
+          add(tok.text, "a numeric option (often a count or limit)", ti, "structure");
+        } else {
+          add(tok.text, "an argument passed to the command", ti, "structure");
+        }
+        break;
+      }
+    }
+  });
+  return { raw, parsed, lines };
+}
+
+// src/card.ts
+var COLORS = ["#79c0ff", "#7ee787", "#ffa657", "#d2a8ff", "#ff7b72", "#f2cc60", "#56d4dd", "#ff9bce"];
+var BG = "#0d1117";
+var PANEL = "#161b22";
+var BORDER = "#30363d";
+var FG = "#e6edf3";
+var MUTED = "#8b949e";
+var FONT = "ui-monospace,'SF Mono','JetBrains Mono','Fira Code',Menlo,Consolas,monospace";
+function esc(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+function colorByTokenIndex(res) {
+  const map = /* @__PURE__ */ new Map();
+  for (const ln of res.lines) {
+    if (!map.has(ln.tokenIndex)) map.set(ln.tokenIndex, ln.colorIndex);
+  }
+  return map;
+}
+function renderSvg(res, opts = {}) {
+  const brand = opts.brand ?? "cmdxray";
+  const CHARW = 15.5;
+  const PADX = 34;
+  const cmdColors = colorByTokenIndex(res);
+  let cx = PADX + 18;
+  const cmdParts = [];
+  const structural = /* @__PURE__ */ new Set(["pipe", "operator", "redirect"]);
+  res.parsed.tokens.forEach((tok, ti) => {
+    const isStruct = structural.has(tok.kind);
+    const ci = cmdColors.get(ti) ?? 0;
+    const col = isStruct ? MUTED : COLORS[ci % COLORS.length];
+    const weight = tok.kind === "command" ? "700" : "600";
+    cmdParts.push(
+      `<text x="${cx}" y="72" fill="${col}" font-size="26" font-family="${FONT}" font-weight="${weight}">${esc(tok.text)}</text>`
+    );
+    cx += CHARW * tok.text.length + CHARW;
+  });
+  const rowH = 44;
+  const glossTop = 150;
+  const rows = res.lines.map((ln, i) => {
+    const y = glossTop + i * rowH;
+    const col = COLORS[ln.colorIndex % COLORS.length];
+    return `<circle cx="${PADX + 8}" cy="${y - 6}" r="6" fill="${col}"/><text x="${PADX + 26}" y="${y}" fill="${col}" font-size="19" font-family="${FONT}" font-weight="600">${esc(ln.token)}</text><text x="${PADX + 220}" y="${y}" fill="${FG}" font-size="18" font-family="${FONT}">${esc(ln.gloss)}</text>`;
+  }).join("");
+  const width = Math.max(760, estimateWidth(res));
+  const height = glossTop + res.lines.length * rowH + 40;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" font-family="${FONT}">
+  <rect width="${width}" height="${height}" rx="16" fill="${BG}"/>
+  <rect x="16" y="16" width="${width - 32}" height="84" rx="10" fill="${PANEL}" stroke="${BORDER}"/>
+  <circle cx="40" cy="42" r="6" fill="#ff5f56"/><circle cx="60" cy="42" r="6" fill="#ffbd2e"/><circle cx="80" cy="42" r="6" fill="#27c93f"/>
+  <text x="${width - 28}" y="46" text-anchor="end" fill="${MUTED}" font-size="14">offline</text>
+  ${cmdParts.join("")}
+  <line x1="${PADX}" y1="${glossTop - 26}" x2="${width - PADX}" y2="${glossTop - 26}" stroke="${BORDER}"/>
+  ${rows}
+  <text x="${PADX}" y="${height - 16}" fill="${MUTED}" font-size="14">explained locally \xB7 <tspan fill="${FG}">${esc(brand)}</tspan></text>
+</svg>`;
+}
+function estimateWidth(res) {
+  let maxGloss = 0;
+  for (const ln of res.lines) maxGloss = Math.max(maxGloss, ln.gloss.length);
+  const cmdLen = res.raw.length * 15.5 + 80;
+  const glossWidth = 220 + 34 + maxGloss * 9.6 + 40;
+  return Math.ceil(Math.max(cmdLen, glossWidth));
+}
+function renderHtml(res, opts = {}) {
+  const svg = renderSvg(res, opts);
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>cmdxray \u2014 ${esc(res.raw)}</title>
+<style>html,body{margin:0;background:#010409;color:#e6edf3;font-family:${FONT}}
+.wrap{display:flex;justify-content:center;padding:32px}
+figure{margin:0}</style></head>
+<body><div class="wrap"><figure>${svg}</figure></div></body></html>`;
+}
+var ANSI = ["\x1B[38;5;75m", "\x1B[38;5;114m", "\x1B[38;5;215m", "\x1B[38;5;183m", "\x1B[38;5;203m", "\x1B[38;5;221m", "\x1B[38;5;80m", "\x1B[38;5;211m"];
+var RESET = "\x1B[0m";
+var DIM = "\x1B[2m";
+function renderTerminal(res, color = true) {
+  const c = (i, s) => color ? ANSI[i % ANSI.length] + s + RESET : s;
+  const dim = (s) => color ? DIM + s + RESET : s;
+  const cmdColors = colorByTokenIndex(res);
+  const structural = /* @__PURE__ */ new Set(["pipe", "operator", "redirect"]);
+  const cmdLine = res.parsed.tokens.map((tok, ti) => {
+    if (structural.has(tok.kind)) return dim(tok.text);
+    const ci = cmdColors.get(ti) ?? 0;
+    return c(ci, tok.text);
+  }).join(" ");
+  const tokenWidth = Math.max(...res.lines.map((l) => l.token.length), 4);
+  const rows = res.lines.map((ln) => `  ${c(ln.colorIndex, ln.token.padEnd(tokenWidth))}  ${ln.gloss}`).join("\n");
+  return `
+  ${cmdLine}
+
+${rows}
+
+  ${dim("explained locally \xB7 cmdxray")}
+`;
+}
+export {
+  DB,
+  GENERIC_FLAGS,
+  explain,
+  parseCommand,
+  renderHtml,
+  renderSvg,
+  renderTerminal
+};
