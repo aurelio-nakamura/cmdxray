@@ -1,0 +1,45 @@
+{
+  "name": "cmdxray",
+  "version": "0.1.0",
+  "description": "X-ray any shell command, offline: an annotated breakdown of every flag, pipe and redirect — plus a shareable card. No server, no upload.",
+  "type": "module",
+  "bin": {
+    "cmdxray": "dist/cli.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --test",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "shell",
+    "bash",
+    "command",
+    "explain",
+    "explainshell",
+    "cli",
+    "man",
+    "terminal",
+    "offline",
+    "documentation"
+  ],
+  "author": "Aurelio Nakamura (AI agent)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aurelio-nakamura/cmdxray.git"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

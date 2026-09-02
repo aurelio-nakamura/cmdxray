@@ -1,0 +1,109 @@
+#!/usr/bin/env node
+// cmdxray — CLI entry point.
+import { execFileSync } from "node:child_process";
+import { writeFileSync, readFileSync } from "node:fs";
+import { explain } from "./explain.js";
+import { renderTerminal, renderSvg, renderHtml } from "./card.js";
+import type { CommandInfo } from "./db.js";
+
+const HELP = `cmdxray — x-ray any shell command, offline.
+
+Usage:
+  cmdxray <command...>            explain a command in your terminal
+  cmdxray --svg <command...>      emit a shareable SVG card to stdout
+  cmdxray --html <command...>     emit a standalone HTML page to stdout
+  cmdxray -o card.svg <command>   write the SVG card to a file
+  echo "<cmd>" | cmdxray          read the command from stdin
+
+Options:
+  --svg        output an SVG card
+  --html       output a standalone HTML page
+  -o <file>    write output to <file> (format inferred from extension)
+  --no-color   disable ANSI colors in terminal output
+  --no-man     do not consult local man pages for unknown commands
+  -h, --help   show this help
+
+Everything runs locally. Nothing is uploaded.`;
+
+// Best-effort: read the one-line summary from a local man page (Node only).
+function makeManLookup(): (cmd: string) => CommandInfo | null {
+  const cache = new Map<string, CommandInfo | null>();
+  return (cmd: string) => {
+    if (!/^[A-Za-z0-9_.-]+$/.test(cmd)) return null;
+    if (cache.has(cmd)) return cache.get(cmd)!;
+    let info: CommandInfo | null = null;
+    try {
+      const out = execFileSync("man", [cmd], {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+        env: { ...process.env, MANWIDTH: "200", MANPAGER: "cat", PAGER: "cat" },
+        timeout: 2500,
+      });
+      const idx = out.indexOf("NAME");
+      if (idx >= 0) {
+        const after = out.slice(idx + 4).split("\n").map((l) => l.trim()).filter(Boolean);
+        const nameLine = after[0] ?? "";
+        const dash = nameLine.indexOf(" - ");
+        const summary = dash >= 0 ? nameLine.slice(dash + 3).trim() : "";
+        if (summary) info = { summary: summary.replace(/\s+/g, " "), flags: {} };
+      }
+    } catch {
+      info = null;
+    }
+    cache.set(cmd, info);
+    return info;
+  };
+}
+
+function main() {
+  const argv = process.argv.slice(2);
+  if (argv.includes("-h") || argv.includes("--help")) {
+    console.log(HELP);
+    return;
+  }
+  let format: "term" | "svg" | "html" = "term";
+  let outFile: string | null = null;
+  let color = true;
+  let useMan = true;
+  const rest: string[] = [];
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === "--svg") format = "svg";
+    else if (a === "--html") format = "html";
+    else if (a === "--no-color") color = false;
+    else if (a === "--no-man") useMan = false;
+    else if (a === "-o") outFile = argv[++i] ?? null;
+    else rest.push(a);
+  }
+
+  let raw = rest.join(" ").trim();
+  if (!raw && !process.stdin.isTTY) {
+    try {
+      raw = readFileSync(0, "utf8").trim();
+    } catch {
+      /* ignore */
+    }
+  }
+  if (!raw) {
+    console.log(HELP);
+    process.exitCode = 1;
+    return;
+  }
+
+  const manLookup = useMan ? makeManLookup() : undefined;
+  const res = explain(raw, { manLookup });
+
+  if (outFile) {
+    const isHtml = outFile.endsWith(".html") || outFile.endsWith(".htm");
+    const content = isHtml ? renderHtml(res) : renderSvg(res);
+    writeFileSync(outFile, content);
+    console.error(`cmdxray: wrote ${outFile}`);
+    return;
+  }
+
+  if (format === "svg") process.stdout.write(renderSvg(res) + "\n");
+  else if (format === "html") process.stdout.write(renderHtml(res) + "\n");
+  else process.stdout.write(renderTerminal(res, color) + "\n");
+}
+
+main();
