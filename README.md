@@ -38,8 +38,10 @@ does at a glance — and neither does the teammate reading your script.
   versions you actually have installed.
 - **A real parser, not a cheatsheet.** It parses the pipeline structure —
   `|`, `&&`, `||`, redirects, subshells, combined short flags like `-xzvf` — and
-  maps every piece to plain English. tldr/cheat show *examples*; cmdxray explains
-  *your* exact command.
+  maps every piece to plain English. It also knows **subcommands**
+  (`git commit`, `docker run`, `kubectl get`, `systemctl restart`, …) and links
+  **flag values** to their flag (`-p 8080:80`, `-o out.html`). tldr/cheat show
+  *examples*; cmdxray explains *your* exact command.
 - **Share the result.** `--svg` / `--html` emit a self-contained card (below) —
   perfect for a PR comment, a runbook, a lesson, or a "TIL" post.
 
@@ -94,9 +96,13 @@ const svg = renderSvg(res);         // shareable SVG card
 
 ## Coverage & contributing
 
-The curated database currently covers common commands (tar, grep, curl, find,
-docker, ssh, rm, cp, ls, ps, xargs, …) and is growing. Adding a command is a few
-lines in [`src/db.ts`](src/db.ts) — accurate, plain-English glosses welcome.
+The curated database currently covers ~35 common commands — `tar`, `grep`,
+`curl`, `wget`, `find`, `sed`, `awk`, `git`, `docker`, `kubectl`, `systemctl`,
+`apt`, `npm`, `ssh`, `scp`, `rsync`, `rm`, `cp`, `mv`, `mkdir`, `chmod`, `chown`,
+`ls`, `ps`, `kill`, `xargs`, `head`, `tail`, `sort`, `cut`, `tr`, `wc`, `cat`,
+`du`, `df`, `ping`, `dd`, `make` — several with subcommand awareness, and it's
+growing. Adding a command (or a subcommand) is a few lines in
+[`src/db.ts`](src/db.ts) — accurate, plain-English glosses welcome.
 
 ## License
 

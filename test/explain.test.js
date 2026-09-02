@@ -63,3 +63,39 @@ test("command line and gloss colors line up by token index", () => {
     assert.ok(l.tokenIndex >= 0 && l.tokenIndex < r.parsed.tokens.length);
   }
 });
+
+test("recognizes subcommands (git commit, docker run, kubectl get)", () => {
+  const g = explain("git commit -m x");
+  const c = g.lines.find((l) => l.token === "commit");
+  assert.match(c.gloss, /record staged changes/);
+
+  const d = explain("docker run nginx");
+  assert.match(d.lines.find((l) => l.token === "run").gloss, /start a new container/);
+
+  const k = explain("kubectl get pods");
+  assert.match(k.lines.find((l) => l.token === "get").gloss, /list resources/);
+});
+
+test("associates a flag value with its flag (curl -o file, -p host:container)", () => {
+  const c = explain("curl -o out.html https://example.com");
+  const v = c.lines.find((l) => l.token === "out.html");
+  assert.match(v.gloss, /value for -o/);
+
+  const d = explain("docker run -p 8080:80 nginx");
+  const p = d.lines.find((l) => l.token === "8080:80");
+  assert.match(p.gloss, /value for -p/);
+});
+
+test("value flag as the last of a combined short group takes the next word", () => {
+  const r = explain("tar -xzvf archive.tgz");
+  const v = r.lines.find((l) => l.token === "archive.tgz");
+  assert.match(v.gloss, /value for -f/);
+});
+
+test("a filename that happens to match a subcommand name is not a subcommand", () => {
+  // only the FIRST operand is treated as a subcommand
+  const r = explain("git add commit");
+  const occurrences = r.lines.filter((l) => l.token === "commit");
+  assert.equal(occurrences.length, 1);
+  assert.match(occurrences[0].gloss, /argument/);
+});

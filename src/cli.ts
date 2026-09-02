@@ -66,17 +66,36 @@ function main() {
   let color = true;
   let useMan = true;
   const rest: string[] = [];
+  // cmdxray's own options are only recognized BEFORE the command word (or after
+  // an explicit `--`). Once the command begins, every remaining token belongs to
+  // it — so a target command's own -o/--html/etc. are never swallowed by cmdxray.
+  let inCommand = false;
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (a === "--svg") format = "svg";
+    if (inCommand) {
+      rest.push(a);
+      continue;
+    }
+    if (a === "--") {
+      inCommand = true;
+    } else if (a === "--svg") format = "svg";
     else if (a === "--html") format = "html";
     else if (a === "--no-color") color = false;
     else if (a === "--no-man") useMan = false;
     else if (a === "-o") outFile = argv[++i] ?? null;
-    else rest.push(a);
+    else {
+      // first non-cmdxray token = start of the command line
+      inCommand = true;
+      rest.push(a);
+    }
   }
 
-  let raw = rest.join(" ").trim();
+  // Re-quote any tokens that contain whitespace so the reconstructed command
+  // line reflects how it was actually typed (e.g. commit -m "fix bug").
+  let raw = rest
+    .map((t) => (/\s/.test(t) && !/^["']/.test(t) ? JSON.stringify(t) : t))
+    .join(" ")
+    .trim();
   if (!raw && !process.stdin.isTTY) {
     try {
       raw = readFileSync(0, "utf8").trim();
