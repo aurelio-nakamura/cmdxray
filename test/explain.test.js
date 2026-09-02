@@ -99,3 +99,40 @@ test("a filename that happens to match a subcommand name is not a subcommand", (
   assert.equal(occurrences.length, 1);
   assert.match(occurrences[0].gloss, /argument/);
 });
+
+test("subcommand-specific flag meaning wins over the base flag", () => {
+  // docker build -t = tag (base docker -t = tty)
+  const b = explain("docker build -t myimg .");
+  const t = b.lines.find((l) => l.token === "-t");
+  assert.match(t.gloss, /tag/);
+  const v = b.lines.find((l) => l.token === "myimg");
+  assert.match(v.gloss, /value for -t/);
+
+  // kubectl logs -f = follow (base kubectl -f = file), and does NOT eat the pod name
+  const k = explain("kubectl logs -f pod-name");
+  const f = k.lines.find((l) => l.token === "-f");
+  assert.match(f.gloss, /follow/);
+  const pod = k.lines.find((l) => l.token === "pod-name");
+  assert.match(pod.gloss, /argument/);
+});
+
+test("bare (no-dash) flag cluster expands: tar czf, ps aux", () => {
+  const t = explain("tar czf backup.tgz /home");
+  for (const l of ["c", "z", "f"]) {
+    assert.ok(t.lines.find((x) => x.token === l), `expected ${l} expanded`);
+  }
+  const v = t.lines.find((l) => l.token === "backup.tgz");
+  assert.match(v.gloss, /value for f/);
+
+  const p = explain("ps aux");
+  for (const l of ["a", "u", "x"]) {
+    assert.ok(p.lines.find((x) => x.token === l), `expected ${l} expanded`);
+  }
+});
+
+test("bare flag cluster does not misfire on ordinary operands", () => {
+  // grep is not bareFlags; 'src' must remain a plain argument, not a/c-flag soup
+  const g = explain("grep -rn TODO src");
+  const s = g.lines.find((l) => l.token === "src");
+  assert.match(s.gloss, /argument/);
+});

@@ -11,12 +11,25 @@ export interface CommandInfo {
   // Flags that consume the FOLLOWING word as their value (short-letter keys and
   // long "--name" keys). Used to label that word as "value for <flag>".
   takesValue?: string[];
+  // Per-subcommand flag overrides. When a subcommand is active, these glosses
+  // win over the command-level `flags` (e.g. `docker build -t` = tag, not tty;
+  // `kubectl logs -f` = follow, not file). Key = subcommand name.
+  subFlags?: Record<string, Record<string, string>>;
+  // Per-subcommand value-taking overrides. When a subcommand overrides a flag
+  // via `subFlags`, whether that flag consumes the next word is decided here
+  // (default: it does NOT). Key = subcommand name.
+  subTakesValue?: Record<string, string[]>;
+  // Traditional tools (tar, ps) accept a leading flag cluster with NO dash,
+  // e.g. `tar czf x.tgz`, `ps aux`. When true, the first bare operand made up
+  // entirely of known single-letter flags is expanded letter-by-letter.
+  bareFlags?: boolean;
 }
 
 export const DB: Record<string, CommandInfo> = {
   tar: {
     summary: "archive utility — bundle files into (or extract them from) a .tar",
     takesValue: ["f", "C"],
+    bareFlags: true,
     flags: {
       c: "create a new archive",
       x: "extract files from an archive",
@@ -254,6 +267,12 @@ export const DB: Record<string, CommandInfo> = {
       logs: "show a container's output",
       compose: "run multi-container apps from a compose file",
     },
+    subFlags: {
+      build: { t: "tag the built image (name:tag)" },
+    },
+    subTakesValue: {
+      build: ["t"],
+    },
     flags: {
       d: "detached — run in the background",
       it: "interactive with a terminal attached",
@@ -370,6 +389,13 @@ export const DB: Record<string, CommandInfo> = {
       rollout: "manage a rollout (status, undo, restart)",
       port: "forward a local port to a pod (port-forward)",
     },
+    subFlags: {
+      logs: { f: "follow — stream new log lines as they arrive" },
+      "port-forward": { f: "read the resource definition from this file" },
+    },
+    subTakesValue: {
+      logs: [],
+    },
     flags: {
       n: "act in the given namespace",
       o: "choose the output format (json, yaml, wide)",
@@ -423,6 +449,7 @@ export const DB: Record<string, CommandInfo> = {
   },
   ps: {
     summary: "report a snapshot of running processes",
+    bareFlags: true,
     flags: {
       a: "show processes for all users",
       u: "show a user-oriented, detailed format",

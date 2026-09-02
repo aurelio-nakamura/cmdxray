@@ -45,14 +45,30 @@ export function explain(raw: string, opts: ExplainOptions = {}): ExplainResult {
   let info: CommandInfo | null = null;
   let expectCommand = true;
   let sawSubcommand = false; // has this command already consumed its subcommand?
+  let currentSub: string | null = null; // the active subcommand, if any
+  let operandCount = 0; // operands seen for the current command (for bareFlags)
   let pendingValueFor: string | null = null; // a flag whose value is the next operand
 
   const add = (token: string, gloss: string, ti: number, source: Explanation["source"]) => {
     lines.push({ token, gloss, colorIndex: color++, tokenIndex: ti, source });
   };
 
-  const takesValue = (info: CommandInfo | null, key: string) =>
-    !!info?.takesValue?.includes(key);
+  // Subcommand-aware flag gloss: a subcommand's override wins over the base flag.
+  const flagGloss = (info: CommandInfo | null, key: string): string | undefined => {
+    if (currentSub) {
+      const sf = info?.subFlags?.[currentSub];
+      if (sf && key in sf) return sf[key];
+    }
+    return info?.flags[key];
+  };
+
+  const takesValue = (info: CommandInfo | null, key: string) => {
+    if (currentSub) {
+      const sf = info?.subFlags?.[currentSub];
+      if (sf && key in sf) return !!info?.subTakesValue?.[currentSub]?.includes(key);
+    }
+    return !!info?.takesValue?.includes(key);
+  };
 
   parsed.tokens.forEach((tok, ti) => {
     switch (tok.kind) {
@@ -62,6 +78,8 @@ export function explain(raw: string, opts: ExplainOptions = {}): ExplainResult {
         info = null;
         expectCommand = true;
         sawSubcommand = false;
+        currentSub = null;
+        operandCount = 0;
         pendingValueFor = null;
         break;
       case "redirect":
@@ -82,6 +100,8 @@ export function explain(raw: string, opts: ExplainOptions = {}): ExplainResult {
         );
         expectCommand = false;
         sawSubcommand = false;
+        currentSub = null;
+        operandCount = 0;
         break;
       case "subshell":
         add(tok.text, "run this inner command first and substitute its output", ti, "structure");
@@ -89,25 +109,27 @@ export function explain(raw: string, opts: ExplainOptions = {}): ExplainResult {
       case "longFlag": {
         const key = tok.text.split("=")[0];
         const hasInlineValue = tok.text.includes("=");
-        const gloss = info?.flags[key] ?? GENERIC_FLAGS[key] ?? "a command option";
-        add(tok.text, gloss, ti, info?.flags[key] ? "db" : GENERIC_FLAGS[key] ? "generic" : "structure");
+        const dbGloss = flagGloss(info, key);
+        const gloss = dbGloss ?? GENERIC_FLAGS[key] ?? "a command option";
+        add(tok.text, gloss, ti, dbGloss ? "db" : GENERIC_FLAGS[key] ? "generic" : "structure");
         if (!hasInlineValue && takesValue(info, key)) pendingValueFor = tok.text;
         break;
       }
       case "shortFlag": {
         // 1) whole-token match (find-style: -name, -mtime, -delete)
-        if (info?.flags[tok.text]) {
-          add(tok.text, info.flags[tok.text], ti, "db");
+        const whole = flagGloss(info, tok.text);
+        if (whole) {
+          add(tok.text, whole, ti, "db");
           if (takesValue(info, tok.text)) pendingValueFor = tok.text;
           break;
         }
         const body = tok.text.replace(/^-/, "");
         const letters = body.split("");
-        const known = (l: string) => info?.flags[l] ?? GENERIC_FLAGS[l];
+        const known = (l: string) => flagGloss(info, l) ?? GENERIC_FLAGS[l];
         // 2) combined short flags (-xzvf) only if every letter is known
         if (letters.length > 1 && letters.every((l) => known(l) !== undefined)) {
           for (const l of letters) {
-            add("-" + l, known(l)!, ti, info?.flags[l] ? "db" : "generic");
+            add("-" + l, known(l)!, ti, flagGloss(info, l) ? "db" : "generic");
           }
           // if the LAST letter takes a value, the next operand is that value
           const last = letters[letters.length - 1];
@@ -117,7 +139,7 @@ export function explain(raw: string, opts: ExplainOptions = {}): ExplainResult {
         // 3) numeric-ish or single/attached short flag: look up first letter
         const first = body.slice(0, 1);
         const gloss = known(first) ?? "a command option";
-        add(tok.text, gloss, ti, info?.flags[first] ? "db" : GENERIC_FLAGS[first] ? "generic" : "structure");
+        add(tok.text, gloss, ti, flagGloss(info, first) ? "db" : GENERIC_FLAGS[first] ? "generic" : "structure");
         // a single short flag with no attached value that expects one
         if (body.length === 1 && takesValue(info, first)) pendingValueFor = tok.text;
         break;
@@ -127,12 +149,29 @@ export function explain(raw: string, opts: ExplainOptions = {}): ExplainResult {
         if (pendingValueFor) {
           add(tok.text, `value for ${pendingValueFor}`, ti, "structure");
           pendingValueFor = null;
+          operandCount++;
           break;
         }
         // b) a subcommand (git commit, docker run, kubectl get)
         if (info?.subcommands && !sawSubcommand && info.subcommands[tok.text]) {
           add(tok.text, info.subcommands[tok.text], ti, "db");
           sawSubcommand = true;
+          currentSub = tok.text;
+          break;
+        }
+        // b2) a leading bare flag cluster (tar czf, ps aux) — no dash, all known.
+        if (
+          info?.bareFlags &&
+          operandCount === 0 &&
+          !sawSubcommand &&
+          /^[A-Za-z]{2,}$/.test(tok.text) &&
+          tok.text.split("").every((l) => info!.flags[l] !== undefined)
+        ) {
+          const letters = tok.text.split("");
+          for (const l of letters) add(l, info.flags[l], ti, "db");
+          const last = letters[letters.length - 1];
+          if (takesValue(info, last)) pendingValueFor = last;
+          operandCount++;
           break;
         }
         // c) a whole-token flag used as an operand (find -delete style)
@@ -143,6 +182,7 @@ export function explain(raw: string, opts: ExplainOptions = {}): ExplainResult {
         } else {
           add(tok.text, "an argument passed to the command", ti, "structure");
         }
+        operandCount++;
         break;
       }
     }
