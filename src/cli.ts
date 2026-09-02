@@ -90,12 +90,20 @@ function main() {
     }
   }
 
-  // Re-quote any tokens that contain whitespace so the reconstructed command
-  // line reflects how it was actually typed (e.g. commit -m "fix bug").
-  let raw = rest
-    .map((t) => (/\s/.test(t) && !/^["']/.test(t) ? JSON.stringify(t) : t))
-    .join(" ")
-    .trim();
+  // Reconstruct the command line from the surviving argv tokens.
+  //  - If the shell already split the command into multiple tokens (rest.length
+  //    > 1), a whitespace-containing token is a genuine single argument (e.g.
+  //    commit -m "fix bug"), so re-quote it to preserve how it was typed.
+  //  - If there is exactly one token, the whole command line was passed as one
+  //    quoted argument (e.g. cmdxray "git commit -m fix && docker run"); use it
+  //    verbatim so the parser tokenizes it, instead of treating it as one word.
+  let raw =
+    rest.length === 1
+      ? rest[0].trim()
+      : rest
+          .map((t) => (/\s/.test(t) && !/^["']/.test(t) ? JSON.stringify(t) : t))
+          .join(" ")
+          .trim();
   if (!raw && !process.stdin.isTTY) {
     try {
       raw = readFileSync(0, "utf8").trim();

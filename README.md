@@ -107,6 +107,11 @@ The curated database currently covers ~35 common commands — `tar`, `grep`,
 growing. Adding a command (or a subcommand) is a few lines in
 [`src/db.ts`](src/db.ts) — accurate, plain-English glosses welcome.
 
+Every command ships a **positive-control example** that the test suite runs
+against it, so accuracy stays pinned as the database grows. See
+[CONTRIBUTING.md](CONTRIBUTING.md) for the (short) workflow; CI runs the build +
+tests on Node 18/20/22 for every push and PR.
+
 ## License
 
 MIT.

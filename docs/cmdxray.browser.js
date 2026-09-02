@@ -690,6 +690,46 @@ var GENERIC_FLAGS = {
   "--yes": "assume yes to prompts",
   "--dry-run": "show what would happen without doing it"
 };
+var EXAMPLES = {
+  tar: ["tar -xzvf archive.tar.gz", "tar czf backup.tgz src"],
+  grep: ["grep -rn TODO src", "grep -i --color needle file.txt"],
+  ls: ["ls -la", "ls -lhSr"],
+  rm: ["rm -rf build", "rm -i note.txt"],
+  cp: ["cp -r src dest", "cp -p a.txt b.txt"],
+  mv: ["mv -i old new", "mv -v a b"],
+  mkdir: ["mkdir -p a/b/c", "mkdir -m 755 dir"],
+  curl: ["curl -sSL -o out.html https://example.com", "curl -X POST -H 'A: b' -d data url"],
+  wget: ["wget -c -O file.zip https://example.com/f.zip"],
+  find: ["find . -name '*.log' -mtime +30 -delete", "find src -type f -maxdepth 2"],
+  chmod: ["chmod -R 755 dir", "chmod -v 600 key"],
+  chown: ["chown -R user:group dir"],
+  ssh: ["ssh -i key.pem -p 2222 user@host", "ssh -N -L 8080:localhost:80 host"],
+  scp: ["scp -r -P 22 file user@host:/tmp"],
+  rsync: ["rsync -avz --delete src/ dest/", "rsync -a --dry-run a/ b/"],
+  docker: ["docker run -it --rm -p 8080:80 nginx", "docker build -t myimg ."],
+  git: ["git commit -am 'fix bug'", "git checkout -b feature", "git log --oneline --graph"],
+  npm: ["npm install -D typescript", "npm run build"],
+  systemctl: ["systemctl restart nginx", "systemctl enable --now docker"],
+  kubectl: ["kubectl get pods -n default -o wide", "kubectl logs -f mypod"],
+  apt: ["apt install -y curl", "apt upgrade --yes"],
+  sed: ["sed -i 's/a/b/g' file.txt", "sed -n -e '1,10p' file.txt"],
+  awk: ["awk -F, '{print $1}' data.csv"],
+  ps: ["ps aux", "ps -ef"],
+  kill: ["kill -9 1234", "kill -15 4321"],
+  xargs: ["xargs -0 -I{} rm {}", "xargs -n1 -P4 echo"],
+  head: ["head -n 20 file.txt", "head -c 100 file.bin"],
+  tail: ["tail -f -n 100 log.txt"],
+  sort: ["sort -k2 -n -r data.txt", "sort -u -f names.txt"],
+  cut: ["cut -d, -f1 data.csv", "cut -c1-10 file.txt"],
+  tr: ["tr -d '\\n'", "tr -s ' '"],
+  wc: ["wc -l file.txt", "wc -w -c file.txt"],
+  cat: ["cat -n file.txt", "cat -A file.txt"],
+  du: ["du -sh dir", "du -ah ."],
+  df: ["df -h", "df -T -i"],
+  ping: ["ping -c 4 host", "ping -i 2 host"],
+  dd: ["dd if=/dev/zero of=out.img bs=1M count=10"],
+  make: ["make -j4 -C build", "make -f Makefile.dev -n"]
+};
 
 // src/explain.ts
 var OPERATOR_GLOSS = {
@@ -936,6 +976,7 @@ ${rows}
 }
 export {
   DB,
+  EXAMPLES,
   GENERIC_FLAGS,
   explain,
   parseCommand,
