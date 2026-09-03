@@ -45,8 +45,9 @@ does at a glance — and neither does the teammate reading your script.
   (`git commit`, `docker run`, `kubectl get`, `systemctl restart`, …) and links
   **flag values** to their flag (`-p 8080:80`, `-o out.html`). It even decodes the
   cryptic one-liners people paste most — **sed** scripts (`s/foo/bar/g` →
-  *substitute, every match*; `y/…/…/`; `/re/d`) and **awk** programs
-  (`'NR>1 {print $2,$3}'`). tldr/cheat show *examples*; cmdxray explains *your*
+  *substitute, every match*; `y/…/…/`; `/re/d`), **awk** programs
+  (`'NR>1 {print $2,$3}'`) and **jq** filters (`.items[] | select(.age > 30) |
+  .name` → *iterate, keep only where…, get field*). tldr/cheat show *examples*; cmdxray explains *your*
   exact command.
 - **Share the result.** `--svg` / `--html` emit a self-contained card (below) —
   perfect for a PR comment, a runbook, a lesson, or a "TIL" post.

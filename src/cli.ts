@@ -63,22 +63,30 @@ function main() {
   }
   let format: "term" | "svg" | "html" = "term";
   let outFile: string | null = null;
-  let color = true;
-  let useMan = true;
+  let color: boolean = true;
+  let useMan: boolean = true;
   const rest: string[] = [];
-  // cmdxray's own options are only recognized BEFORE the command word (or after
-  // an explicit `--`). Once the command begins, every remaining token belongs to
-  // it — so a target command's own -o/--html/etc. are never swallowed by cmdxray.
+  // cmdxray's own options are recognized BEFORE the command word (or after an
+  // explicit `--`). Once a MULTI-TOKEN command begins, every remaining token
+  // belongs to it — so a target command's own -o/--html/etc. are never swallowed
+  // by cmdxray. EXCEPTION: when the whole command is supplied as a single
+  // whitespace-containing quoted token (e.g. `cmdxray "grep foo | head" --svg`),
+  // the command is fully self-contained inside that one token, so trailing
+  // cmdxray options after it are unambiguous and are honored.
+  const isCmdxrayOpt = (a: string) =>
+    a === "--svg" || a === "--html" || a === "--no-color" || a === "--no-man" || a === "-o";
   let inCommand = false;
+  let quotedCommand = false;
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (inCommand) {
+    // Inside a MULTI-token command, everything belongs to the command. Inside a
+    // fully-quoted command, trailing cmdxray options are still honored.
+    if (inCommand && !(quotedCommand && isCmdxrayOpt(a))) {
       rest.push(a);
       continue;
     }
-    if (a === "--") {
-      inCommand = true;
-    } else if (a === "--svg") format = "svg";
+    if (a === "--") inCommand = true;
+    else if (a === "--svg") format = "svg";
     else if (a === "--html") format = "html";
     else if (a === "--no-color") color = false;
     else if (a === "--no-man") useMan = false;
@@ -86,6 +94,7 @@ function main() {
     else {
       // first non-cmdxray token = start of the command line
       inCommand = true;
+      quotedCommand = /\s/.test(a);
       rest.push(a);
     }
   }

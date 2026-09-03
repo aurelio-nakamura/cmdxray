@@ -4,7 +4,7 @@
 
 import { parseCommand, ParsedCommand } from "./parse.js";
 import { DB, GENERIC_FLAGS, CommandInfo } from "./db.js";
-import { sedGloss, awkGloss } from "./scripts.js";
+import { sedGloss, awkGloss, jqGloss } from "./scripts.js";
 
 export interface Explanation {
   token: string; // the piece of the command, e.g. "-x" or "archive.tar.gz"
@@ -189,6 +189,14 @@ export function explain(raw: string, opts: ExplainOptions = {}): ExplainResult {
         }
         if (cmdName === "awk") {
           const g = awkGloss(tok.text);
+          if (g) {
+            add(tok.text, g, ti, "db");
+            operandCount++;
+            break;
+          }
+        }
+        if (cmdName === "jq") {
+          const g = jqGloss(tok.text);
           if (g) {
             add(tok.text, g, ti, "db");
             operandCount++;

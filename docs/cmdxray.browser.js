@@ -526,6 +526,25 @@ var DB = {
       f: "read the awk program from a file"
     }
   },
+  jq: {
+    summary: "command-line JSON processor (apply a filter to JSON input)",
+    takesValue: ["arg", "argjson", "f", "slurpfile", "rawfile"],
+    flags: {
+      r: "raw output \u2014 print strings without JSON quotes",
+      j: "raw output with no trailing newline between results",
+      c: "compact output \u2014 one JSON result per line",
+      n: "don't read input; use null as the input",
+      s: "slurp \u2014 read the whole input stream into one array",
+      R: "read raw input \u2014 each line becomes a JSON string",
+      e: "set the exit code from the last output (for scripting)",
+      S: "sort object keys in the output",
+      a: "output non-ASCII characters as \\uXXXX escapes",
+      f: "read the filter program from a file",
+      arg: "define a string variable: --arg name value",
+      argjson: "define a JSON variable: --argjson name json",
+      tab: "indent the output with tabs"
+    }
+  },
   ps: {
     summary: "report a snapshot of running processes",
     bareFlags: true,
@@ -714,6 +733,7 @@ var EXAMPLES = {
   apt: ["apt install -y curl", "apt upgrade --yes"],
   sed: ["sed -i 's/a/b/g' file.txt", "sed -n -e '1,10p' file.txt"],
   awk: ["awk -F, '{print $1}' data.csv"],
+  jq: ["jq -r '.items[] | select(.age > 30) | .name' data.json"],
   ps: ["ps aux", "ps -ef"],
   kill: ["kill -9 1234", "kill -15 4321"],
   xargs: ["xargs -0 -I{} rm {}", "xargs -n1 -P4 echo"],
@@ -821,6 +841,109 @@ function ordinal(n) {
   const s = ["th", "st", "nd", "rd"];
   const v = n % 100;
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+function jqGloss(tok) {
+  const t = tok.trim();
+  if (!t) return null;
+  const looksJq = /^[.\[{(]/.test(t) || /^(keys|length|add|type|values|to_entries|from_entries|map|select|sort|sort_by|group_by|unique|flatten|first|last|min|max|has|any|all|reverse|floor|ceil|ascii_downcase|ascii_upcase|split|join|test|ltrimstr|rtrimstr|tostring|tonumber|empty|range|env|now|paths|getpath|recurse|del)\b/.test(
+    t
+  ) || splitTopPipes(t).length > 1;
+  if (!looksJq) return null;
+  const stages = splitTopPipes(t).map((s) => s.trim()).filter(Boolean);
+  const parts = stages.map(jqStage);
+  if (parts.every((p) => p === null)) return null;
+  const desc = parts.map((p, i) => p || `apply \`${stages[i]}\``).join(", then ");
+  return `jq filter: ${desc}`;
+}
+function jqStage(s) {
+  if (s === "." || s === "") return "keep the whole input";
+  if (s === ".[]") return "iterate over each element/value";
+  if (s === "keys") return "list its keys";
+  if (s === "length") return "get its length/count";
+  if (s === "add") return "sum/concatenate the elements";
+  if (s === "unique") return "drop duplicate values";
+  if (s === "reverse") return "reverse the order";
+  if (s === "flatten") return "flatten nested arrays";
+  if (s === "first" || s === "last") return `take the ${s} element`;
+  if (s === "to_entries") return "convert the object to {key,value} pairs";
+  if (s === "from_entries") return "rebuild an object from {key,value} pairs";
+  if (s === "type") return "report the JSON type";
+  if (s === "values") return "keep only non-null values";
+  const field = s.match(/^\.([A-Za-z_][\w]*)((?:\.[A-Za-z_][\w]*|\[\d*\]|\["[^"]*"\])*)(\??)$/);
+  if (field) {
+    const path = "." + field[1] + field[2];
+    if (/\[\]$/.test(path)) return `iterate over each element of ${path.replace(/\[\]$/, "")}`;
+    const idx = path.match(/\[(\d+)\]$/);
+    if (idx) return `take index ${idx[1]} of ${path.replace(/\[\d+\]$/, "")}`;
+    return `get field ${path}`;
+  }
+  const call = s.match(/^([a-z_]+)\s*\((.*)\)$/s);
+  if (call) {
+    const [, fn, arg] = call;
+    const a = arg.trim();
+    switch (fn) {
+      case "select":
+        return `keep only items where ${a}`;
+      case "map":
+        return `apply \`${a}\` to each element`;
+      case "map_values":
+        return `apply \`${a}\` to each value`;
+      case "sort_by":
+        return `sort by ${a}`;
+      case "group_by":
+        return `group by ${a}`;
+      case "has":
+        return `check it has key ${a}`;
+      case "split":
+        return `split the string on ${a}`;
+      case "join":
+        return `join the array with ${a}`;
+      case "test":
+        return `test whether it matches ${a}`;
+      case "recurse":
+        return `recurse into ${a || "all children"}`;
+      case "del":
+        return `delete ${a}`;
+    }
+    return `run ${fn}(${a})`;
+  }
+  if (/^\{[\s\S]*\}$/.test(s)) return "build an object from the given fields";
+  if (/^\[[\s\S]*\]$/.test(s)) return "collect the results into an array";
+  if (/^@(csv|tsv|json|base64|base64d|sh|html|uri|text)$/.test(s))
+    return `format the output as ${s.slice(1).toUpperCase()}`;
+  if (/^sort$/.test(s)) return "sort the array";
+  return null;
+}
+function splitTopPipes(s) {
+  const out = [];
+  let depth = 0;
+  let cur = "";
+  let quote = "";
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (quote) {
+      cur += c;
+      if (c === "\\" && i + 1 < s.length) {
+        cur += s[++i];
+      } else if (c === quote) quote = "";
+      continue;
+    }
+    if (c === '"' || c === "'") {
+      quote = c;
+      cur += c;
+      continue;
+    }
+    if (c === "(" || c === "[" || c === "{") depth++;
+    else if (c === ")" || c === "]" || c === "}") depth--;
+    if (c === "|" && depth === 0 && s[i + 1] !== "=" && s[i - 1] !== "|") {
+      out.push(cur);
+      cur = "";
+      continue;
+    }
+    cur += c;
+  }
+  out.push(cur);
+  return out;
 }
 
 // src/explain.ts
@@ -968,6 +1091,14 @@ function explain(raw, opts = {}) {
         }
         if (cmdName === "awk") {
           const g = awkGloss(tok.text);
+          if (g) {
+            add(tok.text, g, ti, "db");
+            operandCount++;
+            break;
+          }
+        }
+        if (cmdName === "jq") {
+          const g = jqGloss(tok.text);
           if (g) {
             add(tok.text, g, ti, "db");
             operandCount++;
