@@ -43,8 +43,11 @@ does at a glance — and neither does the teammate reading your script.
   `|`, `&&`, `||`, redirects, subshells, combined short flags like `-xzvf` — and
   maps every piece to plain English. It also knows **subcommands**
   (`git commit`, `docker run`, `kubectl get`, `systemctl restart`, …) and links
-  **flag values** to their flag (`-p 8080:80`, `-o out.html`). tldr/cheat show
-  *examples*; cmdxray explains *your* exact command.
+  **flag values** to their flag (`-p 8080:80`, `-o out.html`). It even decodes the
+  cryptic one-liners people paste most — **sed** scripts (`s/foo/bar/g` →
+  *substitute, every match*; `y/…/…/`; `/re/d`) and **awk** programs
+  (`'NR>1 {print $2,$3}'`). tldr/cheat show *examples*; cmdxray explains *your*
+  exact command.
 - **Share the result.** `--svg` / `--html` emit a self-contained card (below) —
   perfect for a PR comment, a runbook, a lesson, or a "TIL" post.
 

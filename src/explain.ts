@@ -4,6 +4,7 @@
 
 import { parseCommand, ParsedCommand } from "./parse.js";
 import { DB, GENERIC_FLAGS, CommandInfo } from "./db.js";
+import { sedGloss, awkGloss } from "./scripts.js";
 
 export interface Explanation {
   token: string; // the piece of the command, e.g. "-x" or "archive.tar.gz"
@@ -43,6 +44,7 @@ export function explain(raw: string, opts: ExplainOptions = {}): ExplainResult {
   const lines: Explanation[] = [];
   let color = 0;
   let info: CommandInfo | null = null;
+  let cmdName: string | null = null; // the base command word (for interpreter scripts)
   let expectCommand = true;
   let sawSubcommand = false; // has this command already consumed its subcommand?
   let currentSub: string | null = null; // the active subcommand, if any
@@ -76,6 +78,7 @@ export function explain(raw: string, opts: ExplainOptions = {}): ExplainResult {
       case "operator":
         add(tok.text, OPERATOR_GLOSS[tok.text] ?? "shell control operator", ti, "structure");
         info = null;
+        cmdName = null;
         expectCommand = true;
         sawSubcommand = false;
         currentSub = null;
@@ -92,6 +95,7 @@ export function explain(raw: string, opts: ExplainOptions = {}): ExplainResult {
       }
       case "command":
         info = DB[tok.text] ?? opts.manLookup?.(tok.text) ?? null;
+        cmdName = tok.text;
         add(
           tok.text,
           info ? info.summary : `run the "${tok.text}" program`,
@@ -173,6 +177,23 @@ export function explain(raw: string, opts: ExplainOptions = {}): ExplainResult {
           if (takesValue(info, last)) pendingValueFor = last;
           operandCount++;
           break;
+        }
+        // b3) an interpreter "program": sed script (s/a/b/g) or awk program.
+        if (cmdName === "sed") {
+          const g = sedGloss(tok.text);
+          if (g) {
+            add(tok.text, g, ti, "db");
+            operandCount++;
+            break;
+          }
+        }
+        if (cmdName === "awk") {
+          const g = awkGloss(tok.text);
+          if (g) {
+            add(tok.text, g, ti, "db");
+            operandCount++;
+            break;
+          }
         }
         // c) a whole-token flag used as an operand (find -delete style)
         if (info?.flags[tok.text]) {
