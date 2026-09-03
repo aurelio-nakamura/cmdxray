@@ -199,6 +199,16 @@ var DB = {
       v: "verbose \u2014 print each file as it is moved"
     }
   },
+  ln: {
+    summary: "make links between files",
+    flags: {
+      s: "make a symbolic (soft) link instead of a hard link",
+      f: "force \u2014 remove an existing destination first",
+      n: "treat a symlinked destination as a normal file",
+      v: "verbose \u2014 print the name of each linked file",
+      r: "make the symlink target relative to the link location"
+    }
+  },
   mkdir: {
     summary: "create directories",
     flags: {
@@ -369,6 +379,14 @@ var DB = {
   git: {
     summary: "the distributed version control system",
     takesValue: ["-C", "m", "b"],
+    subFlags: {
+      log: { n: "limit output to the last N commits" },
+      shortlog: { n: "sort authors by number of commits" },
+      commit: { n: "skip the pre-commit and commit-msg hooks (--no-verify)" }
+    },
+    subTakesValue: {
+      log: ["n"]
+    },
     subcommands: {
       clone: "copy a repository to your machine",
       init: "create a new empty repository here",
@@ -717,6 +735,7 @@ var EXAMPLES = {
   cp: ["cp -r src dest", "cp -p a.txt b.txt"],
   mv: ["mv -i old new", "mv -v a b"],
   mkdir: ["mkdir -p a/b/c", "mkdir -m 755 dir"],
+  ln: ["ln -s /usr/bin/python3 python", "ln -sf target link"],
   curl: ["curl -sSL -o out.html https://example.com", "curl -X POST -H 'A: b' -d data url"],
   wget: ["wget -c -O file.zip https://example.com/f.zip"],
   find: ["find . -name '*.log' -mtime +30 -delete", "find src -type f -maxdepth 2"],
