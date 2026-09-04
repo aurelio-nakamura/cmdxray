@@ -277,6 +277,113 @@ var DB = {
       "-print0": "print each match separated by NUL (for xargs -0)"
     }
   },
+  ffmpeg: {
+    summary: "record, convert and stream audio and video",
+    flags: {
+      "-i": "read from this input file (repeat for multiple inputs)",
+      "-vf": "apply a video filter graph (scale, crop, fps, overlay, \u2026)",
+      "-af": "apply an audio filter graph",
+      "-filter_complex": "apply a filter graph across multiple inputs/outputs",
+      "-c": "set the codec (use -c:v for video, -c:a for audio, copy = remux)",
+      "-c:v": "set the video codec (e.g. libx264, libx265)",
+      "-c:a": "set the audio codec (e.g. aac, libmp3lame)",
+      "-vcodec": "set the video codec (older spelling of -c:v)",
+      "-acodec": "set the audio codec (older spelling of -c:a)",
+      "-b:v": "set the target video bitrate (e.g. 1M)",
+      "-b:a": "set the target audio bitrate (e.g. 128k)",
+      "-crf": "constant rate factor \u2014 quality vs size (lower = better, x264/x265)",
+      "-preset": "encoding speed vs compression trade-off (ultrafast \u2026 veryslow)",
+      "-r": "set the frame rate in frames per second",
+      "-s": "set the frame size as WxH (e.g. 1280x720)",
+      "-ss": "seek to this start time before processing",
+      "-t": "limit the output to this duration",
+      "-to": "stop writing at this timestamp",
+      "-map": "choose which input streams end up in the output",
+      "-f": "force this container/output format",
+      "-an": "drop the audio stream (no audio)",
+      "-vn": "drop the video stream (no video)",
+      "-sn": "drop the subtitle stream",
+      "-y": "overwrite the output file without asking",
+      "-n": "never overwrite an existing output file",
+      "-loglevel": "set how verbose ffmpeg's logging is",
+      "-hide_banner": "suppress the startup copyright/build banner"
+    },
+    takesValue: [
+      "-i",
+      "-vf",
+      "-af",
+      "-filter_complex",
+      "-c",
+      "-c:v",
+      "-c:a",
+      "-vcodec",
+      "-acodec",
+      "-b:v",
+      "-b:a",
+      "-crf",
+      "-preset",
+      "-r",
+      "-s",
+      "-ss",
+      "-t",
+      "-to",
+      "-map",
+      "-f",
+      "-loglevel"
+    ]
+  },
+  openssl: {
+    summary: "OpenSSL \u2014 command-line cryptography and TLS toolkit",
+    subcommands: {
+      req: "create or process a certificate signing request (CSR)",
+      x509: "display or convert an X.509 certificate",
+      genrsa: "generate an RSA private key",
+      genpkey: "generate a private key (any algorithm)",
+      rsa: "inspect or convert an RSA key",
+      pkey: "inspect or convert a private key",
+      s_client: "open a TLS connection to a server (debugging client)",
+      s_server: "run a simple TLS server",
+      dgst: "compute a message digest (hash) or sign/verify",
+      enc: "symmetric-cipher encrypt or decrypt",
+      rand: "generate random bytes",
+      verify: "verify a certificate chain",
+      pkcs12: "build or parse a PKCS#12 (.p12/.pfx) bundle"
+    },
+    flags: {
+      "-x509": "output a self-signed certificate instead of a CSR",
+      "-new": "generate a new request/key",
+      "-newkey": "generate a new key of this type (e.g. rsa:4096)",
+      "-key": "use this existing private key",
+      "-keyout": "write the generated private key to this file",
+      "-out": "write output to this file",
+      "-in": "read input from this file",
+      "-days": "how many days the certificate stays valid",
+      "-nodes": "don't encrypt the private key (no passphrase)",
+      "-subj": "set the subject DN inline (skip the interactive prompts)",
+      "-sha256": "use SHA-256 as the signature/digest algorithm",
+      "-text": "also print the certificate/key in human-readable text",
+      "-noout": "don't print the encoded (PEM/DER) output",
+      "-config": "use this OpenSSL configuration file",
+      "-connect": "host:port to connect to (s_client)",
+      "-servername": "SNI hostname to send (s_client)",
+      "-passin": "source of the input passphrase",
+      "-passout": "source of the output passphrase"
+    },
+    takesValue: [
+      "-newkey",
+      "-key",
+      "-keyout",
+      "-out",
+      "-in",
+      "-days",
+      "-subj",
+      "-config",
+      "-connect",
+      "-servername",
+      "-passin",
+      "-passout"
+    ]
+  },
   chmod: {
     summary: "change file mode (permission) bits",
     flags: {
@@ -739,6 +846,8 @@ var EXAMPLES = {
   curl: ["curl -sSL -o out.html https://example.com", "curl -X POST -H 'A: b' -d data url"],
   wget: ["wget -c -O file.zip https://example.com/f.zip"],
   find: ["find . -name '*.log' -mtime +30 -delete", "find src -type f -maxdepth 2"],
+  ffmpeg: ["ffmpeg -i in.mov -c:v libx264 -crf 23 -preset medium out.mp4", "ffmpeg -i in.mp4 -vf scale=1280:-1 -an out.webm"],
+  openssl: ["openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes", "openssl s_client -connect example.com:443 -servername example.com"],
   chmod: ["chmod -R 755 dir", "chmod -v 600 key"],
   chown: ["chown -R user:group dir"],
   ssh: ["ssh -i key.pem -p 2222 user@host", "ssh -N -L 8080:localhost:80 host"],
@@ -964,6 +1073,87 @@ function splitTopPipes(s) {
   out.push(cur);
   return out;
 }
+function chmodModeGloss(tok) {
+  if (/^[0-7]{3,4}$/.test(tok)) {
+    const special = tok.length === 4 ? tok[0] : "";
+    const digits = tok.length === 4 ? tok.slice(1) : tok;
+    const who = ["owner", "group", "other"];
+    const parts = digits.split("").map((d, i) => {
+      const n = +d;
+      return `${who[i]} ${(n & 4 ? "r" : "-") + (n & 2 ? "w" : "-") + (n & 1 ? "x" : "-")}`;
+    });
+    const sym = digits.split("").map((d) => {
+      const n = +d;
+      return (n & 4 ? "r" : "-") + (n & 2 ? "w" : "-") + (n & 1 ? "x" : "-");
+    }).join("");
+    let extra = "";
+    if (special) {
+      const s = +special;
+      const bits = [];
+      if (s & 4) bits.push("setuid");
+      if (s & 2) bits.push("setgid");
+      if (s & 1) bits.push("sticky bit");
+      if (bits.length) extra = ` + ${bits.join(", ")}`;
+    }
+    return `permissions ${sym}${extra} \u2014 ${parts.join(", ")}`;
+  }
+  if (/^([ugoa]*[+\-=][rwxXst]*)(,[ugoa]*[+\-=][rwxXst]*)*$/.test(tok) && /[+\-=]/.test(tok)) {
+    const whoMap = { u: "owner", g: "group", o: "others", a: "all" };
+    const permMap = {
+      r: "read",
+      w: "write",
+      x: "execute",
+      X: "execute (dirs or already-executable)",
+      s: "setuid/setgid",
+      t: "sticky bit"
+    };
+    const opMap = { "+": "add", "-": "remove", "=": "set exactly" };
+    const clauses = tok.split(",").map((cl) => {
+      const m = cl.match(/^([ugoa]*)([+\-=])([rwxXst]*)$/);
+      if (!m) return cl;
+      const who = (m[1] || "a").split("").map((c) => whoMap[c]).join("/");
+      const op = opMap[m[2]];
+      const perms = m[3].split("").map((c) => permMap[c] || c).join(" + ") || "(no permissions)";
+      return `${op} ${perms} for ${who}`;
+    });
+    return `permission change: ${clauses.join("; ")}`;
+  }
+  return null;
+}
+var KILL_SIGNALS = {
+  HUP: [1, "hang up \u2014 commonly triggers a config reload"],
+  INT: [2, "interrupt, like pressing Ctrl-C"],
+  QUIT: [3, "quit and dump core"],
+  ABRT: [6, "abort"],
+  KILL: [9, "force kill \u2014 cannot be caught, blocked, or ignored"],
+  USR1: [10, "user-defined signal 1"],
+  USR2: [12, "user-defined signal 2"],
+  PIPE: [13, "broken pipe"],
+  ALRM: [14, "timer alarm"],
+  TERM: [15, "polite request to terminate (the default signal)"],
+  CONT: [18, "resume a stopped process"],
+  STOP: [19, "stop (pause) the process \u2014 cannot be caught"],
+  TSTP: [20, "stop from the terminal, like Ctrl-Z"]
+};
+var SIGNAL_BY_NUM = Object.fromEntries(
+  Object.entries(KILL_SIGNALS).map(([name, [n]]) => [n, name])
+);
+function killSignalGloss(tok) {
+  let s = tok.replace(/^-/, "");
+  if (s === "") return null;
+  s = s.replace(/^SIG/i, "").toUpperCase();
+  if (/^\d+$/.test(s)) {
+    const n = +s;
+    const name = SIGNAL_BY_NUM[n];
+    if (name) return `send signal ${n} (SIG${name}) \u2014 ${KILL_SIGNALS[name][1]}`;
+    return `send signal ${n} to the process`;
+  }
+  if (s in KILL_SIGNALS) {
+    const [n, desc] = KILL_SIGNALS[s];
+    return `send SIG${s} (signal ${n}) \u2014 ${desc}`;
+  }
+  return null;
+}
 
 // src/explain.ts
 var OPERATOR_GLOSS = {
@@ -1056,6 +1246,13 @@ function explain(raw, opts = {}) {
         break;
       }
       case "shortFlag": {
+        if (cmdName === "kill" || cmdName === "killall" || cmdName === "pkill") {
+          const sig = killSignalGloss(tok.text);
+          if (sig) {
+            add(tok.text, sig, ti, "db");
+            break;
+          }
+        }
         const whole = flagGloss(info, tok.text);
         if (whole) {
           add(tok.text, whole, ti, "db");
@@ -1120,6 +1317,32 @@ function explain(raw, opts = {}) {
           const g = jqGloss(tok.text);
           if (g) {
             add(tok.text, g, ti, "db");
+            operandCount++;
+            break;
+          }
+        }
+        if (cmdName === "chmod" && operandCount === 0) {
+          const g = chmodModeGloss(tok.text);
+          if (g) {
+            add(tok.text, g, ti, "db");
+            operandCount++;
+            break;
+          }
+        }
+        if (cmdName === "kill" || cmdName === "killall" || cmdName === "pkill") {
+          const sig = killSignalGloss(tok.text);
+          if (sig) {
+            add(tok.text, sig, ti, "db");
+            operandCount++;
+            break;
+          }
+          if (cmdName === "kill" && /^%?\d+$/.test(tok.text)) {
+            add(
+              tok.text,
+              tok.text.startsWith("%") ? `job ${tok.text} to signal` : "process ID (PID) to signal",
+              ti,
+              "structure"
+            );
             operandCount++;
             break;
           }

@@ -4,7 +4,7 @@
 
 import { parseCommand, ParsedCommand } from "./parse.js";
 import { DB, GENERIC_FLAGS, CommandInfo } from "./db.js";
-import { sedGloss, awkGloss, jqGloss } from "./scripts.js";
+import { sedGloss, awkGloss, jqGloss, chmodModeGloss, killSignalGloss } from "./scripts.js";
 
 export interface Explanation {
   token: string; // the piece of the command, e.g. "-x" or "archive.tar.gz"
@@ -120,6 +120,14 @@ export function explain(raw: string, opts: ExplainOptions = {}): ExplainResult {
         break;
       }
       case "shortFlag": {
+        // 0) kill/killall signal name flag: -KILL, -HUP, -SIGTERM …
+        if (cmdName === "kill" || cmdName === "killall" || cmdName === "pkill") {
+          const sig = killSignalGloss(tok.text);
+          if (sig) {
+            add(tok.text, sig, ti, "db");
+            break;
+          }
+        }
         // 1) whole-token match (find-style: -name, -mtime, -delete)
         const whole = flagGloss(info, tok.text);
         if (whole) {
@@ -199,6 +207,36 @@ export function explain(raw: string, opts: ExplainOptions = {}): ExplainResult {
           const g = jqGloss(tok.text);
           if (g) {
             add(tok.text, g, ti, "db");
+            operandCount++;
+            break;
+          }
+        }
+        // b4) chmod mode (octal 755 / 4755 or symbolic u+x,go-w) — the first operand.
+        if (cmdName === "chmod" && operandCount === 0) {
+          const g = chmodModeGloss(tok.text);
+          if (g) {
+            add(tok.text, g, ti, "db");
+            operandCount++;
+            break;
+          }
+        }
+        // b5) kill/killall signal as an operand (-9 parses as an operand) + PIDs.
+        if (cmdName === "kill" || cmdName === "killall" || cmdName === "pkill") {
+          const sig = killSignalGloss(tok.text);
+          if (sig) {
+            add(tok.text, sig, ti, "db");
+            operandCount++;
+            break;
+          }
+          if (cmdName === "kill" && /^%?\d+$/.test(tok.text)) {
+            add(
+              tok.text,
+              tok.text.startsWith("%")
+                ? `job ${tok.text} to signal`
+                : "process ID (PID) to signal",
+              ti,
+              "structure",
+            );
             operandCount++;
             break;
           }

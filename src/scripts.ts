@@ -222,3 +222,105 @@ function splitTopPipes(s: string): string[] {
   out.push(cur);
   return out;
 }
+
+// cmdxray — decode chmod modes (octal like 755 / 4755, or symbolic like u+x,go-w).
+// These are otherwise opaque "an argument passed to the command" tokens, yet the
+// mode is the single most important part of a chmod to explain.
+export function chmodModeGloss(tok: string): string | null {
+  // Octal mode: 3 or 4 octal digits.
+  if (/^[0-7]{3,4}$/.test(tok)) {
+    const special = tok.length === 4 ? tok[0] : "";
+    const digits = tok.length === 4 ? tok.slice(1) : tok;
+    const who = ["owner", "group", "other"];
+    const parts = digits.split("").map((d, i) => {
+      const n = +d;
+      return `${who[i]} ${(n & 4 ? "r" : "-") + (n & 2 ? "w" : "-") + (n & 1 ? "x" : "-")}`;
+    });
+    const sym = digits
+      .split("")
+      .map((d) => {
+        const n = +d;
+        return (n & 4 ? "r" : "-") + (n & 2 ? "w" : "-") + (n & 1 ? "x" : "-");
+      })
+      .join("");
+    let extra = "";
+    if (special) {
+      const s = +special;
+      const bits: string[] = [];
+      if (s & 4) bits.push("setuid");
+      if (s & 2) bits.push("setgid");
+      if (s & 1) bits.push("sticky bit");
+      if (bits.length) extra = ` + ${bits.join(", ")}`;
+    }
+    return `permissions ${sym}${extra} — ${parts.join(", ")}`;
+  }
+  // Symbolic mode: one or more comma-separated [ugoa]*[+-=][rwxXst]* clauses.
+  if (
+    /^([ugoa]*[+\-=][rwxXst]*)(,[ugoa]*[+\-=][rwxXst]*)*$/.test(tok) &&
+    /[+\-=]/.test(tok)
+  ) {
+    const whoMap: Record<string, string> = { u: "owner", g: "group", o: "others", a: "all" };
+    const permMap: Record<string, string> = {
+      r: "read",
+      w: "write",
+      x: "execute",
+      X: "execute (dirs or already-executable)",
+      s: "setuid/setgid",
+      t: "sticky bit",
+    };
+    const opMap: Record<string, string> = { "+": "add", "-": "remove", "=": "set exactly" };
+    const clauses = tok.split(",").map((cl) => {
+      const m = cl.match(/^([ugoa]*)([+\-=])([rwxXst]*)$/);
+      if (!m) return cl;
+      const who = (m[1] || "a")
+        .split("")
+        .map((c) => whoMap[c])
+        .join("/");
+      const op = opMap[m[2]];
+      const perms = m[3]
+        .split("")
+        .map((c) => permMap[c] || c)
+        .join(" + ") || "(no permissions)";
+      return `${op} ${perms} for ${who}`;
+    });
+    return `permission change: ${clauses.join("; ")}`;
+  }
+  return null;
+}
+
+// cmdxray — decode kill/killall signal tokens: -9, -KILL, -SIGKILL, -HUP, -15, TERM…
+const KILL_SIGNALS: Record<string, [number, string]> = {
+  HUP: [1, "hang up — commonly triggers a config reload"],
+  INT: [2, "interrupt, like pressing Ctrl-C"],
+  QUIT: [3, "quit and dump core"],
+  ABRT: [6, "abort"],
+  KILL: [9, "force kill — cannot be caught, blocked, or ignored"],
+  USR1: [10, "user-defined signal 1"],
+  USR2: [12, "user-defined signal 2"],
+  PIPE: [13, "broken pipe"],
+  ALRM: [14, "timer alarm"],
+  TERM: [15, "polite request to terminate (the default signal)"],
+  CONT: [18, "resume a stopped process"],
+  STOP: [19, "stop (pause) the process — cannot be caught"],
+  TSTP: [20, "stop from the terminal, like Ctrl-Z"],
+};
+const SIGNAL_BY_NUM: Record<number, string> = Object.fromEntries(
+  Object.entries(KILL_SIGNALS).map(([name, [n]]) => [n, name]),
+);
+
+export function killSignalGloss(tok: string): string | null {
+  let s = tok.replace(/^-/, "");
+  if (s === "") return null;
+  s = s.replace(/^SIG/i, "").toUpperCase();
+  if (/^\d+$/.test(s)) {
+    const n = +s;
+    const name = SIGNAL_BY_NUM[n];
+    if (name) return `send signal ${n} (SIG${name}) — ${KILL_SIGNALS[name][1]}`;
+    return `send signal ${n} to the process`;
+  }
+  if (s in KILL_SIGNALS) {
+    const [n, desc] = KILL_SIGNALS[s];
+    return `send SIG${s} (signal ${n}) — ${desc}`;
+  }
+  return null;
+}

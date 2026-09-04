@@ -1,6 +1,6 @@
 {
   "name": "cmdxray",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "description": "X-ray any shell command, offline: an annotated breakdown of every flag, pipe and redirect — plus a shareable card. No server, no upload.",
   "type": "module",
   "bin": {

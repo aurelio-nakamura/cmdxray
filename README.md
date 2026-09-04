@@ -47,8 +47,11 @@ does at a glance — and neither does the teammate reading your script.
   cryptic one-liners people paste most — **sed** scripts (`s/foo/bar/g` →
   *substitute, every match*; `y/…/…/`; `/re/d`), **awk** programs
   (`'NR>1 {print $2,$3}'`) and **jq** filters (`.items[] | select(.age > 30) |
-  .name` → *iterate, keep only where…, get field*). tldr/cheat show *examples*; cmdxray explains *your*
-  exact command.
+  .name` → *iterate, keep only where…, get field*). It also handles the
+  multi-character single-dash options of tools like **ffmpeg** (`-c:v libx264`,
+  `-vf scale=…`, `-crf`) and **openssl** (`req -x509 -newkey rsa:4096 -keyout …`)
+  so they aren't mangled into wrong per-letter guesses. tldr/cheat show *examples*;
+  cmdxray explains *your* exact command.
 - **Share the result.** `--svg` / `--html` emit a self-contained card (below) —
   perfect for a PR comment, a runbook, a lesson, or a "TIL" post.
 

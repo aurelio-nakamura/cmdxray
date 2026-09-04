@@ -136,3 +136,34 @@ test("bare flag cluster does not misfire on ordinary operands", () => {
   const s = g.lines.find((l) => l.token === "src");
   assert.match(s.gloss, /argument/);
 });
+
+test("ffmpeg -vf is one option, not split into -v -f", () => {
+  const r = explain("ffmpeg -i in.mp4 -vf scale=1280:-1 -an out.webm");
+  const tokens = r.lines.map((l) => l.token);
+  assert.ok(tokens.includes("-vf"), "-vf kept whole");
+  assert.ok(!tokens.includes("-v"), "must not split into -v");
+  const vf = r.lines.find((l) => l.token === "-vf");
+  assert.match(vf.gloss, /video filter/);
+  const an = r.lines.find((l) => l.token === "-an");
+  assert.match(an.gloss, /no audio|drop the audio/);
+});
+
+test("ffmpeg -c:v links its value and is codec-accurate", () => {
+  const r = explain("ffmpeg -i a.mov -c:v libx264 -crf 23 out.mp4");
+  const cv = r.lines.find((l) => l.token === "-c:v");
+  assert.match(cv.gloss, /video codec/);
+  const val = r.lines.find((l) => l.token === "libx264");
+  assert.equal(val.gloss, "value for -c:v");
+});
+
+test("openssl subcommand + long single-dash options are accurate", () => {
+  const r = explain("openssl req -x509 -newkey rsa:4096 -keyout key.pem -days 365 -nodes");
+  const req = r.lines.find((l) => l.token === "req");
+  assert.match(req.gloss, /certificate signing request|CSR/);
+  const nk = r.lines.find((l) => l.token === "-newkey");
+  assert.match(nk.gloss, /new key/);
+  const val = r.lines.find((l) => l.token === "rsa:4096");
+  assert.equal(val.gloss, "value for -newkey");
+  const nodes = r.lines.find((l) => l.token === "-nodes");
+  assert.match(nodes.gloss, /don't encrypt|no passphrase/);
+});
