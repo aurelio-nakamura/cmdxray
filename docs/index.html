@@ -102,6 +102,7 @@
       <button class="btn" id="dlsvg">⬇ Download SVG card</button>
       <button class="btn" id="dlhtml">⬇ Download HTML</button>
       <button class="btn" id="copycli">⧉ Copy the CLI command</button>
+      <button class="btn" id="copylink">🔗 Copy shareable link</button>
     </div>
     <p class="note">Nothing you type is sent anywhere — the parser and renderer run entirely in this page.
       In your terminal, <code>npx cmdxray &lt;command&gt;</code> does the same and also reads your local man pages.</p>
@@ -117,6 +118,8 @@
         <em>your machine's own man pages</em>, matching the versions you actually have installed.</p></div>
       <div class="feat"><h3>A shareable card</h3><p>Emit a self-contained SVG/HTML card — perfect for a PR
         comment, a runbook, a lesson, slides, or a "TIL" post. Each card carries its own explanation.</p></div>
+      <div class="feat"><h3>A shareable link</h3><p>Hit <em>Copy shareable link</em> and send anyone a URL that
+        opens this page with the command already broken down — no install, nothing uploaded.</p></div>
     </div>
   </section>
 
@@ -158,6 +161,20 @@ cmdxray -o card.svg "grep -rn TODO src | head -20"</pre>
   const box = document.getElementById('cardbox');
   const chipsEl = document.getElementById('chips');
 
+  // Deep-linking: load a command from ?cmd=… so a rendered breakdown is a shareable URL.
+  try {
+    const shared = new URLSearchParams(location.search).get('cmd');
+    if (shared && shared.trim()) input.value = shared;
+  } catch (e) {}
+
+  function syncUrl(raw) {
+    try {
+      const u = new URL(location.href);
+      if (raw) u.searchParams.set('cmd', raw); else u.searchParams.delete('cmd');
+      history.replaceState(null, '', u);
+    } catch (e) {}
+  }
+
   const examples = [
     'tar -xzvf archive.tar.gz',
     'curl -fsSL https://example.com/install.sh | sh',
@@ -181,6 +198,7 @@ cmdxray -o card.svg "grep -rn TODO src | head -20"</pre>
   let lastSvg = '', lastHtml = '';
   function render() {
     const raw = input.value.trim();
+    syncUrl(raw);
     if (!raw) { box.innerHTML = '<span style="color:#8b949e;font-family:var(--font)">type a command above…</span>'; return; }
     try {
       const res = explain(raw);
@@ -208,6 +226,15 @@ cmdxray -o card.svg "grep -rn TODO src | head -20"</pre>
     try { await navigator.clipboard.writeText(cli); } catch (e) {}
     const b = document.getElementById('copycli');
     const t = b.textContent; b.textContent = '✓ copied'; setTimeout(() => b.textContent = t, 1200);
+  };
+  document.getElementById('copylink').onclick = async () => {
+    const raw = input.value.trim();
+    if (!raw) return;
+    const u = new URL(location.href);
+    u.searchParams.set('cmd', raw);
+    try { await navigator.clipboard.writeText(u.toString()); } catch (e) {}
+    const b = document.getElementById('copylink');
+    const t = b.textContent; b.textContent = '✓ link copied'; setTimeout(() => b.textContent = t, 1200);
   };
 
   input.addEventListener('input', render);
