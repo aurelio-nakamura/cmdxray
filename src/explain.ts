@@ -50,6 +50,29 @@ export function explain(raw: string, opts: ExplainOptions = {}): ExplainResult {
   let currentSub: string | null = null; // the active subcommand, if any
   let operandCount = 0; // operands seen for the current command (for bareFlags)
   let pendingValueFor: string | null = null; // a flag whose value is the next operand
+  let nestedArmed = false; // next command-word operand starts a nested command (find -exec, xargs)
+  let inNested = false; // currently glossing a nested command (for {} / ; / + tokens)
+
+  const EXEC_FLAGS = new Set(["-exec", "-execdir", "-ok", "-okdir"]);
+
+  // Switch the active command context to a nested command (the thing find -exec /
+  // xargs actually runs). Everything after is glossed against THIS command.
+  const enterNested = (word: string, ti: number, verb: string) => {
+    info = DB[word] ?? opts.manLookup?.(word) ?? null;
+    cmdName = word;
+    add(
+      word,
+      info ? `${verb}: ${info.summary}` : `${verb} the "${word}" command`,
+      ti,
+      info ? (DB[word] ? "db" : "man") : "structure",
+    );
+    nestedArmed = false;
+    inNested = true;
+    sawSubcommand = false;
+    currentSub = null;
+    operandCount = 0;
+    pendingValueFor = null;
+  };
 
   const add = (token: string, gloss: string, ti: number, source: Explanation["source"]) => {
     lines.push({ token, gloss, colorIndex: color++, tokenIndex: ti, source });
@@ -84,6 +107,8 @@ export function explain(raw: string, opts: ExplainOptions = {}): ExplainResult {
         currentSub = null;
         operandCount = 0;
         pendingValueFor = null;
+        nestedArmed = false;
+        inNested = false;
         break;
       case "redirect":
         add(tok.text, OPERATOR_GLOSS[tok.text] ?? "shell redirection", ti, "structure");
@@ -106,6 +131,8 @@ export function explain(raw: string, opts: ExplainOptions = {}): ExplainResult {
         sawSubcommand = false;
         currentSub = null;
         operandCount = 0;
+        nestedArmed = tok.text === "xargs"; // xargs runs the command that follows
+        inNested = false;
         break;
       case "subshell":
         add(tok.text, "run this inner command first and substitute its output", ti, "structure");
@@ -132,7 +159,8 @@ export function explain(raw: string, opts: ExplainOptions = {}): ExplainResult {
         const whole = flagGloss(info, tok.text);
         if (whole) {
           add(tok.text, whole, ti, "db");
-          if (takesValue(info, tok.text)) pendingValueFor = tok.text;
+          if (cmdName === "find" && EXEC_FLAGS.has(tok.text)) nestedArmed = true;
+          else if (takesValue(info, tok.text)) pendingValueFor = tok.text;
           break;
         }
         const body = tok.text.replace(/^-/, "");
@@ -161,6 +189,47 @@ export function explain(raw: string, opts: ExplainOptions = {}): ExplainResult {
         if (pendingValueFor) {
           add(tok.text, `value for ${pendingValueFor}`, ti, "structure");
           pendingValueFor = null;
+          operandCount++;
+          break;
+        }
+        // a1) nested-command placeholders / terminators (find -exec, xargs -I)
+        if (inNested || nestedArmed) {
+          if (tok.text === "{}") {
+            add(tok.text, "placeholder — each matched item is substituted here", ti, "db");
+            operandCount++;
+            break;
+          }
+          if (tok.text === "\\;" || tok.text === ";") {
+            add(tok.text, "end of the -exec command (one run per match)", ti, "structure");
+            inNested = false;
+            break;
+          }
+          if (tok.text === "+") {
+            add(tok.text, "end of -exec: run once with all matches appended", ti, "structure");
+            inNested = false;
+            break;
+          }
+        }
+        // a2) start of a nested command that find/xargs runs (grep, rm, …)
+        if (nestedArmed && !tok.text.startsWith("-")) {
+          enterNested(tok.text, ti, cmdName === "xargs" ? "run per input item" : "run on each match");
+          break;
+        }
+        // a3) a dash-prefixed flag that parsed as an operand (e.g. xargs -0)
+        if (tok.text.startsWith("-")) {
+          const stripped = tok.text.replace(/^-+/, "");
+          const g = flagGloss(info, stripped);
+          if (g) {
+            add(tok.text, g, ti, "db");
+            if (takesValue(info, stripped)) pendingValueFor = tok.text;
+            operandCount++;
+            break;
+          }
+        }
+        // a4) an inline variable assignment after the command (export FOO=bar, make X=1)
+        if (/^[A-Za-z_][A-Za-z0-9_]*=/.test(tok.text)) {
+          const name = tok.text.split("=")[0];
+          add(tok.text, `set ${name} for this command`, ti, "structure");
           operandCount++;
           break;
         }

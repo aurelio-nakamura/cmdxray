@@ -167,3 +167,40 @@ test("openssl subcommand + long single-dash options are accurate", () => {
   const nodes = r.lines.find((l) => l.token === "-nodes");
   assert.match(nodes.gloss, /don't encrypt|no passphrase/);
 });
+
+test("find -exec explains the nested command's own flags", () => {
+  const r = explain("find . -name '*.js' -exec grep -l TODO {} \\;");
+  const byTok = Object.fromEntries(r.lines.map((l) => [l.token, l.gloss]));
+  // the nested command word is recognized as a command, not an opaque argument
+  assert.match(byTok["grep"], /search input for lines/);
+  // grep's own -l is glossed in the nested context (not "a command option")
+  assert.match(byTok["-l"], /names of files with matches/i);
+  // the placeholder and terminator are explained
+  assert.match(byTok["{}"], /placeholder/i);
+  assert.match(byTok["\\;"], /end of the -exec/i);
+  // the pattern after -name is its value, not a bare argument
+  assert.match(byTok["*.js"], /value for -name/);
+});
+
+test("xargs explains the command it runs and its NUL flag", () => {
+  const r = explain("xargs -0 rm -f");
+  const byTok = Object.fromEntries(r.lines.map((l) => [l.token, l.gloss]));
+  assert.match(byTok["-0"], /NUL/); // not "a numeric option"
+  assert.match(byTok["rm"], /remove files/); // rm recognized as the run command
+  assert.match(byTok["-f"], /force/i); // rm's -f, in the nested context
+});
+
+test("netstat combined flags are expanded and curated", () => {
+  const r = explain("netstat -tulpn");
+  const flags = r.lines.filter((l) => l.token.startsWith("-")).map((l) => l.token);
+  assert.deepEqual(flags, ["-t", "-u", "-l", "-p", "-n"]);
+  const byTok = Object.fromEntries(r.lines.map((l) => [l.token, l.gloss]));
+  assert.match(byTok["-l"], /listening/i);
+});
+
+test("inline variable assignment after a command is recognized", () => {
+  const r = explain("export PATH=$PATH:/usr/local/bin");
+  const asg = r.lines.find((l) => l.token.startsWith("PATH="));
+  assert.ok(asg);
+  assert.match(asg.gloss, /set PATH/);
+});

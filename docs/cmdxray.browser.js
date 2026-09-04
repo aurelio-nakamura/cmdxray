@@ -260,17 +260,42 @@ var DB = {
   },
   find: {
     summary: "walk a directory tree looking for files",
+    takesValue: [
+      "-name",
+      "-iname",
+      "-path",
+      "-ipath",
+      "-type",
+      "-mtime",
+      "-mmin",
+      "-size",
+      "-maxdepth",
+      "-mindepth",
+      "-newer",
+      "-user",
+      "-group",
+      "-perm"
+    ],
     flags: {
       "-name": "match files by this name pattern",
       "-iname": "match by name, case-insensitively",
       "-path": "match by path pattern",
+      "-ipath": "match by path pattern, case-insensitively",
       "-type": "match by type (f=file, d=directory, l=symlink)",
       "-mtime": "match by modification age in days",
       "-mmin": "match by modification age in minutes",
       "-size": "match by file size",
+      "-newer": "match files newer than the given reference file",
+      "-user": "match files owned by this user",
+      "-group": "match files owned by this group",
+      "-perm": "match files with these permission bits",
       "-empty": "match empty files and directories",
       "-exec": "run a command on each match ({} = the file, ; ends it)",
+      "-execdir": "like -exec, but run from the match's own directory",
+      "-ok": "like -exec, but prompt before running each command",
+      "-okdir": "like -execdir, but prompt before running each command",
       "-delete": "delete each matching file",
+      "-prune": "don't descend into a matching directory",
       "-maxdepth": "descend at most this many directory levels",
       "-mindepth": "ignore matches shallower than this many levels",
       "-print": "print each match (the default action)",
@@ -681,6 +706,33 @@ var DB = {
       f: "full-format listing"
     }
   },
+  netstat: {
+    summary: "show network connections, routing tables, and interface stats",
+    flags: {
+      t: "TCP connections",
+      u: "UDP connections",
+      l: "only listening sockets",
+      p: "show the PID and program name for each socket",
+      n: "numeric output \u2014 don't resolve hosts, ports, or users",
+      a: "all sockets (listening and non-listening)",
+      r: "show the kernel routing table",
+      e: "extended information",
+      s: "per-protocol summary statistics",
+      c: "continuously refresh the display"
+    }
+  },
+  ss: {
+    summary: "inspect sockets (a faster, modern replacement for netstat)",
+    flags: {
+      t: "TCP sockets",
+      u: "UDP sockets",
+      l: "only listening sockets",
+      p: "show the process using each socket",
+      n: "numeric output \u2014 don't resolve service names",
+      a: "all sockets (listening and non-listening)",
+      s: "print summary statistics"
+    }
+  },
   kill: {
     summary: "send a signal to a process",
     flags: {
@@ -863,6 +915,8 @@ var EXAMPLES = {
   awk: ["awk -F, '{print $1}' data.csv"],
   jq: ["jq -r '.items[] | select(.age > 30) | .name' data.json"],
   ps: ["ps aux", "ps -ef"],
+  netstat: ["netstat -tulpn", "netstat -rn"],
+  ss: ["ss -tulpn", "ss -s"],
   kill: ["kill -9 1234", "kill -15 4321"],
   xargs: ["xargs -0 -I{} rm {}", "xargs -n1 -P4 echo"],
   head: ["head -n 20 file.txt", "head -c 100 file.bin"],
@@ -1181,6 +1235,25 @@ function explain(raw, opts = {}) {
   let currentSub = null;
   let operandCount = 0;
   let pendingValueFor = null;
+  let nestedArmed = false;
+  let inNested = false;
+  const EXEC_FLAGS = /* @__PURE__ */ new Set(["-exec", "-execdir", "-ok", "-okdir"]);
+  const enterNested = (word, ti, verb) => {
+    info = DB[word] ?? opts.manLookup?.(word) ?? null;
+    cmdName = word;
+    add(
+      word,
+      info ? `${verb}: ${info.summary}` : `${verb} the "${word}" command`,
+      ti,
+      info ? DB[word] ? "db" : "man" : "structure"
+    );
+    nestedArmed = false;
+    inNested = true;
+    sawSubcommand = false;
+    currentSub = null;
+    operandCount = 0;
+    pendingValueFor = null;
+  };
   const add = (token, gloss, ti, source) => {
     lines.push({ token, gloss, colorIndex: color++, tokenIndex: ti, source });
   };
@@ -1210,6 +1283,8 @@ function explain(raw, opts = {}) {
         currentSub = null;
         operandCount = 0;
         pendingValueFor = null;
+        nestedArmed = false;
+        inNested = false;
         break;
       case "redirect":
         add(tok.text, OPERATOR_GLOSS[tok.text] ?? "shell redirection", ti, "structure");
@@ -1232,6 +1307,8 @@ function explain(raw, opts = {}) {
         sawSubcommand = false;
         currentSub = null;
         operandCount = 0;
+        nestedArmed = tok.text === "xargs";
+        inNested = false;
         break;
       case "subshell":
         add(tok.text, "run this inner command first and substitute its output", ti, "structure");
@@ -1256,7 +1333,8 @@ function explain(raw, opts = {}) {
         const whole = flagGloss(info, tok.text);
         if (whole) {
           add(tok.text, whole, ti, "db");
-          if (takesValue(info, tok.text)) pendingValueFor = tok.text;
+          if (cmdName === "find" && EXEC_FLAGS.has(tok.text)) nestedArmed = true;
+          else if (takesValue(info, tok.text)) pendingValueFor = tok.text;
           break;
         }
         const body = tok.text.replace(/^-/, "");
@@ -1280,6 +1358,43 @@ function explain(raw, opts = {}) {
         if (pendingValueFor) {
           add(tok.text, `value for ${pendingValueFor}`, ti, "structure");
           pendingValueFor = null;
+          operandCount++;
+          break;
+        }
+        if (inNested || nestedArmed) {
+          if (tok.text === "{}") {
+            add(tok.text, "placeholder \u2014 each matched item is substituted here", ti, "db");
+            operandCount++;
+            break;
+          }
+          if (tok.text === "\\;" || tok.text === ";") {
+            add(tok.text, "end of the -exec command (one run per match)", ti, "structure");
+            inNested = false;
+            break;
+          }
+          if (tok.text === "+") {
+            add(tok.text, "end of -exec: run once with all matches appended", ti, "structure");
+            inNested = false;
+            break;
+          }
+        }
+        if (nestedArmed && !tok.text.startsWith("-")) {
+          enterNested(tok.text, ti, cmdName === "xargs" ? "run per input item" : "run on each match");
+          break;
+        }
+        if (tok.text.startsWith("-")) {
+          const stripped = tok.text.replace(/^-+/, "");
+          const g = flagGloss(info, stripped);
+          if (g) {
+            add(tok.text, g, ti, "db");
+            if (takesValue(info, stripped)) pendingValueFor = tok.text;
+            operandCount++;
+            break;
+          }
+        }
+        if (/^[A-Za-z_][A-Za-z0-9_]*=/.test(tok.text)) {
+          const name = tok.text.split("=")[0];
+          add(tok.text, `set ${name} for this command`, ti, "structure");
           operandCount++;
           break;
         }
