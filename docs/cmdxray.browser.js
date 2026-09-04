@@ -1269,10 +1269,12 @@ var SIGNAL_BY_NUM = Object.fromEntries(
   Object.entries(KILL_SIGNALS).map(([name, [n]]) => [n, name])
 );
 function killSignalGloss(tok) {
+  const hadDash = tok.startsWith("-");
   let s = tok.replace(/^-/, "");
   if (s === "") return null;
   s = s.replace(/^SIG/i, "").toUpperCase();
   if (/^\d+$/.test(s)) {
+    if (!hadDash) return null;
     const n = +s;
     const name = SIGNAL_BY_NUM[n];
     if (name) return `send signal ${n} (SIG${name}) \u2014 ${KILL_SIGNALS[name][1]}`;

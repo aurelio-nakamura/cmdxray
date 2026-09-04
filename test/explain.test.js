@@ -252,3 +252,12 @@ test("fully-quoted awk program is still detected as a program", () => {
   const prog = r.lines.find((l) => l.token.includes("print $1"));
   assert.match(prog.gloss, /awk program/);
 });
+
+test("kill -9 1234: -9 is the signal, 1234 is a PID (not a signal)", () => {
+  const res = explain("kill -9 1234", { manLookup: () => null });
+  const sig = res.lines.find((l) => l.token === "-9");
+  assert.match(sig.gloss, /SIGKILL/);
+  const pid = res.lines.find((l) => l.token === "1234");
+  assert.match(pid.gloss, /process ID \(PID\)/);
+  assert.doesNotMatch(pid.gloss, /send signal 1234/);
+});

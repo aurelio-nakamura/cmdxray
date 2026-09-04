@@ -309,10 +309,14 @@ const SIGNAL_BY_NUM: Record<number, string> = Object.fromEntries(
 );
 
 export function killSignalGloss(tok: string): string | null {
+  const hadDash = tok.startsWith("-");
   let s = tok.replace(/^-/, "");
   if (s === "") return null;
   s = s.replace(/^SIG/i, "").toUpperCase();
   if (/^\d+$/.test(s)) {
+    // A bare number (no leading dash) after `kill` is a PID, not a signal —
+    // e.g. `kill -9 1234`: -9 is the signal, 1234 is the process ID.
+    if (!hadDash) return null;
     const n = +s;
     const name = SIGNAL_BY_NUM[n];
     if (name) return `send signal ${n} (SIG${name}) — ${KILL_SIGNALS[name][1]}`;
