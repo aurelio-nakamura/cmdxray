@@ -204,3 +204,51 @@ test("inline variable assignment after a command is recognized", () => {
   assert.ok(asg);
   assert.match(asg.gloss, /set PATH/);
 });
+
+test("expands grep -rIn per-letter (I and n were being dropped)", () => {
+  const r = explain("grep -rIn foo .");
+  const tokens = r.lines.map((l) => l.token);
+  assert.ok(tokens.includes("-r"));
+  assert.ok(tokens.includes("-I"));
+  assert.ok(tokens.includes("-n"));
+  const bin = r.lines.find((l) => l.token === "-I");
+  assert.match(bin.gloss, /binary/);
+});
+
+test("a flag with a quoted VALUE still classifies as a flag", () => {
+  const r = explain("grep --include='*.py' foo .");
+  const inc = r.lines.find((l) => l.token.startsWith("--include"));
+  assert.ok(inc);
+  assert.match(inc.gloss, /glob/);
+  assert.equal(inc.source, "db");
+});
+
+test("tar --exclude with quoted value is glossed, not generic", () => {
+  const r = explain("tar --exclude='*.log' -czf out.tgz dir");
+  const ex = r.lines.find((l) => l.token.startsWith("--exclude"));
+  assert.match(ex.gloss, /skip files/);
+  assert.equal(ex.source, "db");
+});
+
+test("git rebase -i is interactive, not a generic option", () => {
+  const r = explain("git rebase -i HEAD~3");
+  const i = r.lines.find((l) => l.token === "-i");
+  assert.match(i.gloss, /interactive/);
+  assert.equal(i.source, "db");
+});
+
+test("docker compose second-level subcommand is recognized", () => {
+  const r = explain("docker compose up -d --build");
+  const up = r.lines.find((l) => l.token === "up");
+  assert.match(up.gloss, /start the services/);
+  const build = r.lines.find((l) => l.token === "--build");
+  assert.match(build.gloss, /build images/);
+});
+
+test("fully-quoted awk program is still detected as a program", () => {
+  const r = explain("awk -F',' '{print $1}' data.csv");
+  const f = r.lines.find((l) => l.token === "-F,");
+  assert.match(f.gloss, /field separator/);
+  const prog = r.lines.find((l) => l.token.includes("print $1"));
+  assert.match(prog.gloss, /awk program/);
+});

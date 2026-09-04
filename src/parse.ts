@@ -42,12 +42,18 @@ const REDIRECTS = new Set([">", ">>", "<", "<<", "2>", "2>>", "&>", ">&", "2>&1"
 function lex(raw: string): { text: string; quoted: boolean }[] {
   const words: { text: string; quoted: boolean }[] = [];
   let cur = "";
+  // `quoted` marks a word whose FIRST character was inside quotes — i.e. a
+  // fully-quoted operand/program (awk '{...}', a sed script). A flag whose
+  // VALUE is quoted (--include='*.py', -F',') starts unquoted, so it still
+  // classifies as a flag.
   let quoted = false;
+  let started = false;
   let i = 0;
   const push = () => {
     if (cur.length) words.push({ text: cur, quoted });
     cur = "";
     quoted = false;
+    started = false;
   };
   while (i < raw.length) {
     const c = raw[i];
@@ -57,7 +63,8 @@ function lex(raw: string): { text: string; quoted: boolean }[] {
       continue;
     }
     if (c === "'" || c === '"') {
-      quoted = true;
+      if (!started) quoted = true;
+      started = true;
       const q = c;
       i++;
       while (i < raw.length && raw[i] !== q) {
@@ -68,6 +75,7 @@ function lex(raw: string): { text: string; quoted: boolean }[] {
     }
     if (c === "$" && raw[i + 1] === "(") {
       // subshell $(...)
+      started = true;
       let depth = 1;
       cur += "$(";
       i += 2;
@@ -80,6 +88,7 @@ function lex(raw: string): { text: string; quoted: boolean }[] {
       cur += ")";
       continue;
     }
+    started = true;
     cur += c;
     i++;
   }

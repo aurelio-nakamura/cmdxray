@@ -240,6 +240,16 @@ export function explain(raw: string, opts: ExplainOptions = {}): ExplainResult {
           currentSub = tok.text;
           break;
         }
+        // b1) a second-level subcommand (docker compose up, git stash pop)
+        if (
+          sawSubcommand &&
+          currentSub &&
+          operandCount === 0 &&
+          info?.subSubcommands?.[currentSub]?.[tok.text]
+        ) {
+          add(tok.text, info.subSubcommands[currentSub][tok.text], ti, "db");
+          break;
+        }
         // b2) a leading bare flag cluster (tar czf, ps aux) — no dash, all known.
         if (
           info?.bareFlags &&

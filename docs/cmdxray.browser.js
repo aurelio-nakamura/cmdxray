@@ -5,11 +5,13 @@ function lex(raw) {
   const words = [];
   let cur = "";
   let quoted = false;
+  let started = false;
   let i = 0;
   const push = () => {
     if (cur.length) words.push({ text: cur, quoted });
     cur = "";
     quoted = false;
+    started = false;
   };
   while (i < raw.length) {
     const c = raw[i];
@@ -19,7 +21,8 @@ function lex(raw) {
       continue;
     }
     if (c === "'" || c === '"') {
-      quoted = true;
+      if (!started) quoted = true;
+      started = true;
       const q = c;
       i++;
       while (i < raw.length && raw[i] !== q) {
@@ -29,6 +32,7 @@ function lex(raw) {
       continue;
     }
     if (c === "$" && raw[i + 1] === "(") {
+      started = true;
       let depth = 1;
       cur += "$(";
       i += 2;
@@ -41,6 +45,7 @@ function lex(raw) {
       cur += ")";
       continue;
     }
+    started = true;
     cur += c;
     i++;
   }
@@ -107,28 +112,40 @@ function parseCommand(raw) {
 var DB = {
   tar: {
     summary: "archive utility \u2014 bundle files into (or extract them from) a .tar",
-    takesValue: ["f", "C"],
+    takesValue: ["f", "C", "--exclude", "--exclude-from", "--strip-components", "-T"],
     bareFlags: true,
     flags: {
       c: "create a new archive",
       x: "extract files from an archive",
       t: "list the contents of an archive",
+      r: "append files to the end of an archive",
+      u: "append only files newer than the archive copy",
       z: "filter the archive through gzip (.gz)",
       j: "filter the archive through bzip2 (.bz2)",
       J: "filter the archive through xz (.xz)",
       v: "verbose \u2014 list each file as it is processed",
       f: "use the next argument as the archive file name",
       C: "change to the given directory first",
+      p: "preserve file permissions when extracting",
+      h: "follow symlinks \u2014 archive the files they point to",
+      k: "keep existing files; don't overwrite when extracting",
       "--create": "create a new archive",
       "--extract": "extract files from an archive",
+      "--list": "list the contents of an archive",
       "--gzip": "filter the archive through gzip",
+      "--bzip2": "filter the archive through bzip2",
+      "--xz": "filter the archive through xz",
       "--verbose": "verbose \u2014 list each file as it is processed",
-      "--file": "use the given archive file"
+      "--file": "use the given archive file",
+      "--exclude": "skip files matching this pattern",
+      "--exclude-from": "skip files matching patterns read from this file",
+      "--exclude-vcs": "skip version-control dirs (.git, .svn, \u2026)",
+      "--strip-components": "strip this many leading path parts when extracting"
     }
   },
   grep: {
     summary: "search input for lines matching a pattern",
-    takesValue: ["e", "f", "A", "B", "C", "m"],
+    takesValue: ["e", "f", "A", "B", "C", "m", "d", "--include", "--exclude", "--exclude-dir", "--include-dir"],
     flags: {
       i: "ignore case when matching",
       v: "invert \u2014 show lines that do NOT match",
@@ -136,20 +153,46 @@ var DB = {
       R: "search directories recursively, following symlinks",
       n: "prefix each match with its line number",
       l: "print only the names of files with matches",
+      L: "print only the names of files with NO match",
       c: "print only a count of matching lines",
       E: "interpret the pattern as an extended regex",
       F: "match fixed strings, not regexes",
+      P: "interpret the pattern as a Perl-compatible regex (PCRE)",
+      G: "interpret the pattern as a basic regex (the default)",
       o: "print only the matched part of each line",
       w: "match whole words only",
+      x: "match only whole lines",
+      I: "skip binary files (treat them as non-matching)",
+      a: "treat binary files as text",
+      H: "print the file name with each match",
+      h: "never print the file name with matches",
+      q: "quiet \u2014 print nothing, exit 0 on the first match",
+      s: "suppress error messages about unreadable files",
+      z: "treat input and output as NUL-separated lines",
       A: "also print N lines after each match",
       B: "also print N lines before each match",
       C: "also print N lines of context around each match",
       e: "use the next argument as the pattern",
+      f: "read patterns from the given file",
       "--ignore-case": "ignore case when matching",
       "--invert-match": "show lines that do NOT match",
       "--recursive": "search directories recursively",
       "--line-number": "prefix each match with its line number",
-      "--color": "highlight matches in color"
+      "--color": "highlight matches in color",
+      "--include": "only search files whose name matches this glob",
+      "--exclude": "skip files whose name matches this glob",
+      "--exclude-dir": "skip directories whose name matches this glob",
+      "--include-dir": "only descend into directories matching this glob",
+      "--word-regexp": "match whole words only",
+      "--fixed-strings": "match fixed strings, not regexes",
+      "--files-with-matches": "print only the names of files with matches",
+      "--count": "print only a count of matching lines",
+      "--only-matching": "print only the matched part of each line",
+      "--extended-regexp": "interpret the pattern as an extended regex",
+      "--perl-regexp": "interpret the pattern as a Perl-compatible regex",
+      "--quiet": "quiet \u2014 print nothing, exit 0 on the first match",
+      "--no-filename": "never print the file name with matches",
+      "--with-filename": "print the file name with each match"
     }
   },
   ls: {
@@ -489,10 +532,35 @@ var DB = {
       compose: "run multi-container apps from a compose file"
     },
     subFlags: {
-      build: { t: "tag the built image (name:tag)" }
+      build: { t: "tag the built image (name:tag)" },
+      compose: {
+        d: "detached \u2014 run the services in the background",
+        "--build": "build images before starting the containers",
+        "--no-cache": "don't use cache when building images",
+        "--force-recreate": "recreate containers even if config is unchanged",
+        "--remove-orphans": "remove containers for services not in the compose file",
+        "-f": "use the given compose file"
+      }
     },
     subTakesValue: {
-      build: ["t"]
+      build: ["t"],
+      compose: ["-f"]
+    },
+    subSubcommands: {
+      compose: {
+        up: "create and start the services in the compose file",
+        down: "stop and remove the services, networks and volumes",
+        build: "build or rebuild the services' images",
+        ps: "list the compose project's containers",
+        logs: "show output from the services",
+        exec: "run a command in a running service container",
+        run: "run a one-off command against a service",
+        start: "start existing service containers",
+        stop: "stop running service containers",
+        restart: "restart service containers",
+        pull: "pull the services' images",
+        config: "validate and print the resolved compose file"
+      }
     },
     flags: {
       d: "detached \u2014 run in the background",
@@ -514,7 +582,8 @@ var DB = {
     subFlags: {
       log: { n: "limit output to the last N commits" },
       shortlog: { n: "sort authors by number of commits" },
-      commit: { n: "skip the pre-commit and commit-msg hooks (--no-verify)" }
+      commit: { n: "skip the pre-commit and commit-msg hooks (--no-verify)" },
+      rebase: { i: "interactive \u2014 edit the list of commits before replaying them" }
     },
     subTakesValue: {
       log: ["n"]
@@ -553,9 +622,16 @@ var DB = {
       n: "dry run / no-commit, depending on the subcommand",
       "--amend": "replace the previous commit instead of adding a new one",
       "--force": "force the operation (e.g. push)",
+      "--force-with-lease": "force-push only if the remote hasn't moved since you fetched",
       "--all": "operate on everything (all branches / all changes)",
       "--oneline": "show each commit on a single line",
       "--graph": "draw an ASCII graph of the branch structure",
+      "--continue": "resume the operation after resolving conflicts",
+      "--abort": "cancel the operation and restore the original state",
+      "--skip": "skip the current commit and continue",
+      "--interactive": "interactive \u2014 edit the list of commits before replaying them",
+      "--set-upstream": "record this remote branch as the upstream for tracking",
+      "--no-verify": "skip the pre-commit and commit-msg hooks",
       "-C": "run as if git was started in the given directory"
     }
   },
@@ -1402,6 +1478,10 @@ function explain(raw, opts = {}) {
           add(tok.text, info.subcommands[tok.text], ti, "db");
           sawSubcommand = true;
           currentSub = tok.text;
+          break;
+        }
+        if (sawSubcommand && currentSub && operandCount === 0 && info?.subSubcommands?.[currentSub]?.[tok.text]) {
+          add(tok.text, info.subSubcommands[currentSub][tok.text], ti, "db");
           break;
         }
         if (info?.bareFlags && operandCount === 0 && !sawSubcommand && /^[A-Za-z]{2,}$/.test(tok.text) && tok.text.split("").every((l) => info.flags[l] !== void 0)) {
