@@ -1,7 +1,7 @@
 {
   "name": "cmdxray",
-  "version": "0.9.1",
-  "description": "X-ray any shell command, offline: an annotated breakdown of every flag, pipe and redirect — plus a shareable card. No server, no upload.",
+  "version": "0.10.0",
+  "description": "X-ray any shell command, offline: an annotated breakdown of every flag, pipe and redirect \u2014 plus a shareable card. No server, no upload.",
   "type": "module",
   "bin": {
     "cmdxray": "dist/cli.js"

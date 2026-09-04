@@ -6,6 +6,8 @@ import { explain } from "./explain.js";
 import { renderTerminal, renderSvg, renderHtml } from "./card.js";
 import type { CommandInfo } from "./db.js";
 
+const PLAYGROUND = "https://aurelio-nakamura.github.io/cmdxray/";
+
 const HELP = `cmdxray — x-ray any shell command, offline.
 
 Usage:
@@ -13,17 +15,27 @@ Usage:
   cmdxray --svg <command...>      emit a shareable SVG card to stdout
   cmdxray --html <command...>     emit a standalone HTML page to stdout
   cmdxray -o card.svg <command>   write the SVG card to a file
+  cmdxray --share <command...>    print a shareable link to the breakdown
   echo "<cmd>" | cmdxray          read the command from stdin
 
 Options:
   --svg        output an SVG card
   --html       output a standalone HTML page
   -o <file>    write output to <file> (format inferred from extension)
+  --share      also print a shareable playground link for the command
+  --link       print ONLY the shareable playground link (no explanation)
   --no-color   disable ANSI colors in terminal output
   --no-man     do not consult local man pages for unknown commands
   -h, --help   show this help
 
 Everything runs locally. Nothing is uploaded.`;
+
+// Build a shareable playground deep-link for a command. The link opens the
+// in-browser playground with the command pre-loaded and its card rendered.
+// URLSearchParams on the page decodes this back to the exact command.
+export function shareLink(raw: string): string {
+  return PLAYGROUND + "?cmd=" + encodeURIComponent(raw);
+}
 
 // Best-effort: read the one-line summary from a local man page (Node only).
 function makeManLookup(): (cmd: string) => CommandInfo | null {
@@ -65,6 +77,8 @@ function main() {
   let outFile: string | null = null;
   let color: boolean = true;
   let useMan: boolean = true;
+  let share: boolean = false;
+  let linkOnly: boolean = false;
   const rest: string[] = [];
   // cmdxray's own options are recognized BEFORE the command word (or after an
   // explicit `--`). Once a MULTI-TOKEN command begins, every remaining token
@@ -74,7 +88,8 @@ function main() {
   // the command is fully self-contained inside that one token, so trailing
   // cmdxray options after it are unambiguous and are honored.
   const isCmdxrayOpt = (a: string) =>
-    a === "--svg" || a === "--html" || a === "--no-color" || a === "--no-man" || a === "-o";
+    a === "--svg" || a === "--html" || a === "--no-color" || a === "--no-man" ||
+    a === "-o" || a === "--share" || a === "--link";
   let inCommand = false;
   let quotedCommand = false;
   for (let i = 0; i < argv.length; i++) {
@@ -90,6 +105,8 @@ function main() {
     else if (a === "--html") format = "html";
     else if (a === "--no-color") color = false;
     else if (a === "--no-man") useMan = false;
+    else if (a === "--share") share = true;
+    else if (a === "--link") linkOnly = true;
     else if (a === "-o") outFile = argv[++i] ?? null;
     else {
       // first non-cmdxray token = start of the command line
@@ -126,6 +143,13 @@ function main() {
     return;
   }
 
+  // --link short-circuits: print only the shareable playground URL (handy to
+  // pipe into a clipboard, e.g. `cmdxray --link <cmd> | pbcopy`).
+  if (linkOnly) {
+    process.stdout.write(shareLink(raw) + "\n");
+    return;
+  }
+
   const manLookup = useMan ? makeManLookup() : undefined;
   const res = explain(raw, { manLookup });
 
@@ -139,7 +163,14 @@ function main() {
 
   if (format === "svg") process.stdout.write(renderSvg(res) + "\n");
   else if (format === "html") process.stdout.write(renderHtml(res) + "\n");
-  else process.stdout.write(renderTerminal(res, color) + "\n");
+  else {
+    process.stdout.write(renderTerminal(res, color) + "\n");
+    if (share) {
+      const link = shareLink(raw);
+      const label = color ? `\u001b[2m🔗 Share:\u001b[0m ${link}` : `🔗 Share: ${link}`;
+      process.stdout.write("\n" + label + "\n");
+    }
+  }
 }
 
 main();

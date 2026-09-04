@@ -53,7 +53,8 @@ does at a glance — and neither does the teammate reading your script.
   so they aren't mangled into wrong per-letter guesses. tldr/cheat show *examples*;
   cmdxray explains *your* exact command.
 - **Share the result.** `--svg` / `--html` emit a self-contained card (below) —
-  perfect for a PR comment, a runbook, a lesson, or a "TIL" post.
+  perfect for a PR comment, a runbook, a lesson, or a "TIL" post. Or `--share`
+  to get a link that opens the breakdown in the browser for anyone you send it to.
 
 ## The shareable card
 
@@ -71,12 +72,18 @@ cmdxray <command...>            explain a command in your terminal
 cmdxray --svg <command...>      emit a shareable SVG card to stdout
 cmdxray --html <command...>     emit a standalone HTML page to stdout
 cmdxray -o card.svg <command>   write a card to a file (svg or html by extension)
+cmdxray --share <command...>    explain, then print a shareable link
+cmdxray --link <command...>     print ONLY the shareable link (pipe to clipboard)
 echo "<cmd>" | cmdxray          read the command from stdin
 
   --no-color   plain terminal output
   --no-man     skip local man-page lookups for unknown commands
   -h, --help   help
 ```
+
+`--share` / `--link` produce a URL to the offline playground with your command
+pre-loaded, e.g. `cmdxray --link tar -xzvf a.tgz | pbcopy`. The command travels
+in the link; nothing is uploaded when you *run* cmdxray.
 
 Install it if you use it a lot:
 

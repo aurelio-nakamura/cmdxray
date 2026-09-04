@@ -58,3 +58,30 @@ test("multi-token command keeps its own -o flag", () => {
   const out = run(["curl", "-o", "out.html", "https://example.com"]);
   assert.match(out, /value for -o/); // -o belongs to curl, not cmdxray
 });
+
+// --link prints ONLY the shareable playground deep-link (no explanation), so it
+// can be piped straight to a clipboard. The URL must round-trip through the
+// playground's URLSearchParams, so it is percent-encoded.
+test("--link prints only the shareable playground URL", () => {
+  const out = runRaw(["--link", "git", "commit", "-am", "wip"]).trim();
+  assert.match(out, /^https:\/\/aurelio-nakamura\.github\.io\/cmdxray\/\?cmd=/);
+  assert.equal(decodeURIComponent(out.split("?cmd=")[1]), "git commit -am wip");
+  assert.ok(!/version control/.test(out)); // no explanation, just the link
+});
+
+// --share appends a share footer AFTER the normal terminal explanation.
+test("--share appends a share link footer to the explanation", () => {
+  const out = run(["--share", "tar", "-xzvf", "archive.tgz"]);
+  assert.match(out, /archive/i); // explanation still present
+  assert.match(out, /🔗 Share: https:\/\/aurelio-nakamura\.github\.io\/cmdxray\/\?cmd=/);
+  assert.equal(
+    decodeURIComponent(out.split("?cmd=")[1].trim()),
+    "tar -xzvf archive.tgz"
+  );
+});
+
+// A command with shell metacharacters must encode safely in the share link.
+test("--link encodes pipes and spaces safely", () => {
+  const out = runRaw(["--link", "--no-man", "grep -rn TODO src | head -5"]).trim();
+  assert.equal(decodeURIComponent(out.split("?cmd=")[1]), "grep -rn TODO src | head -5");
+});
