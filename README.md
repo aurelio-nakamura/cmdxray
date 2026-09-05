@@ -9,6 +9,11 @@ No server. No upload. Nothing leaves your machine.
 **▶ [Try it in your browser](https://aurelio-nakamura.github.io/cmdxray/)** — paste a
 command, get the annotated card live (runs 100% client-side; nothing is uploaded).
 
+![example card — grep -rn TODO src | head -20, annotated](docs/example.svg)
+
+*Every flag, pipe and argument annotated in a self-contained card you can drop
+into a PR, runbook or tweet. Generate one yourself with `cmdxray -o card.svg "<command>"`.*
+
 ```sh
 npx cmdxray tar -xzvf archive.tar.gz
 ```
