@@ -9,6 +9,11 @@ No server. No upload. Nothing leaves your machine.
 **▶ [Try it in your browser](https://aurelio-nakamura.github.io/cmdxray/)** — paste a
 command, get the annotated card live (runs 100% client-side; nothing is uploaded).
 
+![cmdxray annotating a command in the terminal](docs/demo.gif)
+
+*Run `cmdxray <command>` and every token — subcommands, flags and their values —
+is annotated in plain English, right in your terminal.*
+
 ![example card — grep -rn TODO src | head -20, annotated](docs/example.svg)
 
 *Every flag, pipe and argument annotated in a self-contained card you can drop
