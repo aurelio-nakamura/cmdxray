@@ -85,3 +85,28 @@ test("--link encodes pipes and spaces safely", () => {
   const out = runRaw(["--link", "--no-man", "grep -rn TODO src | head -5"]).trim();
   assert.equal(decodeURIComponent(out.split("?cmd=")[1]), "grep -rn TODO src | head -5");
 });
+
+// A target command's own -h/--help must be EXPLAINED, not hijacked as cmdxray's
+// help. Regression (pre-v0.11.2): `argv.includes("-h")` scanned the whole line,
+// so `ls -h`, `df -h`, `du -sh`, `ssh -h host` all printed cmdxray's usage.
+test("target command's -h is explained, not treated as cmdxray help", () => {
+  const out = run(["ls", "-h"]);
+  assert.match(out, /list directory contents/); // ls glossed
+  assert.match(out, /human-readable/i); // -h explained as a real flag
+  assert.ok(!/x-ray any shell command/.test(out)); // NOT cmdxray usage
+});
+
+test("du -sh is fully explained (both -s and -h)", () => {
+  const out = run(["du", "-sh", "dir"]);
+  assert.match(out, /disk usage/i);
+  assert.match(out, /human-readable/i);
+  assert.ok(!/x-ray any shell command/.test(out));
+});
+
+// But cmdxray's OWN -h/--help (before any command) still shows usage.
+test("bare -h and --help show cmdxray usage", () => {
+  for (const flag of ["-h", "--help"]) {
+    const out = execFileSync(process.execPath, [cli, flag], { encoding: "utf8" });
+    assert.match(out, /x-ray any shell command/);
+  }
+});

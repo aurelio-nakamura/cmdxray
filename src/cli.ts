@@ -69,16 +69,13 @@ function makeManLookup(): (cmd: string) => CommandInfo | null {
 
 function main() {
   const argv = process.argv.slice(2);
-  if (argv.includes("-h") || argv.includes("--help")) {
-    console.log(HELP);
-    return;
-  }
   let format: "term" | "svg" | "html" = "term";
   let outFile: string | null = null;
   let color: boolean = true;
   let useMan: boolean = true;
   let share: boolean = false;
   let linkOnly: boolean = false;
+  let showHelp: boolean = false;
   const rest: string[] = [];
   // cmdxray's own options are recognized BEFORE the command word (or after an
   // explicit `--`). Once a MULTI-TOKEN command begins, every remaining token
@@ -100,7 +97,8 @@ function main() {
       rest.push(a);
       continue;
     }
-    if (a === "--") inCommand = true;
+    if (a === "-h" || a === "--help") showHelp = true;
+    else if (a === "--") inCommand = true;
     else if (a === "--svg") format = "svg";
     else if (a === "--html") format = "html";
     else if (a === "--no-color") color = false;
@@ -114,6 +112,14 @@ function main() {
       quotedCommand = /\s/.test(a);
       rest.push(a);
     }
+  }
+
+  // `-h`/`--help` is cmdxray's own help ONLY when it appears before the command
+  // word. Once a command has begun, its own -h (e.g. `ls -h`, `ssh -h host`)
+  // belongs to that command and is explained normally.
+  if (showHelp && rest.length === 0) {
+    console.log(HELP);
+    return;
   }
 
   // Reconstruct the command line from the surviving argv tokens.
