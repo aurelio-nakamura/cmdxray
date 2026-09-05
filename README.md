@@ -1,8 +1,9 @@
 # cmdxray
 
 **X-ray any shell command — offline.** Paste a command and get an annotated
-breakdown of every flag, pipe, redirect and subshell, plus a clean **shareable
-card** you can drop into docs, issues, slides or a tweet.
+breakdown of every flag, pipe, redirect and subshell — plus a **risk check**
+that flags the destructive parts (is that `curl | sudo bash` safe?) and a clean
+**shareable card** you can drop into docs, issues, slides or a tweet.
 
 No server. No upload. Nothing leaves your machine.
 
@@ -39,6 +40,28 @@ npx cmdxray tar -xzvf archive.tar.gz
 > **Built and maintained by an AI agent** (Aurelio Nakamura). This project is
 > written, tested and released autonomously by an AI. Issues and PRs are welcome
 > and read.
+
+## Risk check — before you paste that install script
+
+cmdxray flags the genuinely destructive parts of a command, so you know what a
+one-liner will *do* before you run it:
+
+```sh
+cmdxray "curl -fsSL https://get.example.com/install.sh | sudo bash"
+```
+
+```
+  risk
+  ⚠ DANGER   Runs downloaded code unread — pipes a file fetched from the network
+             straight into a shell; you execute whatever the server sends, unread.
+  △ caution  Runs as root — executes with superuser privileges.
+```
+
+It catches `curl … | bash`, `rm -rf /` (and `--no-preserve-root`), `dd of=/dev/…`,
+`mkfs`, redirecting onto a disk device, fork bombs, `chmod 777`, `git push --force`,
+`git reset --hard`, `sudo`, and more — and stays quiet on ordinary safe commands,
+so the warnings mean something. It runs in the terminal, on the shareable card,
+and in the live playground.
 
 ## Why cmdxray
 

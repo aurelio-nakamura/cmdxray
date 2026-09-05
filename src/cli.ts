@@ -11,7 +11,7 @@ const PLAYGROUND = "https://aurelio-nakamura.github.io/cmdxray/";
 const HELP = `cmdxray — x-ray any shell command, offline.
 
 Usage:
-  cmdxray <command...>            explain a command in your terminal
+  cmdxray <command...>            explain a command (+ flag any risky parts) in your terminal
   cmdxray --svg <command...>      emit a shareable SVG card to stdout
   cmdxray --html <command...>     emit a standalone HTML page to stdout
   cmdxray -o card.svg <command>   write the SVG card to a file

@@ -61,7 +61,38 @@ export function renderSvg(res: ExplainResult, opts: { brand?: string } = {}): st
     .join("");
 
   const width = Math.max(760, estimateWidth(res));
-  const height = glossTop + res.lines.length * rowH + 40;
+  const glossBottom = glossTop + res.lines.length * rowH;
+
+  // Risk panel (only when there are warnings).
+  const DANGER = "#ff7b72";
+  const CAUTION = "#f2cc60";
+  let riskSvg = "";
+  let riskHeight = 0;
+  if (res.warnings.length) {
+    const warnRowH = 30;
+    const panelPadTop = 22;
+    const headH = 30;
+    const panelH = headH + res.warnings.length * warnRowH + 18;
+    const panelY = glossBottom + panelPadTop;
+    riskHeight = panelPadTop + panelH;
+    const warnRows = res.warnings
+      .map((w, i) => {
+        const y = panelY + headH + 6 + i * warnRowH;
+        const col = w.level === "danger" ? DANGER : CAUTION;
+        const icon = w.level === "danger" ? "\u26A0" : "\u25B3";
+        return (
+          `<text x="${PADX + 8}" y="${y}" fill="${col}" font-size="17" font-weight="700">${icon} ${esc(w.title)}</text>` +
+          `<text x="${PADX + 8 + (w.title.length + 3) * 10.4}" y="${y}" fill="${MUTED}" font-size="16">${esc(w.detail)}</text>`
+        );
+      })
+      .join("");
+    riskSvg =
+      `<rect x="16" y="${panelY}" width="${width - 32}" height="${panelH}" rx="10" fill="#1c1512" stroke="#5a2d2a"/>` +
+      `<text x="${PADX + 8}" y="${panelY + 22}" fill="${DANGER}" font-size="14" font-weight="700" letter-spacing="1">\u26A0 RISK</text>` +
+      warnRows;
+  }
+
+  const height = glossBottom + riskHeight + 40;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" font-family="${FONT}">
   <rect width="${width}" height="${height}" rx="16" fill="${BG}"/>
@@ -71,6 +102,7 @@ export function renderSvg(res: ExplainResult, opts: { brand?: string } = {}): st
   ${cmdParts.join("")}
   <line x1="${PADX}" y1="${glossTop - 26}" x2="${width - PADX}" y2="${glossTop - 26}" stroke="${BORDER}"/>
   ${rows}
+  ${riskSvg}
   <text x="${PADX}" y="${height - 16}" fill="${MUTED}" font-size="14">explained locally \u00b7 <tspan fill="${FG}">${esc(brand)}</tspan></text>
 </svg>`;
 }
@@ -80,7 +112,11 @@ function estimateWidth(res: ExplainResult): number {
   for (const ln of res.lines) maxGloss = Math.max(maxGloss, ln.gloss.length);
   const cmdLen = res.raw.length * 15.5 + 80;
   const glossWidth = 220 + 34 + maxGloss * 9.6 + 40;
-  return Math.ceil(Math.max(cmdLen, glossWidth));
+  let warnWidth = 0;
+  for (const w of res.warnings) {
+    warnWidth = Math.max(warnWidth, (w.title.length + 3) * 10.4 + w.detail.length * 8.8 + 60);
+  }
+  return Math.ceil(Math.max(cmdLen, glossWidth, warnWidth));
 }
 
 export function renderHtml(res: ExplainResult, opts: { brand?: string } = {}): string {
@@ -118,5 +154,21 @@ export function renderTerminal(res: ExplainResult, color = true): string {
     .map((ln) => `  ${c(ln.colorIndex, ln.token.padEnd(tokenWidth))}  ${ln.gloss}`)
     .join("\n");
 
-  return `\n  ${cmdLine}\n\n${rows}\n\n  ${dim("explained locally · cmdxray")}\n`;
+  let risk = "";
+  if (res.warnings.length) {
+    const RED = "\x1b[38;5;203m";
+    const YEL = "\x1b[38;5;221m";
+    const BOLD = "\x1b[1m";
+    const paint = (w: (typeof res.warnings)[number]) => {
+      const col = w.level === "danger" ? RED : YEL;
+      const icon = w.level === "danger" ? "⚠" : "△";
+      const label = w.level === "danger" ? "DANGER" : "caution";
+      if (!color) return `  ${icon} ${label}  ${w.title} — ${w.detail}`;
+      return `  ${col}${BOLD}${icon} ${label}${RESET}  ${col}${w.title}${RESET} ${dim("— " + w.detail)}`;
+    };
+    const head = color ? `  ${DIM}risk${RESET}` : "  risk";
+    risk = "\n" + head + "\n" + res.warnings.map(paint).join("\n") + "\n";
+  }
+
+  return `\n  ${cmdLine}\n\n${rows}\n${risk}\n  ${dim("explained locally · cmdxray")}\n`;
 }

@@ -5,6 +5,7 @@
 import { parseCommand, ParsedCommand } from "./parse.js";
 import { DB, GENERIC_FLAGS, CommandInfo } from "./db.js";
 import { sedGloss, awkGloss, jqGloss, chmodModeGloss, killSignalGloss } from "./scripts.js";
+import { analyzeDangers, Warning } from "./danger.js";
 
 export interface Explanation {
   token: string; // the piece of the command, e.g. "-x" or "archive.tar.gz"
@@ -18,6 +19,7 @@ export interface ExplainResult {
   raw: string;
   parsed: ParsedCommand;
   lines: Explanation[];
+  warnings: Warning[];
 }
 
 const OPERATOR_GLOSS: Record<string, string> = {
@@ -334,5 +336,5 @@ export function explain(raw: string, opts: ExplainOptions = {}): ExplainResult {
     }
   });
 
-  return { raw, parsed, lines };
+  return { raw, parsed, lines, warnings: analyzeDangers(parsed) };
 }

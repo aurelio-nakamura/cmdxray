@@ -1426,6 +1426,188 @@ function killSignalGloss(tok) {
   return null;
 }
 
+// src/danger.ts
+var SHELLS = /* @__PURE__ */ new Set(["sh", "bash", "zsh", "dash", "ksh", "fish", "ash"]);
+var DOWNLOADERS = /* @__PURE__ */ new Set(["curl", "wget", "fetch"]);
+var DEVICE_RE = /^\/dev\/(sd[a-z]|nvme\d|hd[a-z]|vd[a-z]|disk\d|mmcblk\d)/;
+function flagsOf(seg) {
+  const s = /* @__PURE__ */ new Set();
+  for (const tok of seg.tokens) {
+    if (tok.kind === "shortFlag") {
+      if (tok.bundle) for (const l of tok.bundle) s.add("-" + l);
+      else s.add(tok.text.replace(/=.*/, ""));
+    } else if (tok.kind === "longFlag") {
+      s.add(tok.text.replace(/=.*/, ""));
+    }
+  }
+  return s;
+}
+function operandsOf(seg) {
+  return seg.tokens.filter((t) => t.kind === "operand").map((t) => t.text);
+}
+function effectiveCommand(seg) {
+  if (seg.command !== "sudo" && seg.command !== "env") return seg.command;
+  const ops = operandsOf(seg);
+  return ops.length ? ops[0].replace(/.*\//, "") : seg.command;
+}
+function runsShell(seg) {
+  const base = (seg.command ?? "").replace(/.*\//, "");
+  if (SHELLS.has(base)) return true;
+  if (base === "sudo" || base === "env") {
+    for (const op of operandsOf(seg)) {
+      if (SHELLS.has(op.replace(/.*\//, ""))) return true;
+    }
+  }
+  return false;
+}
+function precedingSeparators(parsed) {
+  const seps = [];
+  let pending = null;
+  let seenCommandInSeg = false;
+  for (const tok of parsed.tokens) {
+    if (tok.kind === "pipe" || tok.kind === "operator") {
+      pending = tok.text;
+      seenCommandInSeg = false;
+      continue;
+    }
+    if (tok.kind === "command" && !seenCommandInSeg) {
+      seps.push(pending);
+      pending = null;
+      seenCommandInSeg = true;
+    }
+  }
+  return seps;
+}
+function analyzeDangers(parsed) {
+  const warnings = [];
+  const seen = /* @__PURE__ */ new Set();
+  const add = (w) => {
+    const key = w.level + "|" + w.title;
+    if (seen.has(key)) return;
+    seen.add(key);
+    warnings.push(w);
+  };
+  const raw = parsed.raw;
+  if (/\b\w+\s*\(\)\s*\{\s*[^}]*\|\s*\w+\s*&\s*[^}]*\}\s*;/.test(raw) || /:\(\)\s*\{\s*:\|:&\s*\}\s*;\s*:/.test(raw.replace(/\s+/g, ""))) {
+    add({
+      level: "danger",
+      title: "Fork bomb",
+      detail: "Recursively spawns processes until the machine runs out of resources and hangs."
+    });
+  }
+  const seps = precedingSeparators(parsed);
+  const commandSegs = parsed.segments.filter((s) => s.command);
+  let sawDownloader = false;
+  commandSegs.forEach((seg, i) => {
+    const base = (seg.command ?? "").replace(/.*\//, "");
+    if (DOWNLOADERS.has(base)) sawDownloader = true;
+    else if (sawDownloader && runsShell(seg) && seps[i] === "|") {
+      add({
+        level: "danger",
+        title: "Runs downloaded code unread",
+        detail: "Pipes a file fetched from the network straight into a shell \u2014 you execute whatever the server sends, sight unseen."
+      });
+    }
+  });
+  for (const seg of parsed.segments) {
+    const base = (seg.command ?? "").replace(/.*\//, "");
+    const eff = (effectiveCommand(seg) ?? "").replace(/.*\//, "");
+    const flags = flagsOf(seg);
+    const ops = operandsOf(seg);
+    if (base === "sudo") {
+      add({
+        level: "caution",
+        title: "Runs as root",
+        detail: "Executes with superuser privileges \u2014 a mistake here can affect the whole system."
+      });
+    }
+    if (eff === "rm") {
+      const recursive = flags.has("-r") || flags.has("-R") || flags.has("--recursive");
+      const force = flags.has("-f") || flags.has("--force");
+      const noPreserve = flags.has("--no-preserve-root");
+      const targets = ops.filter((o) => o !== "sudo" && o !== "rm");
+      const hitsRoot = targets.some(
+        (t) => /^\/$|^\/\*|^~\/?$|^\$HOME\/?$|^\/(bin|etc|usr|var|boot|lib|home|root|dev|sys|proc)\b/.test(t) || t === "*" || t === "." || t === ".." || t === "./*"
+      );
+      if (noPreserve) {
+        add({
+          level: "danger",
+          title: "Disables the / safety guard",
+          detail: "--no-preserve-root removes the check that normally stops rm from wiping the entire root filesystem."
+        });
+      }
+      if (recursive && force) {
+        add({
+          level: "danger",
+          title: hitsRoot ? "Wipes critical paths, no prompt" : "Recursive force-delete",
+          detail: hitsRoot ? "Recursively force-deletes system-critical paths with no confirmation and no recovery." : "Recursively deletes directories without any confirmation \u2014 there is no undo and no trash."
+        });
+      } else if (recursive) {
+        add({ level: "caution", title: "Recursive delete", detail: "Deletes whole directory trees \u2014 double-check the target path." });
+      } else if (force) {
+        add({ level: "caution", title: "Forced delete", detail: "Deletes without prompting, even for write-protected files." });
+      }
+    }
+    if (eff === "dd") {
+      const toDevice = ops.some((o) => /^of=\/dev\//.test(o));
+      if (toDevice) {
+        add({
+          level: "danger",
+          title: "Raw write to a disk device",
+          detail: "dd writes bytes directly to a device (of=/dev/\u2026), overwriting everything on that disk with no confirmation."
+        });
+      }
+    }
+    if (/^mkfs(\.|$)/.test(eff)) {
+      add({ level: "danger", title: "Formats a filesystem", detail: "Creates a new filesystem on the target, erasing all data currently on it." });
+    }
+    if (eff === "chmod") {
+      const world = ops.some((o) => /(^|=)7?77$|^0?777$/.test(o) || /[ugoa]*\+.*w/.test(o) && /o/.test(o));
+      const perm777 = ops.some((o) => /^0?777$/.test(o));
+      if (perm777 || world) {
+        const recursive = flags.has("-R") || flags.has("--recursive");
+        add({
+          level: "caution",
+          title: recursive ? "World-writable, recursively" : "World-writable permissions",
+          detail: "Grants read/write/execute to every user on the machine \u2014 a common security misconfiguration."
+        });
+      }
+    }
+    if (eff === "chown" && (flags.has("-R") || flags.has("--recursive"))) {
+      add({ level: "caution", title: "Recursive ownership change", detail: "Reassigns ownership of an entire tree \u2014 easy to lock yourself out of files if the path is wrong." });
+    }
+    if (eff === "git") {
+      const sub = ops[0];
+      if (sub === "push" && (flags.has("-f") || flags.has("--force") || flags.has("--force-with-lease"))) {
+        add({ level: "caution", title: "Force-push", detail: "Overwrites the remote branch history \u2014 can destroy commits other people rely on." });
+      }
+      if (sub === "reset" && flags.has("--hard")) {
+        add({ level: "caution", title: "Hard reset", detail: "Discards all uncommitted changes in the working tree \u2014 they cannot be recovered." });
+      }
+      if (sub === "clean" && (flags.has("-f") || flags.has("--force"))) {
+        add({ level: "caution", title: "Deletes untracked files", detail: "git clean permanently removes untracked files and directories." });
+      }
+    }
+    if (["shutdown", "reboot", "halt", "poweroff"].includes(eff)) {
+      add({ level: "caution", title: "Changes machine power state", detail: "Shuts down or restarts the system \u2014 active sessions and unsaved work are lost." });
+    }
+    if (eff === "eval") {
+      add({ level: "caution", title: "Evaluates a built string", detail: "Runs an assembled string as a command \u2014 dangerous if any part comes from untrusted input." });
+    }
+    const toks = seg.tokens;
+    for (let i = 0; i < toks.length; i++) {
+      const t = toks[i];
+      if (t.kind === "redirect" && (t.text === ">" || t.text === ">>" || t.text === "&>")) {
+        const target = toks[i + 1]?.text ?? "";
+        if (DEVICE_RE.test(target)) {
+          add({ level: "danger", title: "Writes onto a disk device", detail: `Redirects output straight to ${target}, corrupting whatever is stored there.` });
+        }
+      }
+    }
+  }
+  return warnings;
+}
+
 // src/explain.ts
 var OPERATOR_GLOSS = {
   "|": "pipe \u2014 send this command's output into the next command",
@@ -1695,7 +1877,7 @@ function explain(raw, opts = {}) {
       }
     }
   });
-  return { raw, parsed, lines };
+  return { raw, parsed, lines, warnings: analyzeDangers(parsed) };
 }
 
 // src/card.ts
@@ -1742,7 +1924,27 @@ function renderSvg(res, opts = {}) {
     return `<circle cx="${PADX + 8}" cy="${y - 6}" r="6" fill="${col}"/><text x="${PADX + 26}" y="${y}" fill="${col}" font-size="19" font-family="${FONT}" font-weight="600">${esc(ln.token)}</text><text x="${PADX + 220}" y="${y}" fill="${FG}" font-size="18" font-family="${FONT}">${esc(ln.gloss)}</text>`;
   }).join("");
   const width = Math.max(760, estimateWidth(res));
-  const height = glossTop + res.lines.length * rowH + 40;
+  const glossBottom = glossTop + res.lines.length * rowH;
+  const DANGER = "#ff7b72";
+  const CAUTION = "#f2cc60";
+  let riskSvg = "";
+  let riskHeight = 0;
+  if (res.warnings.length) {
+    const warnRowH = 30;
+    const panelPadTop = 22;
+    const headH = 30;
+    const panelH = headH + res.warnings.length * warnRowH + 18;
+    const panelY = glossBottom + panelPadTop;
+    riskHeight = panelPadTop + panelH;
+    const warnRows = res.warnings.map((w, i) => {
+      const y = panelY + headH + 6 + i * warnRowH;
+      const col = w.level === "danger" ? DANGER : CAUTION;
+      const icon = w.level === "danger" ? "\u26A0" : "\u25B3";
+      return `<text x="${PADX + 8}" y="${y}" fill="${col}" font-size="17" font-weight="700">${icon} ${esc(w.title)}</text><text x="${PADX + 8 + (w.title.length + 3) * 10.4}" y="${y}" fill="${MUTED}" font-size="16">${esc(w.detail)}</text>`;
+    }).join("");
+    riskSvg = `<rect x="16" y="${panelY}" width="${width - 32}" height="${panelH}" rx="10" fill="#1c1512" stroke="#5a2d2a"/><text x="${PADX + 8}" y="${panelY + 22}" fill="${DANGER}" font-size="14" font-weight="700" letter-spacing="1">\u26A0 RISK</text>` + warnRows;
+  }
+  const height = glossBottom + riskHeight + 40;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" font-family="${FONT}">
   <rect width="${width}" height="${height}" rx="16" fill="${BG}"/>
   <rect x="16" y="16" width="${width - 32}" height="84" rx="10" fill="${PANEL}" stroke="${BORDER}"/>
@@ -1751,6 +1953,7 @@ function renderSvg(res, opts = {}) {
   ${cmdParts.join("")}
   <line x1="${PADX}" y1="${glossTop - 26}" x2="${width - PADX}" y2="${glossTop - 26}" stroke="${BORDER}"/>
   ${rows}
+  ${riskSvg}
   <text x="${PADX}" y="${height - 16}" fill="${MUTED}" font-size="14">explained locally \xB7 <tspan fill="${FG}">${esc(brand)}</tspan></text>
 </svg>`;
 }
@@ -1759,7 +1962,11 @@ function estimateWidth(res) {
   for (const ln of res.lines) maxGloss = Math.max(maxGloss, ln.gloss.length);
   const cmdLen = res.raw.length * 15.5 + 80;
   const glossWidth = 220 + 34 + maxGloss * 9.6 + 40;
-  return Math.ceil(Math.max(cmdLen, glossWidth));
+  let warnWidth = 0;
+  for (const w of res.warnings) {
+    warnWidth = Math.max(warnWidth, (w.title.length + 3) * 10.4 + w.detail.length * 8.8 + 60);
+  }
+  return Math.ceil(Math.max(cmdLen, glossWidth, warnWidth));
 }
 function renderHtml(res, opts = {}) {
   const svg = renderSvg(res, opts);
@@ -1786,11 +1993,26 @@ function renderTerminal(res, color = true) {
   }).join(" ");
   const tokenWidth = Math.max(...res.lines.map((l) => l.token.length), 4);
   const rows = res.lines.map((ln) => `  ${c(ln.colorIndex, ln.token.padEnd(tokenWidth))}  ${ln.gloss}`).join("\n");
+  let risk = "";
+  if (res.warnings.length) {
+    const RED = "\x1B[38;5;203m";
+    const YEL = "\x1B[38;5;221m";
+    const BOLD = "\x1B[1m";
+    const paint = (w) => {
+      const col = w.level === "danger" ? RED : YEL;
+      const icon = w.level === "danger" ? "\u26A0" : "\u25B3";
+      const label = w.level === "danger" ? "DANGER" : "caution";
+      if (!color) return `  ${icon} ${label}  ${w.title} \u2014 ${w.detail}`;
+      return `  ${col}${BOLD}${icon} ${label}${RESET}  ${col}${w.title}${RESET} ${dim("\u2014 " + w.detail)}`;
+    };
+    const head = color ? `  ${DIM}risk${RESET}` : "  risk";
+    risk = "\n" + head + "\n" + res.warnings.map(paint).join("\n") + "\n";
+  }
   return `
   ${cmdLine}
 
 ${rows}
-
+${risk}
   ${dim("explained locally \xB7 cmdxray")}
 `;
 }
@@ -1798,6 +2020,7 @@ export {
   DB,
   EXAMPLES,
   GENERIC_FLAGS,
+  analyzeDangers,
   explain,
   parseCommand,
   renderHtml,

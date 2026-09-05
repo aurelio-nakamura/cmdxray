@@ -6,3 +6,5 @@ export type { Explanation, ExplainResult, ExplainOptions } from "./explain.js";
 export { renderSvg, renderHtml, renderTerminal } from "./card.js";
 export { DB, GENERIC_FLAGS, EXAMPLES } from "./db.js";
 export type { CommandInfo } from "./db.js";
+export { analyzeDangers } from "./danger.js";
+export type { Warning, RiskLevel } from "./danger.js";
