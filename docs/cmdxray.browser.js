@@ -207,7 +207,11 @@ var DB = {
       S: "sort by file size, largest first",
       R: "list subdirectories recursively",
       d: "list directories themselves, not their contents",
-      1: "list one entry per line"
+      1: "list one entry per line",
+      F: "append an indicator (/, *, @) to entries by type",
+      i: "show each entry's inode number",
+      "--color": "colorize the output (auto, always, never)",
+      "--group-directories-first": "list directories before files"
     }
   },
   rm: {
@@ -291,14 +295,18 @@ var DB = {
   },
   wget: {
     summary: "download files from the web over HTTP/FTP",
-    takesValue: ["O", "P"],
+    takesValue: ["O", "P", "--limit-rate", "e"],
     flags: {
       O: "write the download to the given file name",
       P: "save files into the given directory",
       c: "continue a partially downloaded file",
       q: "quiet \u2014 no output",
       r: "recursive \u2014 download linked pages too",
-      "--no-check-certificate": "skip TLS certificate validation"
+      "--show-progress": "always show the progress bar, even when quiet",
+      "--no-check-certificate": "skip TLS certificate validation",
+      "--limit-rate": "cap the download speed (e.g. 200k)",
+      N: "only download if the remote file is newer than the local one",
+      "--no-verbose": "turn off verbose output without going fully quiet"
     }
   },
   find: {
@@ -532,7 +540,15 @@ var DB = {
       compose: "run multi-container apps from a compose file"
     },
     subFlags: {
-      build: { t: "tag the built image (name:tag)" },
+      build: {
+        t: "tag the built image (name:tag)",
+        "--no-cache": "build without using any cached layers",
+        "--build-arg": "set a build-time variable (NAME=value)",
+        "--pull": "always pull a newer version of the base image",
+        "--platform": "build for this target platform (e.g. linux/arm64)",
+        "--target": "stop at this named build stage (multi-stage builds)",
+        f: "use the given Dockerfile (--file)"
+      },
       compose: {
         d: "detached \u2014 run the services in the background",
         "--build": "build images before starting the containers",
@@ -543,7 +559,7 @@ var DB = {
       }
     },
     subTakesValue: {
-      build: ["t"],
+      build: ["t", "--build-arg", "--platform", "--target", "f"],
       compose: ["-f"]
     },
     subSubcommands: {
@@ -626,6 +642,7 @@ var DB = {
       "--all": "operate on everything (all branches / all changes)",
       "--oneline": "show each commit on a single line",
       "--graph": "draw an ASCII graph of the branch structure",
+      "--decorate": "show ref names (branches, tags) next to commits",
       "--continue": "resume the operation after resolving conflicts",
       "--abort": "cancel the operation and restore the original state",
       "--skip": "skip the current commit and continue",
@@ -650,12 +667,20 @@ var DB = {
       ci: "clean install exactly from the lockfile",
       exec: "run a package's binary"
     },
+    takesValue: ["--omit", "--include", "-w", "--workspace"],
     flags: {
       g: "operate globally, not on the local project",
       D: "save to devDependencies",
+      S: "save to dependencies (default)",
       "--save-dev": "save to devDependencies",
+      "--save": "save to dependencies",
       "--global": "operate globally",
-      "--production": "skip devDependencies"
+      "--production": "skip devDependencies",
+      "--omit": "exclude a dependency type from install (e.g. dev)",
+      "--include": "force-include a dependency type",
+      "--force": "overwrite conflicts and bypass some checks",
+      "--legacy-peer-deps": "ignore peer-dependency conflicts (npm v7+ behavior)",
+      "--workspace": "run the command for this workspace only"
     }
   },
   systemctl: {
@@ -675,7 +700,13 @@ var DB = {
     flags: {
       "--now": "also start/stop immediately (with enable/disable)",
       "--user": "act on the per-user systemd, not the system one",
-      "--failed": "limit output to failed units"
+      "--failed": "limit output to failed units",
+      "--no-pager": "print output directly instead of piping it to a pager",
+      l: "show full output \u2014 do not truncate long lines",
+      "--full": "show full output \u2014 do not truncate long lines",
+      q: "quiet \u2014 suppress informational messages",
+      "--quiet": "quiet \u2014 suppress informational messages",
+      "--type": "limit to units of this type (service, socket, \u2026)"
     }
   },
   journalctl: {
@@ -808,6 +839,7 @@ var DB = {
       f: "read the resource definition from this file",
       l: "select resources by label",
       w: "watch for changes and stream updates",
+      "--watch": "watch for changes and stream updates",
       A: "act across all namespaces",
       "--all-namespaces": "act across all namespaces",
       "--namespace": "act in the given namespace"
@@ -875,12 +907,16 @@ var DB = {
   ps: {
     summary: "report a snapshot of running processes",
     bareFlags: true,
+    takesValue: ["--sort", "-o", "-p", "-u", "-C"],
     flags: {
       a: "show processes for all users",
       u: "show a user-oriented, detailed format",
       x: "include processes without a controlling terminal",
       e: "show every process",
-      f: "full-format listing"
+      f: "full-format listing",
+      "--sort": "order the output by this column (prefix - for descending)",
+      "--forest": "show the process tree with ASCII art",
+      "--no-headers": "omit the column header line"
     }
   },
   netstat: {
@@ -1066,14 +1102,14 @@ var GENERIC_FLAGS = {
 var EXAMPLES = {
   tar: ["tar -xzvf archive.tar.gz", "tar czf backup.tgz src"],
   grep: ["grep -rn TODO src", "grep -i --color needle file.txt"],
-  ls: ["ls -la", "ls -lhSr"],
+  ls: ["ls -la", "ls -lhSr", "ls -la --color=auto -F"],
   rm: ["rm -rf build", "rm -i note.txt"],
   cp: ["cp -r src dest", "cp -p a.txt b.txt"],
   mv: ["mv -i old new", "mv -v a b"],
   mkdir: ["mkdir -p a/b/c", "mkdir -m 755 dir"],
   ln: ["ln -s /usr/bin/python3 python", "ln -sf target link"],
   curl: ["curl -sSL -o out.html https://example.com", "curl -X POST -H 'A: b' -d data url"],
-  wget: ["wget -c -O file.zip https://example.com/f.zip"],
+  wget: ["wget -c -O file.zip https://example.com/f.zip", "wget -c -q --show-progress --limit-rate=200k https://x.com/f.iso"],
   find: ["find . -name '*.log' -mtime +30 -delete", "find src -type f -maxdepth 2"],
   ffmpeg: ["ffmpeg -i in.mov -c:v libx264 -crf 23 -preset medium out.mp4", "ffmpeg -i in.mp4 -vf scale=1280:-1 -an out.webm"],
   openssl: ["openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes", "openssl s_client -connect example.com:443 -servername example.com"],
@@ -1082,18 +1118,18 @@ var EXAMPLES = {
   ssh: ["ssh -i key.pem -p 2222 user@host", "ssh -N -L 8080:localhost:80 host"],
   scp: ["scp -r -P 22 file user@host:/tmp"],
   rsync: ["rsync -avz --delete src/ dest/", "rsync -a --dry-run a/ b/"],
-  docker: ["docker run -it --rm -p 8080:80 nginx", "docker build -t myimg ."],
-  git: ["git commit -am 'fix bug'", "git checkout -b feature", "git log --oneline --graph"],
-  npm: ["npm install -D typescript", "npm run build"],
-  systemctl: ["systemctl restart nginx", "systemctl enable --now docker"],
+  docker: ["docker run -it --rm -p 8080:80 nginx", "docker build -t myimg .", "docker build -t app:1.0 --no-cache --build-arg VERSION=1 ."],
+  git: ["git commit -am 'fix bug'", "git checkout -b feature", "git log --oneline --graph --all --decorate"],
+  npm: ["npm install -D typescript", "npm run build", "npm ci --omit=dev"],
+  systemctl: ["systemctl restart nginx", "systemctl enable --now docker", "systemctl status nginx --no-pager -l"],
   journalctl: ['journalctl -u nginx --since "1 hour ago" -f', "journalctl -xe -p err"],
   aws: ["aws s3 cp ./dist s3://mybucket/ --recursive --acl public-read", "aws s3 sync . s3://bucket --delete"],
-  kubectl: ["kubectl get pods -n default -o wide", "kubectl logs -f mypod"],
+  kubectl: ["kubectl get pods -n default -o wide", "kubectl logs -f mypod", "kubectl get pods -n kube-system -o wide --watch"],
   apt: ["apt install -y curl", "apt upgrade --yes"],
   sed: ["sed -i 's/a/b/g' file.txt", "sed -n -e '1,10p' file.txt"],
   awk: ["awk -F, '{print $1}' data.csv"],
   jq: ["jq -r '.items[] | select(.age > 30) | .name' data.json"],
-  ps: ["ps aux", "ps -ef"],
+  ps: ["ps aux", "ps -ef", "ps aux --sort=-%mem"],
   netstat: ["netstat -tulpn", "netstat -rn"],
   ss: ["ss -tulpn", "ss -s"],
   kill: ["kill -9 1234", "kill -15 4321"],
