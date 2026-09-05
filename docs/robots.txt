@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://aurelio-nakamura.github.io/cmdxray/sitemap.xml

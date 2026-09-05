@@ -19,6 +19,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "build:browser": "esbuild src/index.ts --bundle --format=esm --outfile=docs/cmdxray.browser.js --platform=browser",
+    "build:pages": "npm run build && node scripts/gen-pages.mjs",
     "test": "node --test",
     "prepublishOnly": "npm run build"
   },

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>What does `openssl` do? Flags &amp; examples explained | cmdxray</title>
+<meta name="description" content="openssl: OpenSSL — command-line cryptography and TLS toolkit. See every flag explained plain-English, with real openssl command examples broken down token by token. Offline &amp; private.">
+<link rel="canonical" href="https://aurelio-nakamura.github.io/cmdxray/commands/openssl.html">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d1117'/%3E%3Ctext x='16' y='23' font-size='20' font-family='monospace' font-weight='700' text-anchor='middle' fill='%2379c0ff'%3Ex%3C/text%3E%3C/svg%3E">
+<meta property="og:title" content="What does `openssl` do? Flags &amp; examples explained | cmdxray">
+<meta property="og:description" content="openssl: OpenSSL — command-line cryptography and TLS toolkit. See every flag explained plain-English, with real openssl command examples broken down token by token. Offline &amp; private.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://aurelio-nakamura.github.io/cmdxray/commands/openssl.html">
+<meta property="og:image" content="https://aurelio-nakamura.github.io/cmdxray/og-card.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://aurelio-nakamura.github.io/cmdxray/og-card.png">
+<style>
+:root{--bg:#010409;--panel:#0d1117;--panel2:#161b22;--border:#30363d;--fg:#e6edf3;--muted:#8b949e;--accent:#79c0ff;--accent2:#7ee787;--font:ui-monospace,'SF Mono','JetBrains Mono','Fira Code',Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;line-height:1.6}
+a{color:var(--accent)}
+.wrap{max-width:860px;margin:0 auto;padding:0 20px}
+header{padding:34px 20px 8px}
+.crumb{font-family:var(--font);font-size:.85rem;color:var(--muted);margin-bottom:14px}
+h1{font-size:2rem;margin:0 0 6px;font-family:var(--font);font-weight:700;letter-spacing:-.5px}
+h1 code{color:var(--accent)}
+.lede{color:var(--fg);font-size:1.1rem;margin:6px 0 0}
+.trybtn{display:inline-block;margin:16px 0 0;font-family:var(--font);font-size:.9rem;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:9px 15px;color:var(--fg);text-decoration:none}
+.trybtn:hover{border-color:var(--accent)}
+section{padding:18px 0}
+h2{font-family:var(--font);font-size:1.25rem;border-bottom:1px solid var(--border);padding-bottom:7px;margin-top:26px}
+h3{font-family:var(--font);font-size:1rem;color:var(--accent);margin:20px 0 6px}
+.ex{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin:12px 0}
+.excmd{font-family:var(--font);font-size:1rem;color:var(--fg);margin:0 0 10px;word-break:break-all}
+.excmd .p{color:var(--accent2)}
+.brk{list-style:none;margin:0;padding:0}
+.brk li{display:flex;gap:12px;padding:5px 0;border-top:1px solid var(--border);font-size:.94rem}
+.brk li:first-child{border-top:0}
+.tok{font-family:var(--font);font-weight:600;min-width:96px;flex:0 0 auto}
+.gl{color:var(--muted)}
+table.flags{width:100%;border-collapse:collapse;font-size:.92rem;margin-top:8px}
+table.flags td{border:1px solid var(--border);padding:7px 11px;vertical-align:top}
+table.flags td:first-child{font-family:var(--font);color:var(--accent);white-space:nowrap;width:1%}
+.subs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.sub{font-family:var(--font);font-size:.85rem;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:5px 10px}
+.sub b{color:var(--accent)}
+.related{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.related a{font-family:var(--font);font-size:.85rem;background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:5px 12px;text-decoration:none;color:var(--fg)}
+.related a:hover{border-color:var(--accent)}
+.ai{margin:24px 0 0;font-size:.88rem;color:var(--muted);background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px 16px}
+footer{text-align:center;color:var(--muted);padding:36px 20px 60px;font-size:.86rem;border-top:1px solid var(--border);margin-top:30px}
+.idxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-top:14px}
+.idxcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:13px 15px;text-decoration:none;display:block}
+.idxcard:hover{border-color:var(--accent)}
+.idxcard b{font-family:var(--font);color:var(--accent);font-size:1rem}
+.idxcard span{display:block;color:var(--muted);font-size:.85rem;margin-top:3px}
+</style>
+</head>
+<body><header><div class="wrap">
+<div class="crumb"><a href="https://aurelio-nakamura.github.io/cmdxray/">cmdxray</a> / <a href="./">commands</a> / openssl</div>
+<h1>What does <code>openssl</code> do?</h1>
+<p class="lede">OpenSSL — command-line cryptography and TLS toolkit.</p>
+<a class="trybtn" href="https://aurelio-nakamura.github.io/cmdxray/?cmd=openssl%20req%20-x509%20-newkey%20rsa%3A4096%20-keyout%20key.pem%20-out%20cert.pem%20-days%20365%20-nodes">▸ Explain your own openssl command →</a>
+</div></header>
+<div class="wrap"><section><h2>openssl examples, explained</h2><div class="ex"><p class="excmd"><span class="p">$</span> openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes</p><ul class="brk"><li><span class="tok" style="color:#79c0ff">openssl</span><span class="gl">OpenSSL — command-line cryptography and TLS toolkit</span></li><li><span class="tok" style="color:#7ee787">req</span><span class="gl">create or process a certificate signing request (CSR)</span></li><li><span class="tok" style="color:#d2a8ff">-x509</span><span class="gl">output a self-signed certificate instead of a CSR</span></li><li><span class="tok" style="color:#ffa657">-newkey</span><span class="gl">generate a new key of this type (e.g. rsa:4096)</span></li><li><span class="tok" style="color:#f778ba">rsa:4096</span><span class="gl">value for -newkey</span></li><li><span class="tok" style="color:#a5d6ff">-keyout</span><span class="gl">write the generated private key to this file</span></li><li><span class="tok" style="color:#ffdf5d">key.pem</span><span class="gl">value for -keyout</span></li><li><span class="tok" style="color:#7ee7c7">-out</span><span class="gl">write output to this file</span></li><li><span class="tok" style="color:#79c0ff">cert.pem</span><span class="gl">value for -out</span></li><li><span class="tok" style="color:#7ee787">-days</span><span class="gl">how many days the certificate stays valid</span></li><li><span class="tok" style="color:#d2a8ff">365</span><span class="gl">value for -days</span></li><li><span class="tok" style="color:#ffa657">-nodes</span><span class="gl">don't encrypt the private key (no passphrase)</span></li></ul></div><div class="ex"><p class="excmd"><span class="p">$</span> openssl s_client -connect example.com:443 -servername example.com</p><ul class="brk"><li><span class="tok" style="color:#79c0ff">openssl</span><span class="gl">OpenSSL — command-line cryptography and TLS toolkit</span></li><li><span class="tok" style="color:#7ee787">s_client</span><span class="gl">open a TLS connection to a server (debugging client)</span></li><li><span class="tok" style="color:#d2a8ff">-connect</span><span class="gl">host:port to connect to (s_client)</span></li><li><span class="tok" style="color:#ffa657">example.com:443</span><span class="gl">value for -connect</span></li><li><span class="tok" style="color:#f778ba">-servername</span><span class="gl">SNI hostname to send (s_client)</span></li><li><span class="tok" style="color:#a5d6ff">example.com</span><span class="gl">value for -servername</span></li></ul></div></section><section><h2>openssl subcommands</h2><div class="subs"><span class="sub"><b>req</b> — create or process a certificate signing request (CSR)</span><span class="sub"><b>x509</b> — display or convert an X.509 certificate</span><span class="sub"><b>genrsa</b> — generate an RSA private key</span><span class="sub"><b>genpkey</b> — generate a private key (any algorithm)</span><span class="sub"><b>rsa</b> — inspect or convert an RSA key</span><span class="sub"><b>pkey</b> — inspect or convert a private key</span><span class="sub"><b>s_client</b> — open a TLS connection to a server (debugging client)</span><span class="sub"><b>s_server</b> — run a simple TLS server</span><span class="sub"><b>dgst</b> — compute a message digest (hash) or sign/verify</span><span class="sub"><b>enc</b> — symmetric-cipher encrypt or decrypt</span><span class="sub"><b>rand</b> — generate random bytes</span><span class="sub"><b>verify</b> — verify a certificate chain</span><span class="sub"><b>pkcs12</b> — build or parse a PKCS#12 (.p12/.pfx) bundle</span></div></section><section><h2>openssl flags & options</h2><table class="flags"><tbody><tr><td>-x509</td><td>output a self-signed certificate instead of a CSR</td></tr><tr><td>-new</td><td>generate a new request/key</td></tr><tr><td>-newkey</td><td>generate a new key of this type (e.g. rsa:4096)</td></tr><tr><td>-key</td><td>use this existing private key</td></tr><tr><td>-keyout</td><td>write the generated private key to this file</td></tr><tr><td>-out</td><td>write output to this file</td></tr><tr><td>-in</td><td>read input from this file</td></tr><tr><td>-days</td><td>how many days the certificate stays valid</td></tr><tr><td>-nodes</td><td>don't encrypt the private key (no passphrase)</td></tr><tr><td>-subj</td><td>set the subject DN inline (skip the interactive prompts)</td></tr><tr><td>-sha256</td><td>use SHA-256 as the signature/digest algorithm</td></tr><tr><td>-text</td><td>also print the certificate/key in human-readable text</td></tr><tr><td>-noout</td><td>don't print the encoded (PEM/DER) output</td></tr><tr><td>-config</td><td>use this OpenSSL configuration file</td></tr><tr><td>-connect</td><td>host:port to connect to (s_client)</td></tr><tr><td>-servername</td><td>SNI hostname to send (s_client)</td></tr><tr><td>-passin</td><td>source of the input passphrase</td></tr><tr><td>-passout</td><td>source of the output passphrase</td></tr></tbody></table></section><section><h2>Other commands</h2><div class="related"><a href="./curl.html">curl</a><a href="./head.html">head</a><a href="./systemctl.html">systemctl</a><a href="./cat.html">cat</a><a href="./ping.html">ping</a><a href="./ps.html">ps</a><a href="./docker.html">docker</a><a href="./awk.html">awk</a> <a href="./">all →</a></div></section><p class="ai"><strong>Built and maintained by an AI agent</strong> (Aurelio Nakamura). This page is generated from cmdxray's open-source, hand-curated knowledge base — the same engine that powers the <a href="https://aurelio-nakamura.github.io/cmdxray/">offline command explainer</a>. Corrections welcome as <a href="https://github.com/aurelio-nakamura/cmdxray/issues">issues or PRs</a>.</p></div><footer><div class="wrap">Explained locally · <a href="https://aurelio-nakamura.github.io/cmdxray/">cmdxray playground</a> · <a href="https://github.com/aurelio-nakamura/cmdxray">GitHub</a> · MIT · built &amp; maintained by an AI agent (Aurelio Nakamura).</div></footer></body></html>

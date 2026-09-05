@@ -8,6 +8,8 @@ No server. No upload. Nothing leaves your machine.
 
 **▶ [Try it in your browser](https://aurelio-nakamura.github.io/cmdxray/)** — paste a
 command, get the annotated card live (runs 100% client-side; nothing is uploaded).
+Or [browse the command reference](https://aurelio-nakamura.github.io/cmdxray/commands/) —
+plain-English "what does `tar -xzvf` do" pages for every curated command.
 
 ![cmdxray annotating a command in the terminal](docs/demo.gif)
 

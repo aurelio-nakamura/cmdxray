@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>What does `du` do? Flags &amp; examples explained | cmdxray</title>
+<meta name="description" content="du: estimate file and directory disk usage. See every flag explained plain-English, with real du command examples broken down token by token. Offline &amp; private.">
+<link rel="canonical" href="https://aurelio-nakamura.github.io/cmdxray/commands/du.html">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d1117'/%3E%3Ctext x='16' y='23' font-size='20' font-family='monospace' font-weight='700' text-anchor='middle' fill='%2379c0ff'%3Ex%3C/text%3E%3C/svg%3E">
+<meta property="og:title" content="What does `du` do? Flags &amp; examples explained | cmdxray">
+<meta property="og:description" content="du: estimate file and directory disk usage. See every flag explained plain-English, with real du command examples broken down token by token. Offline &amp; private.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://aurelio-nakamura.github.io/cmdxray/commands/du.html">
+<meta property="og:image" content="https://aurelio-nakamura.github.io/cmdxray/og-card.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://aurelio-nakamura.github.io/cmdxray/og-card.png">
+<style>
+:root{--bg:#010409;--panel:#0d1117;--panel2:#161b22;--border:#30363d;--fg:#e6edf3;--muted:#8b949e;--accent:#79c0ff;--accent2:#7ee787;--font:ui-monospace,'SF Mono','JetBrains Mono','Fira Code',Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;line-height:1.6}
+a{color:var(--accent)}
+.wrap{max-width:860px;margin:0 auto;padding:0 20px}
+header{padding:34px 20px 8px}
+.crumb{font-family:var(--font);font-size:.85rem;color:var(--muted);margin-bottom:14px}
+h1{font-size:2rem;margin:0 0 6px;font-family:var(--font);font-weight:700;letter-spacing:-.5px}
+h1 code{color:var(--accent)}
+.lede{color:var(--fg);font-size:1.1rem;margin:6px 0 0}
+.trybtn{display:inline-block;margin:16px 0 0;font-family:var(--font);font-size:.9rem;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:9px 15px;color:var(--fg);text-decoration:none}
+.trybtn:hover{border-color:var(--accent)}
+section{padding:18px 0}
+h2{font-family:var(--font);font-size:1.25rem;border-bottom:1px solid var(--border);padding-bottom:7px;margin-top:26px}
+h3{font-family:var(--font);font-size:1rem;color:var(--accent);margin:20px 0 6px}
+.ex{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin:12px 0}
+.excmd{font-family:var(--font);font-size:1rem;color:var(--fg);margin:0 0 10px;word-break:break-all}
+.excmd .p{color:var(--accent2)}
+.brk{list-style:none;margin:0;padding:0}
+.brk li{display:flex;gap:12px;padding:5px 0;border-top:1px solid var(--border);font-size:.94rem}
+.brk li:first-child{border-top:0}
+.tok{font-family:var(--font);font-weight:600;min-width:96px;flex:0 0 auto}
+.gl{color:var(--muted)}
+table.flags{width:100%;border-collapse:collapse;font-size:.92rem;margin-top:8px}
+table.flags td{border:1px solid var(--border);padding:7px 11px;vertical-align:top}
+table.flags td:first-child{font-family:var(--font);color:var(--accent);white-space:nowrap;width:1%}
+.subs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.sub{font-family:var(--font);font-size:.85rem;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:5px 10px}
+.sub b{color:var(--accent)}
+.related{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.related a{font-family:var(--font);font-size:.85rem;background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:5px 12px;text-decoration:none;color:var(--fg)}
+.related a:hover{border-color:var(--accent)}
+.ai{margin:24px 0 0;font-size:.88rem;color:var(--muted);background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px 16px}
+footer{text-align:center;color:var(--muted);padding:36px 20px 60px;font-size:.86rem;border-top:1px solid var(--border);margin-top:30px}
+.idxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-top:14px}
+.idxcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:13px 15px;text-decoration:none;display:block}
+.idxcard:hover{border-color:var(--accent)}
+.idxcard b{font-family:var(--font);color:var(--accent);font-size:1rem}
+.idxcard span{display:block;color:var(--muted);font-size:.85rem;margin-top:3px}
+</style>
+</head>
+<body><header><div class="wrap">
+<div class="crumb"><a href="https://aurelio-nakamura.github.io/cmdxray/">cmdxray</a> / <a href="./">commands</a> / du</div>
+<h1>What does <code>du</code> do?</h1>
+<p class="lede">estimate file and directory disk usage.</p>
+<a class="trybtn" href="https://aurelio-nakamura.github.io/cmdxray/?cmd=du%20-sh%20dir">▸ Explain your own du command →</a>
+</div></header>
+<div class="wrap"><section><h2>du examples, explained</h2><div class="ex"><p class="excmd"><span class="p">$</span> du -sh dir</p><ul class="brk"><li><span class="tok" style="color:#79c0ff">du</span><span class="gl">estimate file and directory disk usage</span></li><li><span class="tok" style="color:#7ee787">-s</span><span class="gl">show only a total for each argument</span></li><li><span class="tok" style="color:#d2a8ff">-h</span><span class="gl">human-readable sizes (K, M, G)</span></li><li><span class="tok" style="color:#ffa657">dir</span><span class="gl">an argument passed to the command</span></li></ul></div><div class="ex"><p class="excmd"><span class="p">$</span> du -ah .</p><ul class="brk"><li><span class="tok" style="color:#79c0ff">du</span><span class="gl">estimate file and directory disk usage</span></li><li><span class="tok" style="color:#7ee787">-a</span><span class="gl">show sizes for files too, not just directories</span></li><li><span class="tok" style="color:#d2a8ff">-h</span><span class="gl">human-readable sizes (K, M, G)</span></li><li><span class="tok" style="color:#ffa657">.</span><span class="gl">an argument passed to the command</span></li></ul></div></section><section><h2>du flags & options</h2><table class="flags"><tbody><tr><td>-h</td><td>human-readable sizes (K, M, G)</td></tr><tr><td>-s</td><td>show only a total for each argument</td></tr><tr><td>-a</td><td>show sizes for files too, not just directories</td></tr><tr><td>-c</td><td>also print a grand total</td></tr><tr><td>-max-depth</td><td>only report directories this many levels deep</td></tr></tbody></table></section><section><h2>Other commands</h2><div class="related"><a href="./curl.html">curl</a><a href="./cp.html">cp</a><a href="./ps.html">ps</a><a href="./find.html">find</a><a href="./kubectl.html">kubectl</a><a href="./ss.html">ss</a><a href="./ffmpeg.html">ffmpeg</a><a href="./sed.html">sed</a> <a href="./">all →</a></div></section><p class="ai"><strong>Built and maintained by an AI agent</strong> (Aurelio Nakamura). This page is generated from cmdxray's open-source, hand-curated knowledge base — the same engine that powers the <a href="https://aurelio-nakamura.github.io/cmdxray/">offline command explainer</a>. Corrections welcome as <a href="https://github.com/aurelio-nakamura/cmdxray/issues">issues or PRs</a>.</p></div><footer><div class="wrap">Explained locally · <a href="https://aurelio-nakamura.github.io/cmdxray/">cmdxray playground</a> · <a href="https://github.com/aurelio-nakamura/cmdxray">GitHub</a> · MIT · built &amp; maintained by an AI agent (Aurelio Nakamura).</div></footer></body></html>

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shell command explainer — every flag, offline | cmdxray</title>
+<meta name="description" content="Browse plain-English explanations of 46 common shell commands (apt, awk, aws, cat, chmod, chown, cp, curl, cut, dd…). Every flag explained, real examples broken down, offline &amp; private.">
+<link rel="canonical" href="https://aurelio-nakamura.github.io/cmdxray/commands/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d1117'/%3E%3Ctext x='16' y='23' font-size='20' font-family='monospace' font-weight='700' text-anchor='middle' fill='%2379c0ff'%3Ex%3C/text%3E%3C/svg%3E">
+<meta property="og:title" content="Shell command explainer — every flag, offline | cmdxray">
+<meta property="og:description" content="Browse plain-English explanations of 46 common shell commands (apt, awk, aws, cat, chmod, chown, cp, curl, cut, dd…). Every flag explained, real examples broken down, offline &amp; private.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://aurelio-nakamura.github.io/cmdxray/commands/">
+<meta property="og:image" content="https://aurelio-nakamura.github.io/cmdxray/og-card.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://aurelio-nakamura.github.io/cmdxray/og-card.png">
+<style>
+:root{--bg:#010409;--panel:#0d1117;--panel2:#161b22;--border:#30363d;--fg:#e6edf3;--muted:#8b949e;--accent:#79c0ff;--accent2:#7ee787;--font:ui-monospace,'SF Mono','JetBrains Mono','Fira Code',Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;line-height:1.6}
+a{color:var(--accent)}
+.wrap{max-width:860px;margin:0 auto;padding:0 20px}
+header{padding:34px 20px 8px}
+.crumb{font-family:var(--font);font-size:.85rem;color:var(--muted);margin-bottom:14px}
+h1{font-size:2rem;margin:0 0 6px;font-family:var(--font);font-weight:700;letter-spacing:-.5px}
+h1 code{color:var(--accent)}
+.lede{color:var(--fg);font-size:1.1rem;margin:6px 0 0}
+.trybtn{display:inline-block;margin:16px 0 0;font-family:var(--font);font-size:.9rem;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:9px 15px;color:var(--fg);text-decoration:none}
+.trybtn:hover{border-color:var(--accent)}
+section{padding:18px 0}
+h2{font-family:var(--font);font-size:1.25rem;border-bottom:1px solid var(--border);padding-bottom:7px;margin-top:26px}
+h3{font-family:var(--font);font-size:1rem;color:var(--accent);margin:20px 0 6px}
+.ex{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin:12px 0}
+.excmd{font-family:var(--font);font-size:1rem;color:var(--fg);margin:0 0 10px;word-break:break-all}
+.excmd .p{color:var(--accent2)}
+.brk{list-style:none;margin:0;padding:0}
+.brk li{display:flex;gap:12px;padding:5px 0;border-top:1px solid var(--border);font-size:.94rem}
+.brk li:first-child{border-top:0}
+.tok{font-family:var(--font);font-weight:600;min-width:96px;flex:0 0 auto}
+.gl{color:var(--muted)}
+table.flags{width:100%;border-collapse:collapse;font-size:.92rem;margin-top:8px}
+table.flags td{border:1px solid var(--border);padding:7px 11px;vertical-align:top}
+table.flags td:first-child{font-family:var(--font);color:var(--accent);white-space:nowrap;width:1%}
+.subs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.sub{font-family:var(--font);font-size:.85rem;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:5px 10px}
+.sub b{color:var(--accent)}
+.related{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.related a{font-family:var(--font);font-size:.85rem;background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:5px 12px;text-decoration:none;color:var(--fg)}
+.related a:hover{border-color:var(--accent)}
+.ai{margin:24px 0 0;font-size:.88rem;color:var(--muted);background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px 16px}
+footer{text-align:center;color:var(--muted);padding:36px 20px 60px;font-size:.86rem;border-top:1px solid var(--border);margin-top:30px}
+.idxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-top:14px}
+.idxcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:13px 15px;text-decoration:none;display:block}
+.idxcard:hover{border-color:var(--accent)}
+.idxcard b{font-family:var(--font);color:var(--accent);font-size:1rem}
+.idxcard span{display:block;color:var(--muted);font-size:.85rem;margin-top:3px}
+</style>
+</head>
+<body><header><div class="wrap">
+<div class="crumb"><a href="https://aurelio-nakamura.github.io/cmdxray/">cmdxray</a> / commands</div>
+<h1>Shell commands, explained</h1>
+<p class="lede">Plain-English breakdowns of 46 common commands — every flag, real examples, token by token. Or <a href="https://aurelio-nakamura.github.io/cmdxray/">paste your own command</a> into the offline explainer.</p>
+</div></header>
+<div class="wrap"><section><div class="idxgrid"><a class="idxcard" href="./apt.html"><b>apt</b><span>install and manage Debian/Ubuntu packages</span></a><a class="idxcard" href="./awk.html"><b>awk</b><span>pattern-scanning and text-processing language</span></a><a class="idxcard" href="./aws.html"><b>aws</b><span>command-line interface for Amazon Web Services</span></a><a class="idxcard" href="./cat.html"><b>cat</b><span>concatenate files and print them</span></a><a class="idxcard" href="./chmod.html"><b>chmod</b><span>change file mode (permission) bits</span></a><a class="idxcard" href="./chown.html"><b>chown</b><span>change file owner and group</span></a><a class="idxcard" href="./cp.html"><b>cp</b><span>copy files or directories</span></a><a class="idxcard" href="./curl.html"><b>curl</b><span>transfer data to or from a URL</span></a><a class="idxcard" href="./cut.html"><b>cut</b><span>extract selected columns from each line</span></a><a class="idxcard" href="./dd.html"><b>dd</b><span>copy and convert data block by block</span></a><a class="idxcard" href="./df.html"><b>df</b><span>report free space on mounted filesystems</span></a><a class="idxcard" href="./docker.html"><b>docker</b><span>build, run and manage containers</span></a><a class="idxcard" href="./du.html"><b>du</b><span>estimate file and directory disk usage</span></a><a class="idxcard" href="./ffmpeg.html"><b>ffmpeg</b><span>record, convert and stream audio and video</span></a><a class="idxcard" href="./find.html"><b>find</b><span>walk a directory tree looking for files</span></a><a class="idxcard" href="./git.html"><b>git</b><span>the distributed version control system</span></a><a class="idxcard" href="./grep.html"><b>grep</b><span>search input for lines matching a pattern</span></a><a class="idxcard" href="./head.html"><b>head</b><span>print the first part of files</span></a><a class="idxcard" href="./journalctl.html"><b>journalctl</b><span>query and display logs from the systemd journal</span></a><a class="idxcard" href="./jq.html"><b>jq</b><span>command-line JSON processor (apply a filter to JSON input)</span></a><a class="idxcard" href="./kill.html"><b>kill</b><span>send a signal to a process</span></a><a class="idxcard" href="./kubectl.html"><b>kubectl</b><span>control a Kubernetes cluster</span></a><a class="idxcard" href="./ln.html"><b>ln</b><span>make links between files</span></a><a class="idxcard" href="./ls.html"><b>ls</b><span>list directory contents</span></a><a class="idxcard" href="./make.html"><b>make</b><span>build targets according to a Makefile</span></a><a class="idxcard" href="./mkdir.html"><b>mkdir</b><span>create directories</span></a><a class="idxcard" href="./mv.html"><b>mv</b><span>move or rename files and directories</span></a><a class="idxcard" href="./netstat.html"><b>netstat</b><span>show network connections, routing tables, and interface stats</span></a><a class="idxcard" href="./npm.html"><b>npm</b><span>the Node.js package manager</span></a><a class="idxcard" href="./openssl.html"><b>openssl</b><span>OpenSSL — command-line cryptography and TLS toolkit</span></a><a class="idxcard" href="./ping.html"><b>ping</b><span>test reachability of a host on the network</span></a><a class="idxcard" href="./ps.html"><b>ps</b><span>report a snapshot of running processes</span></a><a class="idxcard" href="./rm.html"><b>rm</b><span>remove files or directories</span></a><a class="idxcard" href="./rsync.html"><b>rsync</b><span>efficiently sync files, copying only what changed</span></a><a class="idxcard" href="./scp.html"><b>scp</b><span>copy files between hosts over SSH</span></a><a class="idxcard" href="./sed.html"><b>sed</b><span>stream editor — transform text line by line</span></a><a class="idxcard" href="./sort.html"><b>sort</b><span>sort lines of text</span></a><a class="idxcard" href="./ss.html"><b>ss</b><span>inspect sockets (a faster, modern replacement for netstat)</span></a><a class="idxcard" href="./ssh.html"><b>ssh</b><span>log in to or run a command on a remote machine</span></a><a class="idxcard" href="./systemctl.html"><b>systemctl</b><span>control the systemd init system and its services</span></a><a class="idxcard" href="./tail.html"><b>tail</b><span>print the last part of files</span></a><a class="idxcard" href="./tar.html"><b>tar</b><span>archive utility — bundle files into (or extract them from) a .tar</span></a><a class="idxcard" href="./tr.html"><b>tr</b><span>translate or delete characters</span></a><a class="idxcard" href="./wc.html"><b>wc</b><span>count lines, words and bytes</span></a><a class="idxcard" href="./wget.html"><b>wget</b><span>download files from the web over HTTP/FTP</span></a><a class="idxcard" href="./xargs.html"><b>xargs</b><span>build and run command lines from standard input</span></a></div></section>
+<p class="ai"><strong>Built and maintained by an AI agent</strong> (Aurelio Nakamura). Generated from cmdxray's open-source curated knowledge base.</p>
+</div><footer><div class="wrap">Explained locally · <a href="https://aurelio-nakamura.github.io/cmdxray/">cmdxray playground</a> · <a href="https://github.com/aurelio-nakamura/cmdxray">GitHub</a> · MIT · built &amp; maintained by an AI agent (Aurelio Nakamura).</div></footer></body></html>
