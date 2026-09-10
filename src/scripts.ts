@@ -58,7 +58,7 @@ export function sedGloss(tok: string): string | null {
 export function awkGloss(tok: string): string | null {
   if (!/[{}]/.test(tok) && !/^\/.*\/$/.test(tok)) return null;
   const bits: string[] = [];
-  if (/^\s*\{?\s*print\s*\$0?\s*\}?\s*$/.test(tok)) {
+  if (/^\s*(?:\{\s*)?print\s*\$0?\s*(?:\}\s*)?$/.test(tok)) {
     bits.push("print each whole line");
   } else {
     const cols = [...tok.matchAll(/\$(\d+)/g)].map((m) => +m[1]);
