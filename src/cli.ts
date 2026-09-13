@@ -4,6 +4,7 @@ import { execFileSync } from "node:child_process";
 import { writeFileSync, readFileSync } from "node:fs";
 import { explain } from "./explain.js";
 import { renderTerminal, renderSvg, renderHtml } from "./card.js";
+import { toJsonReport } from "./json.js";
 import type { CommandInfo } from "./db.js";
 
 const PLAYGROUND = "https://aurelio-nakamura.github.io/cmdxray/";
@@ -14,6 +15,7 @@ Usage:
   cmdxray <command...>            explain a command (+ flag any risky parts) in your terminal
   cmdxray --svg <command...>      emit a shareable SVG card to stdout
   cmdxray --html <command...>     emit a standalone HTML page to stdout
+  cmdxray --json <command...>     emit a structured JSON report to stdout
   cmdxray -o card.svg <command>   write the SVG card to a file
   cmdxray --share <command...>    print a shareable link to the breakdown
   echo "<cmd>" | cmdxray          read the command from stdin
@@ -21,7 +23,8 @@ Usage:
 Options:
   --svg        output an SVG card
   --html       output a standalone HTML page
-  -o <file>    write output to <file> (format inferred from extension)
+  --json       output a structured JSON report (parsed AST + explanations + risk warnings)
+  -o <file>    write output to <file> (format inferred from extension: .svg/.html/.json)
   --share      also print a shareable playground link for the command
   --link       print ONLY the shareable playground link (no explanation)
   --no-color   disable ANSI colors in terminal output
@@ -69,7 +72,7 @@ function makeManLookup(): (cmd: string) => CommandInfo | null {
 
 function main() {
   const argv = process.argv.slice(2);
-  let format: "term" | "svg" | "html" = "term";
+  let format: "term" | "svg" | "html" | "json" = "term";
   let outFile: string | null = null;
   let color: boolean = true;
   let useMan: boolean = true;
@@ -85,7 +88,7 @@ function main() {
   // the command is fully self-contained inside that one token, so trailing
   // cmdxray options after it are unambiguous and are honored.
   const isCmdxrayOpt = (a: string) =>
-    a === "--svg" || a === "--html" || a === "--no-color" || a === "--no-man" ||
+    a === "--svg" || a === "--html" || a === "--json" || a === "--no-color" || a === "--no-man" ||
     a === "-o" || a === "--share" || a === "--link";
   let inCommand = false;
   let quotedCommand = false;
@@ -101,6 +104,7 @@ function main() {
     else if (a === "--") inCommand = true;
     else if (a === "--svg") format = "svg";
     else if (a === "--html") format = "html";
+    else if (a === "--json") format = "json";
     else if (a === "--no-color") color = false;
     else if (a === "--no-man") useMan = false;
     else if (a === "--share") share = true;
@@ -161,7 +165,12 @@ function main() {
 
   if (outFile) {
     const isHtml = outFile.endsWith(".html") || outFile.endsWith(".htm");
-    const content = isHtml ? renderHtml(res) : renderSvg(res);
+    const isJson = outFile.endsWith(".json") || format === "json";
+    const content = isJson
+      ? JSON.stringify(toJsonReport(res), null, 2)
+      : isHtml
+        ? renderHtml(res)
+        : renderSvg(res);
     writeFileSync(outFile, content);
     console.error(`cmdxray: wrote ${outFile}`);
     return;
@@ -169,6 +178,7 @@ function main() {
 
   if (format === "svg") process.stdout.write(renderSvg(res) + "\n");
   else if (format === "html") process.stdout.write(renderHtml(res) + "\n");
+  else if (format === "json") process.stdout.write(JSON.stringify(toJsonReport(res), null, 2) + "\n");
   else {
     process.stdout.write(renderTerminal(res, color) + "\n");
     if (share) {

@@ -8,18 +8,21 @@
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/cat.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/chmod.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/chown.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/column.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/cp.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/crontab.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/curl.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/cut.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/dd.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/df.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/diff.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/docker.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/du.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/ffmpeg.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/find.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/git.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/grep.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/gzip.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/head.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/ip.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/journalctl.html</loc></url>
@@ -48,7 +51,9 @@
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/systemctl.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/tail.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/tar.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/tee.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/tr.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/uniq.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/unzip.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/wc.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/wget.html</loc></url>

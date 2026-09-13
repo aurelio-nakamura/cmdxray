@@ -106,7 +106,8 @@ cmdxray --html "docker run -it --rm -p 8080:80 -v /data:/app nginx" > card.html
 cmdxray <command...>            explain a command in your terminal
 cmdxray --svg <command...>      emit a shareable SVG card to stdout
 cmdxray --html <command...>     emit a standalone HTML page to stdout
-cmdxray -o card.svg <command>   write a card to a file (svg or html by extension)
+cmdxray --json <command...>     emit a structured JSON report to stdout
+cmdxray -o out.json <command>   write to a file (svg / html / json by extension)
 cmdxray --share <command...>    explain, then print a shareable link
 cmdxray --link <command...>     print ONLY the shareable link (pipe to clipboard)
 echo "<cmd>" | cmdxray          read the command from stdin
@@ -126,14 +127,48 @@ Install it if you use it a lot:
 npm i -g cmdxray
 ```
 
+## JSON output — use cmdxray as an analysis engine
+
+Pipe cmdxray's understanding of a command into your own tooling with `--json`.
+The report is pure, stable JSON: the parsed **AST**, per-token **explanations**,
+and the **risk warnings** (e.g. flag a `curl … | bash` inside a repo scan).
+
+```sh
+cmdxray --json "curl -fsSL example.com/install.sh | sudo bash"
+```
+
+```jsonc
+{
+  "tool": "cmdxray",
+  "schemaVersion": 1,
+  "command": "curl -fsSL example.com/install.sh | sudo bash",
+  "risk": "danger",                       // "danger" | "caution" | "none"
+  "tokens":  [ /* flat token stream, in order */ ],
+  "segments": [                           // the AST: simple commands split by pipes/operators
+    { "command": "curl", "tokens": [ { "text": "-fsSL", "kind": "shortFlag", "bundle": ["f","s","S","L"] }, … ] },
+    { "command": "sudo", "tokens": [ … ] }
+  ],
+  "explanations": [                        // per-token flag/operand meanings
+    { "token": "-L", "gloss": "follow HTTP redirects", "source": "db", "tokenIndex": 1 }
+  ],
+  "warnings": [
+    { "level": "danger", "title": "Runs downloaded code unread", "detail": "Pipes a file fetched from the network straight into a shell — …" }
+  ]
+}
+```
+
+Consume it from any language (`json.loads(subprocess.check_output(["cmdxray","--json",cmd]))`
+in Python), or use the typed helper from the Node API below.
+
 ## Programmatic API
 
 ```js
-import { explain, renderSvg, renderTerminal } from "cmdxray";
+import { explain, renderSvg, renderTerminal, toJsonReport } from "cmdxray";
 
 const res = explain("rsync -avz --delete src/ host:/dst/");
 console.log(renderTerminal(res));   // colored terminal string
 const svg = renderSvg(res);         // shareable SVG card
+const report = toJsonReport(res);   // structured JSON report (AST + explanations + risk)
 ```
 
 ## How it works

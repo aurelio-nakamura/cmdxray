@@ -8,3 +8,11 @@ export { DB, GENERIC_FLAGS, EXAMPLES } from "./db.js";
 export type { CommandInfo } from "./db.js";
 export { analyzeDangers } from "./danger.js";
 export type { Warning, RiskLevel } from "./danger.js";
+export { toJsonReport, JSON_SCHEMA_VERSION } from "./json.js";
+export type {
+  JsonReport,
+  JsonSegment,
+  JsonToken,
+  JsonExplanation,
+  JsonWarning,
+} from "./json.js";

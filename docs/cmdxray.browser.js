@@ -946,6 +946,99 @@ var DB = {
       s: "print summary statistics"
     }
   },
+  lsof: {
+    summary: "list open files (and the processes that hold them open)",
+    takesValue: ["i", "p", "u", "c"],
+    flags: {
+      i: "list network files \u2014 optionally filtered, e.g. -i :8080, -i tcp:80",
+      p: "restrict to the given process ID(s)",
+      u: "restrict to files opened by the given user(s)",
+      c: "restrict to processes whose name begins with this string",
+      n: "don't resolve host names \u2014 numeric addresses (faster)",
+      P: "don't resolve port names \u2014 numeric ports (faster)",
+      t: "terse output \u2014 print only process IDs (handy for scripting)",
+      a: "AND the selection filters together instead of OR-ing them"
+    }
+  },
+  ip: {
+    summary: "show / manipulate routing, network devices, interfaces and tunnels",
+    subcommands: {
+      addr: "protocol (IP) addresses on network interfaces",
+      address: "protocol (IP) addresses on network interfaces",
+      a: "protocol (IP) addresses on network interfaces",
+      link: "network devices (interfaces)",
+      l: "network devices (interfaces)",
+      route: "the routing table",
+      r: "the routing table",
+      neigh: "the ARP / neighbour table",
+      rule: "routing policy rules",
+      tunnel: "IP tunnels",
+      maddr: "multicast addresses",
+      monitor: "watch for network events as they happen"
+    },
+    subSubcommands: {
+      addr: { show: "list the addresses", add: "add an address", del: "remove an address", flush: "remove all matching addresses" },
+      address: { show: "list the addresses", add: "add an address", del: "remove an address", flush: "remove all matching addresses" },
+      a: { show: "list the addresses", add: "add an address", del: "remove an address", flush: "remove all matching addresses" },
+      link: { show: "list the devices", set: "change device settings", add: "create a virtual device", del: "delete a device" },
+      l: { show: "list the devices", set: "change device settings" },
+      route: { show: "list the routes", add: "add a route", del: "remove a route", get: "resolve the route for an address", flush: "remove all matching routes" },
+      r: { show: "list the routes", add: "add a route", del: "remove a route", get: "resolve the route for an address" },
+      neigh: { show: "list the neighbour entries", flush: "clear the neighbour table" }
+    },
+    flags: {
+      "-4": "operate on IPv4 only",
+      "-6": "operate on IPv6 only",
+      "-br": "brief, tabular output",
+      "-brief": "brief, tabular output",
+      "-c": "colorize the output",
+      "-s": "show statistics (repeat for more detail)",
+      "-j": "output as JSON",
+      "-json": "output as JSON",
+      "-d": "show detailed output"
+    }
+  },
+  crontab: {
+    summary: "install, view, or edit a user's scheduled (cron) jobs",
+    takesValue: ["u"],
+    flags: {
+      e: "edit the current crontab in your $EDITOR",
+      l: "list (print) the current crontab",
+      r: "remove the current crontab entirely",
+      i: "prompt for confirmation before removing",
+      u: "operate on the named user's crontab (needs privileges)"
+    }
+  },
+  unzip: {
+    summary: "extract files from a ZIP archive",
+    takesValue: ["d", "x"],
+    flags: {
+      l: "list the archive contents without extracting",
+      d: "extract into the given directory",
+      o: "overwrite existing files without prompting",
+      n: "never overwrite existing files",
+      q: "quiet \u2014 suppress the per-file listing",
+      p: "extract to standard output (pipe-friendly)",
+      j: "junk paths \u2014 don't recreate the archive's directory tree",
+      x: "exclude files matching the given name(s)",
+      v: "verbose / show archive details"
+    }
+  },
+  nc: {
+    summary: "open, listen on, or script raw TCP/UDP connections (netcat)",
+    takesValue: ["p", "w", "s"],
+    flags: {
+      l: "listen for an incoming connection instead of connecting",
+      v: "verbose \u2014 report connections and errors",
+      n: "numeric only \u2014 skip DNS/service-name lookups",
+      p: "use this source port",
+      u: "use UDP instead of TCP",
+      k: "keep listening for more connections after one closes",
+      w: "give up after this many seconds of inactivity (timeout)",
+      z: "zero-I/O mode \u2014 just scan for listening ports, send no data",
+      s: "use this source address"
+    }
+  },
   kill: {
     summary: "send a signal to a process",
     flags: {
@@ -998,6 +1091,19 @@ var DB = {
       f: "fold case \u2014 treat lower and upper case alike"
     }
   },
+  uniq: {
+    summary: "report or omit repeated adjacent lines",
+    takesValue: ["f", "s", "w"],
+    flags: {
+      c: "prefix each line with the number of times it occurred",
+      d: "print only lines that are repeated",
+      u: "print only lines that are never repeated",
+      i: "ignore case when comparing lines",
+      f: "skip the first N fields when comparing",
+      s: "skip the first N characters when comparing",
+      w: "compare no more than N characters per line"
+    }
+  },
   cut: {
     summary: "extract selected columns from each line",
     takesValue: ["d", "f", "c"],
@@ -1022,6 +1128,52 @@ var DB = {
       w: "count words",
       c: "count bytes",
       m: "count characters"
+    }
+  },
+  tee: {
+    summary: "copy input to a file and pass it through to output too",
+    flags: {
+      a: "append to the file instead of overwriting it",
+      i: "ignore interrupt signals"
+    }
+  },
+  diff: {
+    summary: "compare two files line by line and show the differences",
+    takesValue: ["C", "U"],
+    flags: {
+      u: "unified format \u2014 the diff style used by patches and git",
+      r: "recursively compare any subdirectories found",
+      i: "ignore case differences",
+      w: "ignore all whitespace",
+      b: "ignore changes in the amount of whitespace",
+      q: "report only whether files differ, not the details",
+      N: "treat absent files as empty (with -r)",
+      C: "output the given number of lines of copied context",
+      U: "output the given number of lines of unified context"
+    }
+  },
+  gzip: {
+    summary: "compress files with gzip (replaces the original with .gz)",
+    takesValue: ["S"],
+    flags: {
+      d: "decompress instead of compress",
+      k: "keep the input file instead of deleting it",
+      c: "write to standard output, keep the original",
+      r: "recurse into directories",
+      f: "force \u2014 overwrite existing files / compress links",
+      v: "verbose \u2014 show the name and compression ratio",
+      "9": "compress best (slowest); -1 is fastest, least compression"
+    }
+  },
+  column: {
+    summary: "format input into neatly aligned columns",
+    takesValue: ["s", "c", "o"],
+    flags: {
+      t: "create a table, determining columns from the input",
+      s: "use the given characters as input field separators",
+      o: "use the given string to separate output columns",
+      c: "format output to fit this display width",
+      n: "do not merge multiple adjacent delimiters into one"
     }
   },
   cat: {
@@ -1132,11 +1284,21 @@ var EXAMPLES = {
   ps: ["ps aux", "ps -ef", "ps aux --sort=-%mem"],
   netstat: ["netstat -tulpn", "netstat -rn"],
   ss: ["ss -tulpn", "ss -s"],
+  lsof: ["lsof -i :8080", "lsof -p 1234", "lsof -nP -i tcp"],
+  ip: ["ip addr show", "ip route add default via 192.168.1.1", "ip -br link"],
+  crontab: ["crontab -e", "crontab -l", "crontab -r"],
+  unzip: ["unzip archive.zip -d dest", "unzip -l archive.zip"],
+  nc: ["nc -lvnp 4444", "nc -zv host 22"],
   kill: ["kill -9 1234", "kill -15 4321"],
   xargs: ["xargs -0 -I{} rm {}", "xargs -n1 -P4 echo"],
   head: ["head -n 20 file.txt", "head -c 100 file.bin"],
   tail: ["tail -f -n 100 log.txt"],
   sort: ["sort -k2 -n -r data.txt", "sort -u -f names.txt"],
+  uniq: ["uniq -c sorted.txt", "sort names.txt | uniq -d"],
+  tee: ["ls | tee files.txt", "make 2>&1 | tee -a build.log"],
+  diff: ["diff -u old.txt new.txt", "diff -r dir1/ dir2/"],
+  gzip: ["gzip -k big.log", "gzip -d archive.gz"],
+  column: ["column -t -s, data.csv", "mount | column -t"],
   cut: ["cut -d, -f1 data.csv", "cut -c1-10 file.txt"],
   tr: ["tr -d '\\n'", "tr -s ' '"],
   wc: ["wc -l file.txt", "wc -w -c file.txt"],
@@ -1197,7 +1359,7 @@ function sedGloss(tok) {
 function awkGloss(tok) {
   if (!/[{}]/.test(tok) && !/^\/.*\/$/.test(tok)) return null;
   const bits = [];
-  if (/^\s*\{?\s*print\s*\$0?\s*\}?\s*$/.test(tok)) {
+  if (/^\s*(?:\{\s*)?print\s*\$0?\s*(?:\}\s*)?$/.test(tok)) {
     bits.push("print each whole line");
   } else {
     const cols = [...tok.matchAll(/\$(\d+)/g)].map((m) => +m[1]);
@@ -2016,14 +2178,50 @@ ${risk}
   ${dim("explained locally \xB7 cmdxray")}
 `;
 }
+
+// src/json.ts
+var JSON_SCHEMA_VERSION = 1;
+function cleanToken(t) {
+  const out = { text: t.text, kind: t.kind };
+  if (t.bundle && t.bundle.length) out.bundle = t.bundle;
+  if (t.quoted) out.quoted = true;
+  return out;
+}
+function toJsonReport(res) {
+  const risk = res.warnings.some((w) => w.level === "danger") ? "danger" : res.warnings.some((w) => w.level === "caution") ? "caution" : "none";
+  return {
+    tool: "cmdxray",
+    schemaVersion: JSON_SCHEMA_VERSION,
+    command: res.raw,
+    risk,
+    tokens: res.parsed.tokens.map(cleanToken),
+    segments: res.parsed.segments.map((s) => ({
+      command: s.command,
+      tokens: s.tokens.map(cleanToken)
+    })),
+    explanations: res.lines.map((l) => ({
+      token: l.token,
+      gloss: l.gloss,
+      source: l.source,
+      tokenIndex: l.tokenIndex
+    })),
+    warnings: res.warnings.map((w) => ({
+      level: w.level,
+      title: w.title,
+      detail: w.detail
+    }))
+  };
+}
 export {
   DB,
   EXAMPLES,
   GENERIC_FLAGS,
+  JSON_SCHEMA_VERSION,
   analyzeDangers,
   explain,
   parseCommand,
   renderHtml,
   renderSvg,
-  renderTerminal
+  renderTerminal,
+  toJsonReport
 };
