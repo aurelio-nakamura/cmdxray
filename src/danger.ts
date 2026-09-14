@@ -99,6 +99,43 @@ export function analyzeDangers(parsed: ParsedCommand): Warning[] {
     });
   }
 
+  // --- CI/CD template-expression injection: ${{ … }} spliced into a command ---
+  // In GitHub Actions (and similar CI), a ${{ … }} expression is substituted into
+  // the `run:` script by the runner BEFORE the shell parses it. When the value is
+  // attacker-controllable (a PR/issue title or body, a branch name, a commit
+  // message…), a crafted value like `"; rm -rf / #` breaks out of its context and
+  // runs as code. The only safe pattern is to pass the value through an
+  // environment variable and reference it quoted ("$VAR"), so a ${{ … }} inlined
+  // directly into a command is a genuine injection vector.
+  {
+    const exprRe = /\$\{\{\s*([^}]*?)\s*\}\}/g;
+    // Expression sources an external actor can control the text of.
+    const UNTRUSTED =
+      /github\.head_ref|github\.event\.(issue|pull_request|discussion)\.(title|body)|github\.event\.pull_request\.head\.(ref|label)|github\.event\.pull_request\.head\.repo\.(default_branch|description|homepage)|github\.event\.comment\.body|github\.event\.review(_comment)?\.body|github\.event\.commits|github\.event\.head_commit\.(message|author)|github\.event\.pages|github\.event\.workflow_run\.(head_branch|display_title)/;
+    let m: RegExpExecArray | null;
+    let sawExpr = false;
+    let sawUntrusted = false;
+    while ((m = exprRe.exec(raw)) !== null) {
+      sawExpr = true;
+      if (UNTRUSTED.test(m[1])) sawUntrusted = true;
+    }
+    if (sawUntrusted) {
+      add({
+        level: "danger",
+        title: "CI expression injection",
+        detail:
+          "A ${{ … }} expression that can carry attacker-controlled text (a PR/issue title or body, branch name, or commit message) is spliced into this command before the shell runs it — a crafted value can inject arbitrary commands. Pass it through an environment variable and quote it (\"$VAR\") instead of inlining it.",
+      });
+    } else if (sawExpr) {
+      add({
+        level: "caution",
+        title: "CI expression interpolation",
+        detail:
+          "A ${{ … }} template expression is substituted into this command by the CI runner before the shell parses it. If its value is user-influenced, pass it via an environment variable referenced as \"$VAR\" rather than inlining it, to avoid shell injection.",
+      });
+    }
+  }
+
   const seps = precedingSeparators(parsed);
   const commandSegs = parsed.segments.filter((s) => s.command);
 

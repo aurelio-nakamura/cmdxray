@@ -107,6 +107,7 @@ cmdxray <command...>            explain a command in your terminal
 cmdxray --svg <command...>      emit a shareable SVG card to stdout
 cmdxray --html <command...>     emit a standalone HTML page to stdout
 cmdxray --json <command...>     emit a structured JSON report to stdout
+cmdxray --batch-json            read a JSON array of commands from stdin, emit a JSON array
 cmdxray -o out.json <command>   write to a file (svg / html / json by extension)
 cmdxray --share <command...>    explain, then print a shareable link
 cmdxray --link <command...>     print ONLY the shareable link (pipe to clipboard)
@@ -159,6 +160,56 @@ cmdxray --json "curl -fsSL example.com/install.sh | sudo bash"
 
 Consume it from any language (`json.loads(subprocess.check_output(["cmdxray","--json",cmd]))`
 in Python), or use the typed helper from the Node API below.
+
+### Batch mode — scan thousands of commands in one process
+
+Spawning a Node process per command is the bottleneck when a scanner extracts
+thousands of embedded shell snippets across a repo. `--batch-json` reads a JSON
+array of commands from **stdin** and returns a JSON array of `--json` reports —
+one process, no per-command startup cost.
+
+```sh
+echo '["echo hi", "curl -fsSL https://x.sh | bash"]' | cmdxray --batch-json
+```
+
+```jsonc
+[
+  { "tool": "cmdxray", "command": "echo hi", "risk": "none", "warnings": [], … },
+  { "tool": "cmdxray", "command": "curl -fsSL https://x.sh | bash", "risk": "danger",
+    "warnings": [ { "level": "danger", "title": "Runs downloaded code unread", … } ], … }
+]
+```
+
+Each array element is the same shape as `--json`. Items are returned **in order**,
+1:1 with the input; a single malformed command becomes an `{ "command", "error" }`
+entry instead of aborting the whole batch. Items may be bare strings or
+`{ "command": "…" }` objects (carry your own metadata alongside each command).
+
+```python
+import json, subprocess
+cmds = ["echo hi", "curl -fsSL https://x.sh | bash", "rm -rf /tmp/x"]
+reports = json.loads(subprocess.run(
+    ["cmdxray", "--batch-json"], input=json.dumps(cmds),
+    capture_output=True, text=True).stdout)
+danger = [r["command"] for r in reports if r.get("risk") == "danger"]
+```
+
+### CI/CD template-injection detection
+
+cmdxray flags GitHub-Actions-style `${{ … }}` expressions spliced directly into a
+command — the classic [script-injection](https://docs.github.com/actions/security-guides/security-hardening-for-github-actions)
+vector. Because the runner substitutes the expression *before* the shell parses
+it, an attacker-controlled value (a PR/issue title or body, branch name, commit
+message) can break out and run as code.
+
+```sh
+cmdxray 'echo "Reviewing: ${{ github.event.pull_request.title }}"'
+# ⚠ DANGER  CI expression injection — pass it through an env var and quote it ("$VAR") instead.
+```
+
+Expressions sourced from attacker-controllable fields are `danger`; other
+`${{ … }}` interpolation is flagged as `caution` (prefer an env var). Ordinary
+shell variables (`$HOME`, `${VAR}`) are never flagged.
 
 ## Programmatic API
 

@@ -9,6 +9,8 @@ export type { CommandInfo } from "./db.js";
 export { analyzeDangers } from "./danger.js";
 export type { Warning, RiskLevel } from "./danger.js";
 export { toJsonReport, JSON_SCHEMA_VERSION } from "./json.js";
+export { runBatch } from "./batch.js";
+export type { BatchEntry, BatchError } from "./batch.js";
 export type {
   JsonReport,
   JsonSegment,

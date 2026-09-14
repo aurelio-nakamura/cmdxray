@@ -5,6 +5,7 @@ import { writeFileSync, readFileSync } from "node:fs";
 import { explain } from "./explain.js";
 import { renderTerminal, renderSvg, renderHtml } from "./card.js";
 import { toJsonReport } from "./json.js";
+import { runBatch } from "./batch.js";
 import type { CommandInfo } from "./db.js";
 
 const PLAYGROUND = "https://aurelio-nakamura.github.io/cmdxray/";
@@ -16,15 +17,18 @@ Usage:
   cmdxray --svg <command...>      emit a shareable SVG card to stdout
   cmdxray --html <command...>     emit a standalone HTML page to stdout
   cmdxray --json <command...>     emit a structured JSON report to stdout
+  cmdxray --batch-json            read a JSON array of commands from stdin, emit a JSON array of reports
   cmdxray -o card.svg <command>   write the SVG card to a file
   cmdxray --share <command...>    print a shareable link to the breakdown
   echo "<cmd>" | cmdxray          read the command from stdin
 
 Options:
-  --svg        output an SVG card
-  --html       output a standalone HTML page
-  --json       output a structured JSON report (parsed AST + explanations + risk warnings)
-  -o <file>    write output to <file> (format inferred from extension: .svg/.html/.json)
+  --svg          output an SVG card
+  --html         output a standalone HTML page
+  --json         output a structured JSON report (parsed AST + explanations + risk warnings)
+  --batch-json   read a JSON array of command strings from stdin, emit a JSON array of
+                 --json reports (one process, no per-command startup cost — for CI/bulk scans)
+  -o <file>      write output to <file> (format inferred from extension: .svg/.html/.json)
   --share      also print a shareable playground link for the command
   --link       print ONLY the shareable playground link (no explanation)
   --no-color   disable ANSI colors in terminal output
@@ -78,6 +82,7 @@ function main() {
   let useMan: boolean = true;
   let share: boolean = false;
   let linkOnly: boolean = false;
+  let batch: boolean = false;
   let showHelp: boolean = false;
   const rest: string[] = [];
   // cmdxray's own options are recognized BEFORE the command word (or after an
@@ -88,7 +93,7 @@ function main() {
   // the command is fully self-contained inside that one token, so trailing
   // cmdxray options after it are unambiguous and are honored.
   const isCmdxrayOpt = (a: string) =>
-    a === "--svg" || a === "--html" || a === "--json" || a === "--no-color" || a === "--no-man" ||
+    a === "--svg" || a === "--html" || a === "--json" || a === "--batch-json" || a === "--no-color" || a === "--no-man" ||
     a === "-o" || a === "--share" || a === "--link";
   let inCommand = false;
   let quotedCommand = false;
@@ -105,6 +110,7 @@ function main() {
     else if (a === "--svg") format = "svg";
     else if (a === "--html") format = "html";
     else if (a === "--json") format = "json";
+    else if (a === "--batch-json") batch = true;
     else if (a === "--no-color") color = false;
     else if (a === "--no-man") useMan = false;
     else if (a === "--share") share = true;
@@ -123,6 +129,29 @@ function main() {
   // belongs to that command and is explained normally.
   if (showHelp && rest.length === 0) {
     console.log(HELP);
+    return;
+  }
+
+  // --batch-json: read a JSON array of commands from stdin and emit a JSON array
+  // of reports in one process (no per-command Node startup cost). For CI/bulk
+  // scanners that x-ray thousands of embedded shell snippets (issue #3).
+  if (batch) {
+    let input = "";
+    try {
+      input = readFileSync(0, "utf8");
+    } catch {
+      console.error("cmdxray --batch-json: could not read a JSON array of commands from stdin.");
+      process.exitCode = 1;
+      return;
+    }
+    const manLookup = useMan ? makeManLookup() : undefined;
+    try {
+      const reports = runBatch(input, { manLookup });
+      process.stdout.write(JSON.stringify(reports, null, 2) + "\n");
+    } catch (e) {
+      console.error((e as Error).message);
+      process.exitCode = 1;
+    }
     return;
   }
 

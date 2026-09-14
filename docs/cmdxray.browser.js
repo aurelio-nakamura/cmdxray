@@ -1657,6 +1657,30 @@ function analyzeDangers(parsed) {
       detail: "Recursively spawns processes until the machine runs out of resources and hangs."
     });
   }
+  {
+    const exprRe = /\$\{\{\s*([^}]*?)\s*\}\}/g;
+    const UNTRUSTED = /github\.head_ref|github\.event\.(issue|pull_request|discussion)\.(title|body)|github\.event\.pull_request\.head\.(ref|label)|github\.event\.pull_request\.head\.repo\.(default_branch|description|homepage)|github\.event\.comment\.body|github\.event\.review(_comment)?\.body|github\.event\.commits|github\.event\.head_commit\.(message|author)|github\.event\.pages|github\.event\.workflow_run\.(head_branch|display_title)/;
+    let m;
+    let sawExpr = false;
+    let sawUntrusted = false;
+    while ((m = exprRe.exec(raw)) !== null) {
+      sawExpr = true;
+      if (UNTRUSTED.test(m[1])) sawUntrusted = true;
+    }
+    if (sawUntrusted) {
+      add({
+        level: "danger",
+        title: "CI expression injection",
+        detail: 'A ${{ \u2026 }} expression that can carry attacker-controlled text (a PR/issue title or body, branch name, or commit message) is spliced into this command before the shell runs it \u2014 a crafted value can inject arbitrary commands. Pass it through an environment variable and quote it ("$VAR") instead of inlining it.'
+      });
+    } else if (sawExpr) {
+      add({
+        level: "caution",
+        title: "CI expression interpolation",
+        detail: 'A ${{ \u2026 }} template expression is substituted into this command by the CI runner before the shell parses it. If its value is user-influenced, pass it via an environment variable referenced as "$VAR" rather than inlining it, to avoid shell injection.'
+      });
+    }
+  }
   const seps = precedingSeparators(parsed);
   const commandSegs = parsed.segments.filter((s) => s.command);
   let sawDownloader = false;
@@ -2212,6 +2236,37 @@ function toJsonReport(res) {
     }))
   };
 }
+
+// src/batch.ts
+function commandOf(item) {
+  if (typeof item === "string") return item;
+  if (item && typeof item === "object" && typeof item.command === "string") {
+    return item.command;
+  }
+  return null;
+}
+function runBatch(input, opts = {}) {
+  let arr;
+  try {
+    arr = JSON.parse(input);
+  } catch (e) {
+    throw new Error("cmdxray --batch-json: stdin is not valid JSON \u2014 expected a JSON array of command strings. " + e.message);
+  }
+  if (!Array.isArray(arr)) {
+    throw new Error("cmdxray --batch-json: expected a JSON array of command strings on stdin, got " + (arr === null ? "null" : typeof arr) + ".");
+  }
+  return arr.map((item) => {
+    const command = commandOf(item);
+    if (command == null) {
+      return { command: null, error: "each item must be a command string, or an object with a string `command` field" };
+    }
+    try {
+      return toJsonReport(explain(command.trim(), opts));
+    } catch (e) {
+      return { command, error: e.message };
+    }
+  });
+}
 export {
   DB,
   EXAMPLES,
@@ -2223,5 +2278,6 @@ export {
   renderHtml,
   renderSvg,
   renderTerminal,
+  runBatch,
   toJsonReport
 };
