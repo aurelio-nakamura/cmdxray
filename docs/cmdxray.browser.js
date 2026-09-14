@@ -1232,6 +1232,266 @@ var DB = {
       B: "unconditionally rebuild every target",
       n: "dry run \u2014 print recipes without running them"
     }
+  },
+  pip: {
+    summary: "the Python package installer",
+    subcommands: {
+      install: "install packages",
+      uninstall: "remove packages",
+      list: "list installed packages",
+      show: "show details about an installed package",
+      freeze: "output installed packages in requirements format",
+      download: "download packages without installing",
+      wheel: "build wheel archives from requirements",
+      check: "verify installed packages have compatible dependencies"
+    },
+    takesValue: ["r", "-r", "--requirement", "e", "-e", "--editable", "-c", "--constraint", "--index-url", "-i", "--extra-index-url", "--target", "-t"],
+    flags: {
+      r: "install from the given requirements file",
+      e: "install a project in editable/development mode",
+      U: "upgrade packages to the newest available version",
+      "--requirement": "install from the given requirements file",
+      "--editable": "install a project in editable/development mode",
+      "--upgrade": "upgrade packages to the newest available version",
+      "--user": "install to the per-user site-packages directory",
+      "--no-cache-dir": "disable the wheel/download cache",
+      "--no-deps": "don't install package dependencies",
+      "--force-reinstall": "reinstall even if already up to date",
+      "--index-url": "base URL of the package index to use",
+      "--extra-index-url": "an additional package index to consult",
+      "--target": "install packages into this directory",
+      "--break-system-packages": "allow modifying an externally-managed environment"
+    }
+  },
+  python: {
+    summary: "the Python interpreter",
+    takesValue: ["m", "c", "-W", "-X"],
+    flags: {
+      m: "run the named library module as a script",
+      c: "run the given program passed as a string",
+      i: "drop into interactive mode after running the script",
+      u: "force stdout/stderr to be unbuffered",
+      O: "enable basic optimizations (assert stripped)",
+      B: "don't write .pyc bytecode files",
+      E: "ignore PYTHON* environment variables",
+      "--version": "print the Python version and exit"
+    }
+  },
+  go: {
+    summary: "the Go toolchain \u2014 build, test, and manage Go code",
+    subcommands: {
+      build: "compile packages and dependencies",
+      run: "compile and run a Go program",
+      test: "run package tests",
+      get: "add or update a dependency in go.mod",
+      install: "compile and install a package's binary",
+      mod: "manage the module's go.mod file",
+      fmt: "reformat source with gofmt",
+      vet: "report likely mistakes in packages",
+      generate: "run code generators marked with go:generate",
+      clean: "remove object and cached files"
+    },
+    takesValue: ["o", "-o", "-tags", "-ldflags", "-run", "-count"],
+    flags: {
+      o: "write the output binary to this path",
+      v: "print the names of packages as they compile",
+      "-race": "enable the data-race detector",
+      "-tags": "build tags to consider satisfied",
+      "-ldflags": "flags to pass to the linker",
+      "-run": "run only tests matching this regexp",
+      "-count": "run each test this many times (use 1 to disable caching)",
+      "-cover": "enable coverage analysis",
+      "-bench": "run benchmarks matching this regexp"
+    },
+    subFlags: {
+      mod: { init: "create a new go.mod", tidy: "add missing and remove unused modules", download: "download modules to the cache" }
+    },
+    subSubcommands: {
+      mod: {
+        init: "create a new go.mod in the current directory",
+        tidy: "add missing and remove unused module requirements",
+        download: "download modules to the local cache",
+        vendor: "copy dependencies into a vendor directory"
+      }
+    }
+  },
+  cargo: {
+    summary: "the Rust package manager and build tool",
+    subcommands: {
+      build: "compile the current package",
+      run: "build and run a binary target",
+      test: "run the package's tests",
+      check: "type-check without producing a binary",
+      add: "add a dependency to Cargo.toml",
+      remove: "remove a dependency from Cargo.toml",
+      update: "update dependencies in Cargo.lock",
+      publish: "upload the crate to a registry (crates.io)",
+      install: "build and install a Rust binary",
+      new: "create a new cargo package",
+      init: "create a cargo package in an existing directory",
+      clippy: "run the Clippy linter",
+      fmt: "format the code with rustfmt",
+      bench: "run benchmarks"
+    },
+    takesValue: ["-p", "--package", "--bin", "--example", "--features", "--target"],
+    flags: {
+      "--release": "build with optimizations (the release profile)",
+      "--all-features": "activate all Cargo features",
+      "--no-default-features": "do not activate the default feature set",
+      "--features": "space/comma-separated list of features to activate",
+      "--workspace": "run the command for every package in the workspace",
+      "--package": "run the command for this package only",
+      "--bin": "build/run only this binary target",
+      "--example": "build/run this example target",
+      "--target": "build for the given target triple",
+      "--locked": "require an up-to-date Cargo.lock and don't change it",
+      "--offline": "run without accessing the network"
+    }
+  },
+  gcloud: {
+    summary: "the Google Cloud CLI",
+    subcommands: {
+      compute: "manage Compute Engine resources",
+      storage: "manage Cloud Storage buckets and objects",
+      auth: "manage credentials and authorization",
+      config: "manage the local gcloud configuration",
+      projects: "manage Cloud projects",
+      container: "manage Kubernetes Engine (GKE) clusters",
+      functions: "manage Cloud Functions",
+      run: "manage Cloud Run services",
+      iam: "manage identity and access management",
+      app: "manage App Engine applications"
+    },
+    takesValue: ["--project", "--region", "--zone", "--account", "--format", "--configuration"],
+    flags: {
+      "--project": "the Cloud project ID to operate on",
+      "--region": "the region to operate in",
+      "--zone": "the zone to operate in",
+      "--account": "the account to run the command as",
+      "--format": "output format (json, yaml, table, value, \u2026)",
+      "--quiet": "disable interactive prompts, use defaults",
+      "--recursive": "recurse into directories (e.g. storage copies)",
+      "--impersonate-service-account": "run the command as this service account"
+    }
+  },
+  terraform: {
+    summary: "infrastructure-as-code provisioning tool",
+    subcommands: {
+      init: "initialize a working directory and download providers",
+      plan: "show the changes required to reach the desired state",
+      apply: "create or update infrastructure to match the config",
+      destroy: "remove all managed infrastructure",
+      validate: "check whether the configuration is syntactically valid",
+      fmt: "rewrite config files to the canonical format",
+      output: "read an output value from state",
+      state: "advanced state management",
+      import: "associate existing infrastructure with a resource",
+      workspace: "manage multiple named states"
+    },
+    takesValue: ["-var", "-var-file", "-target", "-state", "-out"],
+    flags: {
+      "-auto-approve": "skip the interactive approval prompt",
+      "-var": "set a single input variable (name=value)",
+      "-var-file": "load input variables from this file",
+      "-target": "limit the operation to this resource address",
+      "-out": "write the generated plan to this file",
+      "-no-color": "disable colored output",
+      "-json": "produce machine-readable JSON output",
+      "-upgrade": "upgrade provider/module versions during init"
+    }
+  },
+  gh: {
+    summary: "the official GitHub CLI",
+    subcommands: {
+      repo: "manage repositories (create, clone, view, fork)",
+      pr: "manage pull requests (create, checkout, merge, \u2026)",
+      issue: "manage issues (create, list, close, \u2026)",
+      release: "manage releases",
+      run: "view and manage GitHub Actions runs",
+      workflow: "view and manage GitHub Actions workflows",
+      auth: "authenticate gh and manage credentials",
+      api: "make an authenticated GitHub API request",
+      gist: "manage gists",
+      secret: "manage repository/organization secrets"
+    },
+    takesValue: ["-R", "--repo", "-t", "--title", "-b", "--body", "-F", "--field", "-f"],
+    flags: {
+      R: "operate on the given owner/repo instead of the current one",
+      "--repo": "operate on the given owner/repo instead of the current one",
+      "--title": "set the title (PR/issue/release)",
+      "--body": "set the body text (PR/issue/release)",
+      "--web": "open the relevant page in a browser",
+      "--json": "output selected fields as JSON",
+      "--jq": "filter JSON output with a jq expression"
+    },
+    subFlags: {
+      pr: { "-B": "the base branch to merge into", "-d": "delete the branch after merge", "-s": "squash the commits when merging" }
+    }
+  },
+  yarn: {
+    summary: "an alternative Node.js package manager",
+    subcommands: {
+      install: "install project dependencies",
+      add: "add a dependency to the project",
+      remove: "remove a dependency",
+      run: "run a script defined in package.json",
+      build: "run the build script",
+      test: "run the test script",
+      upgrade: "upgrade dependencies to their latest allowed versions",
+      dlx: "download and run a package one-off (Yarn Berry)",
+      why: "explain why a package is installed"
+    },
+    takesValue: [],
+    flags: {
+      D: "add to devDependencies",
+      "--dev": "add to devDependencies",
+      "--frozen-lockfile": "fail rather than update the lockfile (Yarn 1)",
+      "--immutable": "fail if the lockfile would change (Yarn Berry)",
+      "--production": "skip devDependencies",
+      "--global": "operate on the global package set"
+    }
+  },
+  pnpm: {
+    summary: "a fast, disk-efficient Node.js package manager",
+    subcommands: {
+      install: "install project dependencies",
+      add: "add a dependency to the project",
+      remove: "remove a dependency",
+      run: "run a script defined in package.json",
+      dlx: "download and run a package one-off",
+      exec: "run a command from a local dependency's binaries",
+      update: "update dependencies to newer allowed versions",
+      why: "show which packages depend on a given one"
+    },
+    takesValue: ["--filter", "-C", "--dir"],
+    flags: {
+      D: "add to devDependencies",
+      "--save-dev": "add to devDependencies",
+      "--frozen-lockfile": "fail rather than update the lockfile",
+      "--prod": "install only production dependencies",
+      "-r": "run the command in every workspace package (recursive)",
+      "--recursive": "run the command in every workspace package",
+      "--filter": "restrict the command to matching workspace packages",
+      "-g": "operate on globally-installed packages",
+      "--global": "operate on globally-installed packages"
+    }
+  },
+  zip: {
+    summary: "package and compress files into a .zip archive",
+    takesValue: ["x", "-x", "i", "-i"],
+    flags: {
+      r: "recurse into directories",
+      q: "quiet \u2014 suppress normal output",
+      v: "verbose output (or print version when used alone)",
+      "0": "store only \u2014 no compression",
+      "9": "compress better (slowest)",
+      e: "encrypt the archive, prompting for a password",
+      m: "move files into the zip \u2014 delete the originals after adding",
+      j: "junk paths \u2014 store just the file names, not directories",
+      u: "update \u2014 add new files and replace changed ones",
+      x: "exclude files matching the given pattern",
+      i: "include only files matching the given pattern"
+    }
   }
 };
 var GENERIC_FLAGS = {
@@ -1307,7 +1567,17 @@ var EXAMPLES = {
   df: ["df -h", "df -T -i"],
   ping: ["ping -c 4 host", "ping -i 2 host"],
   dd: ["dd if=/dev/zero of=out.img bs=1M count=10"],
-  make: ["make -j4 -C build", "make -f Makefile.dev -n"]
+  make: ["make -j4 -C build", "make -f Makefile.dev -n"],
+  pip: ["pip install -U -r requirements.txt", "pip install -e . --no-cache-dir"],
+  python: ["python -m venv .venv", "python -u -c 'print(1)'"],
+  go: ["go build -o bin/app -race ./...", "go test -run TestFoo -count 1 ./...", "go mod tidy"],
+  cargo: ["cargo build --release", "cargo test --workspace --all-features", "cargo add serde --features derive"],
+  gcloud: ["gcloud compute instances list --project my-proj --zone us-central1-a", "gcloud storage cp ./dist gs://my-bucket --recursive"],
+  terraform: ["terraform apply -auto-approve -var-file=prod.tfvars", "terraform plan -out plan.tfplan -no-color"],
+  gh: ["gh pr create --title 'fix' --body 'closes #1'", "gh repo clone owner/name", "gh api repos/owner/name --jq .stargazers_count"],
+  yarn: ["yarn add -D typescript", "yarn install --frozen-lockfile"],
+  pnpm: ["pnpm add -D vitest", "pnpm install --frozen-lockfile", "pnpm -r run build"],
+  zip: ["zip -r archive.zip src -x '*.log'", "zip -9 -j out.zip a.txt b.txt"]
 };
 
 // src/scripts.ts

@@ -39,6 +39,16 @@ So a good example is both documentation *and* a regression guard for that
 program — exactly the "simple positive control per program" this project aims
 for.
 
+**Negative controls.** cmdxray is a static, read-only explainer, so it must
+degrade *gracefully* on input it doesn't recognise — unknown programs, typo'd
+command names, bogus subcommands, and unrecognised flags. The
+[`test/negative-controls.test.js`](test/negative-controls.test.js) suite pins
+that contract: on malformed input cmdxray must never throw, never claim a
+curated (`db`) source for something it doesn't actually know, and never borrow a
+real command/flag's gloss for a typo. If you add behaviour that touches parsing
+or the fallback path, keep these green — a wrong-but-confident answer on a
+malformed shell line is worse than an honest "I don't know this one."
+
 ## Running the checks locally
 
 ```bash

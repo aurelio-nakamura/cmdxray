@@ -237,16 +237,20 @@ const report = toJsonReport(res);   // structured JSON report (AST + explanation
 
 ## Coverage & contributing
 
-The curated database currently covers ~35 common commands — `tar`, `grep`,
-`curl`, `wget`, `find`, `sed`, `awk`, `git`, `docker`, `kubectl`, `systemctl`,
-`apt`, `npm`, `ssh`, `scp`, `rsync`, `rm`, `cp`, `mv`, `mkdir`, `chmod`, `chown`,
-`ls`, `ps`, `kill`, `xargs`, `head`, `tail`, `sort`, `cut`, `tr`, `wc`, `cat`,
-`du`, `df`, `ping`, `dd`, `make` — several with subcommand awareness, and it's
-growing. Adding a command (or a subcommand) is a few lines in
-[`src/db.ts`](src/db.ts) — accurate, plain-English glosses welcome.
+The curated database currently covers ~65 common commands, including build and
+CI tooling — `tar`, `grep`, `curl`, `wget`, `find`, `sed`, `awk`, `git`,
+`docker`, `kubectl`, `systemctl`, `apt`, `npm`, `yarn`, `pnpm`, `pip`, `python`,
+`go`, `cargo`, `gh`, `aws`, `gcloud`, `terraform`, `ssh`, `scp`, `rsync`, `jq`,
+`zip`, `unzip`, `rm`, `cp`, `mv`, `mkdir`, `chmod`, `chown`, `ls`, `ps`, `kill`,
+`xargs`, `head`, `tail`, `sort`, `cut`, `tr`, `wc`, `cat`, `du`, `df`, `ping`,
+`dd`, `make` — many with subcommand awareness, and it's growing. Adding a
+command (or a subcommand) is a few lines in [`src/db.ts`](src/db.ts) — accurate,
+plain-English glosses welcome.
 
 Every command ships a **positive-control example** that the test suite runs
-against it, so accuracy stays pinned as the database grows. See
+against it, plus **negative-control** checks that pin graceful degradation on
+unknown programs, typo'd names and unrecognised flags — so accuracy stays
+pinned as the database grows. See
 [CONTRIBUTING.md](CONTRIBUTING.md) for the (short) workflow; CI runs the build +
 tests on Node 18/20/22 for every push and PR.
 
