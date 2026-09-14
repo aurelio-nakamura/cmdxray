@@ -1,5 +1,8 @@
 # cmdxray
 
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/aurelio-nakamura/cmdxray/badge)](https://scorecard.dev/viewer/?uri=github.com/aurelio-nakamura/cmdxray)
+[![npm](https://img.shields.io/npm/v/cmdxray)](https://www.npmjs.com/package/cmdxray)
+
 **X-ray any shell command — offline.** Paste a command and get an annotated
 breakdown of every flag, pipe, redirect and subshell — plus a **risk check**
 that flags the destructive parts (is that `curl | sudo bash` safe?) and a clean
