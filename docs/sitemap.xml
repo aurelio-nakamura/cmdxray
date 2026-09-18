@@ -41,6 +41,7 @@
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/go.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/gpg.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/grep.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/groupadd.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/gunzip.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/gzip.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/head.html</loc></url>
@@ -55,16 +56,22 @@
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/kill.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/killall.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/kubectl.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/ldd.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/less.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/ln.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/ls.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/lsblk.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/lscpu.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/lsmod.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/lsof.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/lspci.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/lsusb.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/make.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/man.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/md5sum.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/mkdir.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/mktemp.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/modprobe.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/mount.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/mv.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/nano.html</loc></url>
@@ -75,6 +82,7 @@
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/npm.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/nslookup.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/openssl.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/passwd.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/paste.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/ping.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/pip.html</loc></url>
@@ -88,18 +96,23 @@
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/rm.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/rsync.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/scp.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/screen.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/sed.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/seq.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/sftp.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/sha1sum.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/sha256sum.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/sha512sum.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/shuf.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/sleep.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/sort.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/split.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/ss.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/ssh.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/ssh-copy-id.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/ssh-keygen.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/stat.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/strings.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/su.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/sudo.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/systemctl.html</loc></url>
@@ -120,6 +133,8 @@
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/uniq.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/unzip.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/uptime.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/useradd.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/usermod.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/vim.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/watch.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/wc.html</loc></url>
@@ -130,5 +145,6 @@
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/xargs.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/xz.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/yarn.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/zcat.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/zip.html</loc></url>
 </urlset>
