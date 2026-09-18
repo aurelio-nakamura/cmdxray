@@ -1492,6 +1492,371 @@ var DB = {
       x: "exclude files matching the given pattern",
       i: "include only files matching the given pattern"
     }
+  },
+  sudo: {
+    summary: "run a command as another user (root by default)",
+    takesValue: ["u", "g", "p"],
+    flags: {
+      u: "run as this user instead of root",
+      g: "run as this group",
+      i: "start a fresh login shell as the target user",
+      s: "run a shell as the target user",
+      k: "invalidate the cached credentials (force a re-prompt next time)",
+      l: "list the commands you're allowed to run",
+      b: "run the command in the background",
+      E: "preserve your current environment variables",
+      H: "set HOME to the target user's home directory",
+      n: "non-interactive \u2014 fail rather than prompt for a password",
+      p: "use this custom password prompt"
+    }
+  },
+  touch: {
+    summary: "create empty files, or update a file's access/modification times",
+    takesValue: ["d", "t", "r"],
+    flags: {
+      a: "change only the access time",
+      m: "change only the modification time",
+      c: "don't create the file if it doesn't already exist",
+      r: "use this reference file's timestamps instead of now",
+      d: "set the time from a human-readable date string",
+      t: "set the time from a [[CC]YY]MMDDhhmm[.ss] stamp"
+    }
+  },
+  less: {
+    summary: "view text one screen at a time (a pager)",
+    takesValue: ["x"],
+    flags: {
+      N: "show line numbers",
+      S: "chop long lines instead of wrapping them",
+      i: "ignore case in searches",
+      F: "quit immediately if the content fits on one screen",
+      R: "pass ANSI color escape sequences through unchanged",
+      X: "don't clear the screen on exit",
+      x: "set the tab width in columns"
+    }
+  },
+  date: {
+    summary: "print or set the system date and time",
+    takesValue: ["d", "r", "s"],
+    flags: {
+      u: "use UTC instead of local time",
+      d: "print the given date string instead of the current time",
+      s: "set the system clock to the given time",
+      r: "show the last-modified time of the given file",
+      I: "output in ISO 8601 format",
+      R: "output in RFC 5322 format (for email headers)"
+    }
+  },
+  echo: {
+    summary: "print text to standard output",
+    takesValue: [],
+    flags: {
+      n: "don't print the trailing newline",
+      e: "interpret backslash escapes like \n and 	",
+      E: "don't interpret backslash escapes (the default)"
+    }
+  },
+  printf: {
+    summary: "format and print data using a printf-style template",
+    takesValue: [],
+    flags: {
+      v: "store the output in a shell variable instead of printing it"
+    }
+  },
+  base64: {
+    summary: "encode or decode data in Base64",
+    takesValue: ["w"],
+    flags: {
+      d: "decode Base64 input instead of encoding",
+      i: "ignore non-alphabet characters while decoding",
+      w: "wrap encoded lines after this many characters (0 = no wrap)"
+    }
+  },
+  env: {
+    summary: "show the environment, or run a command with a modified one",
+    takesValue: ["u", "C"],
+    flags: {
+      i: "start with a completely empty environment",
+      u: "remove this variable from the environment",
+      "0": "end each output line with NUL instead of a newline",
+      C: "change to this directory before running the command"
+    }
+  },
+  dig: {
+    summary: "query DNS name servers (a DNS lookup tool)",
+    takesValue: ["t", "p", "x", "b"],
+    flags: {
+      x: "do a reverse lookup on the given IP address",
+      t: "query for this record type (A, AAAA, MX, TXT, NS\u2026)",
+      p: "query the server on this port instead of 53",
+      "4": "use IPv4 transport only",
+      "6": "use IPv6 transport only",
+      b: "send the query from this source address"
+    }
+  },
+  watch: {
+    summary: "run a command repeatedly and watch its output update",
+    takesValue: ["n"],
+    flags: {
+      n: "set the interval between runs, in seconds",
+      d: "highlight what changed between updates",
+      t: "hide the header showing the interval and command",
+      g: "exit as soon as the output first changes",
+      b: "beep if the command exits non-zero",
+      e: "freeze and wait for a key if the command errors"
+    }
+  },
+  uname: {
+    summary: "print system and kernel information",
+    takesValue: [],
+    flags: {
+      a: "print everything",
+      s: "the kernel name",
+      r: "the kernel release",
+      v: "the kernel version",
+      m: "the machine hardware name",
+      n: "the network node hostname",
+      o: "the operating system",
+      p: "the processor type"
+    }
+  },
+  sha256sum: {
+    summary: "compute or verify SHA-256 checksums",
+    takesValue: ["c"],
+    flags: {
+      c: "read checksums from a file and verify them",
+      b: "read the files in binary mode",
+      t: "read the files in text mode",
+      "--quiet": "don't print OK for each file that verifies",
+      "--ignore-missing": "don't fail for files that are missing when verifying"
+    }
+  },
+  free: {
+    summary: "show memory and swap usage",
+    takesValue: ["s", "c"],
+    flags: {
+      h: "human-readable units (KiB/MiB/GiB)",
+      m: "show the amounts in mebibytes",
+      g: "show the amounts in gibibytes",
+      b: "show the amounts in bytes",
+      s: "refresh continuously every N seconds",
+      c: "stop after this many refreshes",
+      t: "add a line showing the totals"
+    }
+  },
+  top: {
+    summary: "show a live, sorted view of running processes",
+    takesValue: ["d", "p", "u", "n"],
+    flags: {
+      d: "set the refresh delay in seconds",
+      n: "exit after this many refreshes",
+      p: "monitor only these process IDs",
+      u: "show only this user's processes",
+      b: "batch mode \u2014 plain output for logs or pipes",
+      i: "hide idle processes"
+    }
+  },
+  mount: {
+    summary: "attach a filesystem to the directory tree (or list current mounts)",
+    takesValue: ["t", "o"],
+    flags: {
+      t: "specify the filesystem type (ext4, xfs, nfs\u2026)",
+      o: "pass a comma-separated list of mount options",
+      a: "mount everything listed in /etc/fstab",
+      r: "mount the filesystem read-only",
+      w: "mount the filesystem read-write",
+      v: "verbose output",
+      B: "bind-mount an existing directory somewhere else"
+    }
+  },
+  umount: {
+    summary: "detach (unmount) a mounted filesystem",
+    takesValue: ["t", "O"],
+    flags: {
+      a: "unmount every filesystem listed in /etc/mtab",
+      f: "force the unmount (useful for an unreachable NFS mount)",
+      l: "lazy unmount \u2014 detach now, clean up once it is no longer busy",
+      r: "if the unmount fails, remount the filesystem read-only instead",
+      n: "unmount without writing to /etc/mtab",
+      R: "recursively unmount the given directory and everything below it",
+      t: "act only on filesystems of the given type",
+      v: "verbose output",
+      O: "act only on filesystems with the given mount options"
+    }
+  },
+  which: {
+    summary: "locate a command \u2014 print the full path of the executable that would run",
+    flags: {
+      a: "print ALL matching executables on PATH, not just the first",
+      s: "print nothing; just set exit status (found / not found)"
+    }
+  },
+  whoami: {
+    summary: "print the effective user name of the current user",
+    flags: {}
+  },
+  hostname: {
+    summary: "show or set the system's host name",
+    flags: {
+      I: "print all network addresses of the host (space-separated)",
+      i: "print the host's IP address(es)",
+      f: "print the fully-qualified domain name (FQDN)",
+      s: "print the short host name (everything up to the first dot)",
+      d: "print the DNS domain name",
+      a: "print the host's alias names"
+    }
+  },
+  ifconfig: {
+    summary: "configure or display network-interface settings (legacy; prefer `ip`)",
+    flags: {
+      a: "show all interfaces, including ones that are down",
+      s: "short listing, like `netstat -i`",
+      v: "verbose \u2014 show extra error details"
+    }
+  },
+  "ssh-keygen": {
+    summary: "generate, manage and convert SSH authentication keys",
+    takesValue: ["t", "b", "C", "f", "N", "R", "F"],
+    flags: {
+      t: "type of key to create (ed25519, rsa, ecdsa)",
+      b: "number of bits in the key",
+      C: "comment to attach to the key (often your email)",
+      f: "key file to write to or read from",
+      N: "new passphrase for the key ('' means no passphrase)",
+      p: "change the passphrase of an existing private key",
+      y: "read a private key and print its public key",
+      l: "show the fingerprint of a key file",
+      R: "remove all keys for the given hostname from known_hosts",
+      F: "search known_hosts for the given hostname",
+      q: "quiet \u2014 suppress the usual output"
+    }
+  },
+  stat: {
+    summary: "display detailed file status \u2014 size, permissions, timestamps, inode",
+    takesValue: ["c", "--format", "--printf"],
+    flags: {
+      c: "use the given custom output format",
+      f: "report on the filesystem the file lives on, not the file",
+      t: "terse output \u2014 one line of raw numbers",
+      L: "follow symlinks \u2014 stat the file they point to",
+      "--format": "use the given output format (add a trailing newline)",
+      "--printf": "like --format, but interpret backslash escapes and add no newline",
+      "--dereference": "follow symlinks"
+    }
+  },
+  file: {
+    summary: "identify a file's type by inspecting its contents, not its name",
+    flags: {
+      b: "brief \u2014 don't print the file name, just the type",
+      i: "print a MIME type string instead of human-readable text",
+      z: "look inside compressed files",
+      L: "follow symlinks",
+      s: "read block/character special files (devices) too",
+      k: "keep going \u2014 report all matches, not just the first",
+      "--mime": "print the MIME type",
+      "--mime-type": "print only the MIME type (e.g. text/plain)"
+    }
+  },
+  basename: {
+    summary: "strip the directory (and optionally a suffix) from a path, leaving the file name",
+    takesValue: ["s"],
+    flags: {
+      a: "treat every argument as a name to strip (process multiple)",
+      s: "remove the given trailing suffix from the name",
+      z: "end each output line with NUL instead of a newline"
+    }
+  },
+  dirname: {
+    summary: "strip the last component from a path, leaving the directory portion",
+    flags: {
+      z: "end each output line with NUL instead of a newline"
+    }
+  },
+  realpath: {
+    summary: "resolve a path to its absolute, symlink-free canonical form",
+    takesValue: ["--relative-to", "--relative-base"],
+    flags: {
+      e: "require every path component to exist (error otherwise)",
+      m: "allow missing components \u2014 resolve the path anyway",
+      s: "don't expand symlinks (only collapse . and .. and slashes)",
+      z: "end each output line with NUL instead of a newline",
+      "--relative-to": "print the result relative to the given directory",
+      "--relative-base": "print relative when under this dir, else absolute"
+    }
+  },
+  md5sum: {
+    summary: "compute or verify MD5 checksums (128-bit; use sha256sum for security)",
+    flags: {
+      c: "read checksums from the given file(s) and verify them",
+      b: "read files in binary mode",
+      t: "read files in text mode (the default)",
+      "--check": "verify checksums listed in a file",
+      "--quiet": "with -c, don't print OK for each verified file",
+      "--ignore-missing": "with -c, don't fail over files that are missing",
+      "--status": "with -c, print nothing \u2014 signal the result via exit code"
+    }
+  },
+  tree: {
+    summary: "list directory contents as an indented tree",
+    takesValue: ["L", "P", "I"],
+    flags: {
+      L: "descend only this many directory levels deep",
+      a: "include hidden files (dotfiles)",
+      d: "list directories only",
+      f: "print the full path prefix for each entry",
+      i: "don't indent \u2014 print a flat list (pair with -f)",
+      h: "print sizes in human-readable form",
+      p: "show the type and permissions of each entry",
+      s: "print the size of each file",
+      P: "list only files matching the given pattern",
+      I: "do NOT list files matching the given pattern",
+      "--du": "show each directory's size as the sum of its contents",
+      "--dirsfirst": "list directories before files"
+    }
+  },
+  htop: {
+    summary: "interactive process and resource viewer (a friendlier `top`)",
+    takesValue: ["d", "u", "p", "s"],
+    flags: {
+      d: "delay between updates, in tenths of a second",
+      u: "show only processes owned by the given user",
+      p: "monitor only the given PIDs (comma-separated)",
+      s: "sort by the given column on startup",
+      t: "start in tree view",
+      C: "use a monochrome (no-color) scheme",
+      H: "hide user threads",
+      "--tree": "show processes as a parent/child tree"
+    }
+  },
+  pkill: {
+    summary: "signal processes selected by name or attribute \u2014 no PID needed",
+    takesValue: ["u", "U", "t"],
+    flags: {
+      f: "match against the full command line, not just the process name",
+      u: "match processes with the given effective user",
+      U: "match processes with the given real user",
+      x: "require an exact match of the process name",
+      n: "select only the newest matching process",
+      o: "select only the oldest matching process",
+      c: "print a count of matches instead of signalling them",
+      "9": "SIGKILL \u2014 force the matching processes to stop immediately",
+      "15": "SIGTERM \u2014 politely ask the matching processes to stop"
+    }
+  },
+  killall: {
+    summary: "kill all processes matching a given name",
+    takesValue: ["u", "s"],
+    flags: {
+      i: "ask for confirmation before killing each process",
+      u: "kill only processes owned by the given user",
+      v: "report whether each signal was sent successfully",
+      w: "wait for the killed processes to actually die",
+      e: "require an exact match for long process names",
+      I: "match the process name case-insensitively",
+      g: "kill the process group instead of the process",
+      s: "send the named signal instead of SIGTERM",
+      "9": "SIGKILL \u2014 force the matching processes to stop immediately"
+    }
   }
 };
 var GENERIC_FLAGS = {
@@ -1577,7 +1942,38 @@ var EXAMPLES = {
   gh: ["gh pr create --title 'fix' --body 'closes #1'", "gh repo clone owner/name", "gh api repos/owner/name --jq .stargazers_count"],
   yarn: ["yarn add -D typescript", "yarn install --frozen-lockfile"],
   pnpm: ["pnpm add -D vitest", "pnpm install --frozen-lockfile", "pnpm -r run build"],
-  zip: ["zip -r archive.zip src -x '*.log'", "zip -9 -j out.zip a.txt b.txt"]
+  zip: ["zip -r archive.zip src -x '*.log'", "zip -9 -j out.zip a.txt b.txt"],
+  sudo: ["sudo -u postgres psql", "sudo -i"],
+  touch: ["touch newfile.txt", "touch -c -m existing.log"],
+  less: ["less -N server.log", "less -S -R output.txt"],
+  date: ["date -u", 'date -d "next friday"'],
+  echo: ["echo -n hello", "echo -e 'a\\tb'"],
+  printf: ["printf '%s\\n' hello", 'printf "%-10s %d\\n" name 42'],
+  base64: ["base64 secret.bin", "base64 -d encoded.txt"],
+  env: ["env", "env -u DEBUG node app.js"],
+  dig: ["dig example.com", "dig -t MX example.com"],
+  watch: ["watch -n 10 date", "watch -d ls"],
+  uname: ["uname -a", "uname -srm"],
+  sha256sum: ["sha256sum file.iso", "sha256sum -c SHASUMS256.txt"],
+  free: ["free -h", "free -m -s 5"],
+  top: ["top", "top -b -n 1"],
+  mount: ["mount", "mount -t ext4 -o ro /dev/sdb1 /mnt"],
+  umount: ["umount /mnt", "umount -l /mnt/nfs", "umount -a -t nfs"],
+  which: ["which python", "which -a node"],
+  whoami: ["whoami"],
+  hostname: ["hostname", "hostname -I", "hostname -f"],
+  ifconfig: ["ifconfig", "ifconfig -a", "ifconfig eth0"],
+  "ssh-keygen": ["ssh-keygen -t ed25519 -C you@example.com", "ssh-keygen -R oldhost", "ssh-keygen -y -f id_rsa"],
+  stat: ["stat file.txt", "stat -L link", "stat -t /etc/hosts"],
+  file: ["file /bin/ls", "file -i document.pdf", "file -b image.png"],
+  basename: ["basename /usr/bin/sort", "basename -s .txt notes.txt", "basename -a src/a.c src/b.c"],
+  dirname: ["dirname /usr/bin/sort"],
+  realpath: ["realpath ./file.txt", "realpath -m /a/b/missing", "realpath --relative-to /home /home/user/x"],
+  md5sum: ["md5sum file.iso", "md5sum -c MD5SUMS"],
+  tree: ["tree -L 2 src", "tree -a -d", "tree -h --du"],
+  htop: ["htop", "htop -u postgres", "htop -t"],
+  pkill: ["pkill -f node", "pkill -9 chrome", "pkill -u www-data"],
+  killall: ["killall firefox", "killall -9 node", "killall -u alice"]
 };
 
 // src/scripts.ts
