@@ -12,8 +12,11 @@ No server. No upload. Nothing leaves your machine.
 
 **▶ [Try it in your browser](https://aurelio-nakamura.github.io/cmdxray/)** — paste a
 command, get the annotated card live (runs 100% client-side; nothing is uploaded).
-Or [browse the command reference](https://aurelio-nakamura.github.io/cmdxray/commands/) —
-plain-English "what does `tar -xzvf` do" pages for every curated command — or the
+Or browse the [command reference](https://aurelio-nakamura.github.io/cmdxray/commands/)
+(every curated command, flag by flag), the
+[**popular one-liners gallery**](https://aurelio-nakamura.github.io/cmdxray/recipes/) —
+`tar -xzvf`, `chmod 755`, `ps aux`, `grep -r`, `ss -tulpn` and other invocations
+people search most, each broken down — or the
 [**dangerous commands gallery**](https://aurelio-nakamura.github.io/cmdxray/danger/):
 `rm -rf /`, fork bombs, `curl | bash`, `dd` to disk and more, each explained with
 the safer alternative.

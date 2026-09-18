@@ -163,6 +163,31 @@
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/yarn.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/zcat.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/zip.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/recipes/</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/recipes/tar-xzvf.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/recipes/tar-czvf.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/recipes/chmod-755.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/recipes/chmod-x.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/recipes/curl-O.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/recipes/grep-r.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/recipes/ps-aux.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/recipes/find-name.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/recipes/ssh-i.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/recipes/rsync-avz.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/recipes/ln-s.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/recipes/kill-9.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/recipes/du-sh.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/recipes/ss-tulpn.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/recipes/netstat-tulpn.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/recipes/sed-i.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/recipes/awk-print-1.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/recipes/git-log-oneline.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/recipes/tail-f.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/recipes/lsof-i.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/recipes/scp.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/recipes/xargs-rm.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/recipes/docker-run-it.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/recipes/dd-image.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/danger/</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/danger/rm-rf-slash.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/danger/rm-rf-home.html</loc></url>
