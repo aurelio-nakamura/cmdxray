@@ -17,6 +17,13 @@ export interface Warning {
 const SHELLS = new Set(["sh", "bash", "zsh", "dash", "ksh", "fish", "ash"]);
 const DOWNLOADERS = new Set(["curl", "wget", "fetch"]);
 const DEVICE_RE = /^\/dev\/(sd[a-z]|nvme\d|hd[a-z]|vd[a-z]|disk\d|mmcblk\d)/;
+// A path that overwriting or truncating would break the running system.
+const SYSTEM_FILE_RE =
+  /^\/(etc\/(passwd|shadow|group|gshadow|fstab|hosts|sudoers|resolv\.conf|crontab)|boot\/|etc\/?$)/;
+// An operand that points at a system-critical root the caller almost never
+// means to recurse over destructively.
+const SYSTEM_ROOT_RE =
+  /^\/$|^\/\*$|^~\/?$|^\$HOME\/?$|^\/(bin|sbin|etc|usr|var|boot|lib|lib64|home|root|dev|sys|proc)\/?\*?$/;
 
 // The flags active on a segment, expanded so combined short flags (-rf) count
 // as individual flags (-r, -f) and long flags drop any =value.
@@ -232,7 +239,88 @@ export function analyzeDangers(parsed: ParsedCommand): Warning[] {
 
     // --- chown -R: recursive ownership change ---
     if (eff === "chown" && (flags.has("-R") || flags.has("--recursive"))) {
-      add({ level: "caution", title: "Recursive ownership change", detail: "Reassigns ownership of an entire tree — easy to lock yourself out of files if the path is wrong." });
+      const hitsRoot = ops.some((o) => SYSTEM_ROOT_RE.test(o));
+      add({
+        level: hitsRoot ? "danger" : "caution",
+        title: hitsRoot ? "Recursive chown of a system path" : "Recursive ownership change",
+        detail: hitsRoot
+          ? "Recursively rewrites ownership across a system-critical path — this breaks sudo, ssh and login and can lock everyone out of the machine."
+          : "Reassigns ownership of an entire tree — easy to lock yourself out of files if the path is wrong.",
+      });
+    }
+
+    // --- chmod -R on a system path: locks the system out of its own files ---
+    if (eff === "chmod" && (flags.has("-R") || flags.has("--recursive"))) {
+      const hitsRoot = ops.some((o) => SYSTEM_ROOT_RE.test(o));
+      if (hitsRoot) {
+        add({
+          level: "danger",
+          title: "Recursive chmod of a system path",
+          detail: "Recursively rewrites permissions across a system-critical path — stripping or over-granting bits here breaks sudo/ssh/boot and can render the machine unusable.",
+        });
+      }
+    }
+
+    // --- disk destroyers: shred / wipefs / blkdiscard on a whole device ---
+    if (eff === "shred" || eff === "wipefs" || eff === "blkdiscard") {
+      const toDevice = ops.some((o) => DEVICE_RE.test(o));
+      if (toDevice) {
+        add({
+          level: "danger",
+          title: "Destroys a disk device",
+          detail: `${eff} operates directly on a raw device — it irreversibly erases the partition table and/or every byte on that disk.`,
+        });
+      }
+    }
+
+    // --- kill/pkill targeting every process or PID 1 (init) ---
+    if (eff === "kill" || eff === "killall5") {
+      // `kill -9 -1` / `kill -1` (PID -1 = every process the user can signal),
+      // or signalling PID 1 (init/systemd) which can wedge the system.
+      const targetsAll = eff === "killall5" || ops.some((o) => o === "-1") ||
+        (seg.tokens.some((t) => t.kind === "operand" && t.text === "1") &&
+          (flags.has("-9") || flags.has("-KILL") || ops.includes("-KILL")));
+      const hitsInit = ops.includes("1");
+      if (targetsAll) {
+        add({
+          level: "danger",
+          title: "Signals every process / init",
+          detail: "Sends a signal to PID 1 or to every process the user owns (-1) — this can kill your session or bring the whole system down.",
+        });
+      } else if (hitsInit) {
+        add({
+          level: "caution",
+          title: "Signals PID 1 (init)",
+          detail: "PID 1 is the init/systemd process; signalling it can destabilise or halt the system.",
+        });
+      }
+    }
+
+    // --- find … -delete: mass deletion with no prompt ---
+    if (eff === "find") {
+      const hasDelete = seg.tokens.some((t) => t.text === "-delete");
+      const execRm =
+        seg.tokens.some((t) => t.text === "-exec" || t.text === "-execdir") &&
+        seg.tokens.some((t) => t.text === "rm");
+      if (hasDelete || execRm) {
+        const hitsRoot = ops.some((o) => SYSTEM_ROOT_RE.test(o) || o === "/");
+        add({
+          level: hitsRoot ? "danger" : "caution",
+          title: hitsRoot ? "Mass-deletes from a system path" : "Deletes every match, no prompt",
+          detail: hitsRoot
+            ? "find … -delete (or -exec rm) walks a system-critical path and removes everything it matches, with no confirmation and no undo."
+            : "find removes every file it matches with no confirmation — a too-broad pattern deletes far more than intended.",
+        });
+      }
+    }
+
+    // --- crontab -r: wipes all scheduled jobs (a keystroke away from -e) ---
+    if (eff === "crontab" && (flags.has("-r") || ops.includes("-r"))) {
+      add({
+        level: "caution",
+        title: "Removes all cron jobs",
+        detail: "crontab -r deletes the user's entire crontab with no confirmation — and sits right next to -e on the keyboard.",
+      });
     }
 
     // --- git: history / data-losing operations ---
@@ -267,6 +355,12 @@ export function analyzeDangers(parsed: ParsedCommand): Warning[] {
         const target = toks[i + 1]?.text ?? "";
         if (DEVICE_RE.test(target)) {
           add({ level: "danger", title: "Writes onto a disk device", detail: `Redirects output straight to ${target}, corrupting whatever is stored there.` });
+        } else if ((t.text === ">" || t.text === "&>") && SYSTEM_FILE_RE.test(target)) {
+          add({
+            level: "danger",
+            title: "Truncates a critical system file",
+            detail: `A single '>' onto ${target} empties it before anything is written — blanking this file can lock out logins or break booting.`,
+          });
         }
       }
     }
