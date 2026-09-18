@@ -21,7 +21,8 @@ const attr = (s) => esc(s).replace(/'/g, "&#39;");
 
 const cmds = Object.keys(DB).sort();
 
-function head(title, desc, canonical) {
+function head(title, desc, canonical, ogImage) {
+  const img = `${BASE}/${ogImage || "og-card.png"}`;
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -35,9 +36,11 @@ function head(title, desc, canonical) {
 <meta property="og:description" content="${attr(desc)}">
 <meta property="og:type" content="article">
 <meta property="og:url" content="${canonical}">
-<meta property="og:image" content="${BASE}/og-card.png">
+<meta property="og:image" content="${img}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="${BASE}/og-card.png">
+<meta name="twitter:image" content="${img}">
 <style>
 :root{--bg:#010409;--panel:#0d1117;--panel2:#161b22;--border:#30363d;--fg:#e6edf3;--muted:#8b949e;--accent:#79c0ff;--accent2:#7ee787;--font:ui-monospace,'SF Mono','JetBrains Mono','Fira Code',Menlo,Consolas,monospace}
 *{box-sizing:border-box}
@@ -226,7 +229,7 @@ mkdirSync(DOUT, { recursive: true });
     const title = `Is \`${d.label}\` dangerous? What it does & how to stay safe | cmdxray`;
     const desc = `${d.label}: ${d.tagline}. What the command does, why it is dangerous, the safer alternative, and every token explained — offline.`;
     const canonical = `${BASE}/danger/${d.slug}.html`;
-    let body = head(title, desc, canonical);
+    let body = head(title, desc, canonical, "danger-og-card.png");
     body += `<header><div class="wrap">
 <div class="crumb"><a href="${BASE}/">cmdxray</a> / <a href="./">dangerous commands</a> / ${esc(d.slug)}</div>
 <h1><code>${esc(d.label)}</code><span class="riskpill ${risk}">${risk === "danger" ? "danger" : "caution"}</span></h1>
@@ -255,7 +258,7 @@ mkdirSync(DOUT, { recursive: true });
   const title = `Dangerous shell commands, explained (and how to stay safe) | cmdxray`;
   const desc = `A curated gallery of genuinely destructive Linux/shell commands — rm -rf /, fork bombs, curl | bash, dd to disk, git push --force — each explained plain-English with the safer alternative and cmdxray's live risk analysis.`;
   const canonical = `${BASE}/danger/`;
-  let body = head(title, desc, canonical);
+  let body = head(title, desc, canonical, "danger-og-card.png");
   body += `<header><div class="wrap">
 <div class="crumb"><a href="${BASE}/">cmdxray</a> / dangerous commands</div>
 <h1>Dangerous shell commands, explained</h1>
