@@ -1857,6 +1857,195 @@ var DB = {
       s: "send the named signal instead of SIGTERM",
       "9": "SIGKILL \u2014 force the matching processes to stop immediately"
     }
+  },
+  sleep: {
+    summary: "pause for a given amount of time before returning",
+    flags: {
+      "--help": "show usage information and exit",
+      "--version": "print version information and exit"
+    }
+  },
+  timeout: {
+    summary: "run a command, killing it if it runs longer than a time limit",
+    takesValue: ["s", "k", "--signal", "--kill-after"],
+    flags: {
+      s: "send this signal instead of SIGTERM when time runs out",
+      k: "if still alive after this long, follow up with SIGKILL",
+      "--signal": "send this signal instead of SIGTERM when time runs out",
+      "--kill-after": "if still alive after this long, follow up with SIGKILL",
+      "--preserve-status": "exit with the command's own status, not 124",
+      "--foreground": "let the command read from the terminal (don't isolate it)",
+      v: "verbose \u2014 announce when the command is being signalled",
+      "--verbose": "verbose \u2014 announce when the command is being signalled"
+    }
+  },
+  seq: {
+    summary: "print a sequence of numbers, from FIRST to LAST",
+    takesValue: ["s", "f", "-w"],
+    flags: {
+      s: "use this string to separate numbers (default: newline)",
+      f: "format each number with this printf-style float format",
+      w: "pad numbers with leading zeros to equal width",
+      "--separator": "use this string to separate numbers",
+      "--format": "format each number with this printf-style float format",
+      "--equal-width": "pad numbers with leading zeros to equal width"
+    }
+  },
+  nohup: {
+    summary: "run a command immune to hangups, ignoring SIGHUP so it survives logout",
+    flags: {
+      "--help": "show usage information and exit",
+      "--version": "print version information and exit"
+    }
+  },
+  nslookup: {
+    summary: "query DNS name servers for a domain's records interactively or in one shot",
+    flags: {
+      "-type": "query this record type (e.g. -type=MX, -type=NS)",
+      "-query": "query this record type (alias of -type)",
+      "-debug": "show the full debugging detail of each response",
+      "-port": "query the server on this port instead of 53"
+    }
+  },
+  traceroute: {
+    summary: "trace the network hops (routers) packets take to reach a host",
+    takesValue: ["m", "q", "w", "p", "f"],
+    flags: {
+      n: "show numeric addresses; don't resolve hop names via DNS",
+      I: "use ICMP ECHO probes instead of UDP datagrams",
+      T: "use TCP SYN probes (handy through firewalls)",
+      m: "set the maximum number of hops (TTL) to probe",
+      q: "send this many probe packets per hop (default 3)",
+      w: "wait this many seconds for a reply before giving up",
+      p: "use this base destination port for probes",
+      f: "start probing from this first TTL (hop) instead of 1"
+    }
+  },
+  sha1sum: {
+    summary: "compute or check SHA-1 (160-bit) checksums of files",
+    flags: {
+      c: "read checksums from the files and verify them",
+      b: "read files in binary mode",
+      t: "read files in text mode (default)",
+      "--check": "read checksums from the files and verify them",
+      "--quiet": "when checking, don't print OK for each verified file",
+      "--status": "when checking, print nothing; signal result via exit code",
+      "--ignore-missing": "when checking, don't fail for missing files"
+    }
+  },
+  xz: {
+    summary: "compress or decompress files with the LZMA2 algorithm (.xz)",
+    takesValue: ["T", "--threads"],
+    flags: {
+      z: "compress (the default action)",
+      d: "decompress",
+      k: "keep \u2014 don't delete the input file after (de)compressing",
+      f: "force overwrite of the output and (de)compress even unusual files",
+      c: "write to standard output; leave files unchanged",
+      l: "list information about the compressed .xz file",
+      t: "test the integrity of the compressed file",
+      "9": "use the maximum compression level (slowest, smallest)",
+      "0": "use the fastest compression level (largest)",
+      e: "use extra effort for a slightly smaller file",
+      T: "use this many worker threads (0 = one per CPU)",
+      v: "verbose \u2014 show progress and stats",
+      "--threads": "use this many worker threads (0 = one per CPU)",
+      "--keep": "keep \u2014 don't delete the input file",
+      "--decompress": "decompress"
+    }
+  },
+  bzip2: {
+    summary: "compress or decompress files with the Burrows-Wheeler algorithm (.bz2)",
+    flags: {
+      z: "compress (the default action)",
+      d: "decompress",
+      k: "keep \u2014 don't delete the input file after (de)compressing",
+      f: "force overwrite of existing output files",
+      c: "write to standard output; leave files unchanged",
+      t: "test the integrity of the compressed file",
+      "9": "use the largest block size \u2014 best compression (default)",
+      "1": "use the smallest block size \u2014 least memory",
+      v: "verbose \u2014 show the compression ratio for each file",
+      "--decompress": "decompress",
+      "--keep": "keep \u2014 don't delete the input file"
+    }
+  },
+  paste: {
+    summary: "merge lines of files side by side, separated by tabs",
+    takesValue: ["d", "--delimiters"],
+    flags: {
+      d: "use these characters instead of tab to separate columns",
+      s: "paste one file at a time \u2014 its lines onto a single row",
+      z: "treat input and output lines as NUL-terminated",
+      "--delimiters": "use these characters instead of tab to separate columns",
+      "--serial": "paste one file at a time onto a single row"
+    }
+  },
+  comm: {
+    summary: "compare two SORTED files line by line, in three columns",
+    flags: {
+      "1": "suppress column 1 \u2014 lines unique to the first file",
+      "2": "suppress column 2 \u2014 lines unique to the second file",
+      "3": "suppress column 3 \u2014 lines common to both files",
+      i: "compare lines case-insensitively",
+      "--check-order": "fail if either input is not properly sorted",
+      "--nocheck-order": "do not check that the input is sorted",
+      "--total": "also print a summary count line"
+    }
+  },
+  nl: {
+    summary: "number the lines of a file as it writes them out",
+    takesValue: ["b", "w", "s", "v", "i"],
+    flags: {
+      b: "which lines to number: a=all, t=non-empty (default), n=none",
+      w: "use this column width for the line numbers",
+      s: "put this string between the number and the text",
+      v: "start numbering at this value",
+      i: "increment the line number by this step",
+      n: "number format: ln, rn (default), or rz (zero-padded)"
+    }
+  },
+  tac: {
+    summary: "concatenate and print files in reverse \u2014 last line first",
+    takesValue: ["s", "--separator"],
+    flags: {
+      s: "use this string as the line separator instead of newline",
+      r: "treat the separator as a regular expression",
+      b: "attach the separator before, rather than after, each line",
+      "--separator": "use this string as the line separator instead of newline",
+      "--before": "attach the separator before each line"
+    }
+  },
+  rev: {
+    summary: "reverse the order of characters on every line",
+    flags: {
+      "--help": "show usage information and exit",
+      "--version": "print version information and exit"
+    }
+  },
+  "ssh-copy-id": {
+    summary: "install your public SSH key into a remote host's authorized_keys",
+    takesValue: ["i", "p", "o"],
+    flags: {
+      i: "use this identity (public key) file",
+      p: "connect to this port on the remote host",
+      o: "pass this option through to ssh",
+      f: "force \u2014 copy the key even if it appears to be installed already",
+      n: "dry run \u2014 show which keys would be installed, but don't"
+    }
+  },
+  sftp: {
+    summary: "interactive secure file transfer over SSH",
+    takesValue: ["P", "i", "o", "b", "l"],
+    flags: {
+      P: "connect to this port on the remote host",
+      i: "use this identity (private key) file",
+      o: "pass this option through to ssh",
+      b: "read batch commands from this file (non-interactive)",
+      r: "recursively copy entire directories",
+      l: "limit the transfer bandwidth (Kbit/s)",
+      a: "resume (append to) partial transfers of existing files"
+    }
   }
 };
 var GENERIC_FLAGS = {
@@ -1973,7 +2162,23 @@ var EXAMPLES = {
   tree: ["tree -L 2 src", "tree -a -d", "tree -h --du"],
   htop: ["htop", "htop -u postgres", "htop -t"],
   pkill: ["pkill -f node", "pkill -9 chrome", "pkill -u www-data"],
-  killall: ["killall firefox", "killall -9 node", "killall -u alice"]
+  killall: ["killall firefox", "killall -9 node", "killall -u alice"],
+  sleep: ["sleep 5", "sleep 0.5"],
+  timeout: ["timeout 10 ./run.sh", "timeout -s KILL 30 python job.py", "timeout -k 5 60 make"],
+  seq: ["seq 1 10", "seq -s, 0 2 20", "seq -w 1 100"],
+  nohup: ["nohup ./server &", "nohup python app.py > out.log 2>&1 &"],
+  nslookup: ["nslookup example.com", "nslookup -type=MX example.com"],
+  traceroute: ["traceroute example.com", "traceroute -n -m 20 1.1.1.1", "traceroute -T -p 443 host"],
+  sha1sum: ["sha1sum file.iso", "sha1sum -c SHA1SUMS"],
+  xz: ["xz -9 big.log", "xz -dk archive.xz", "xz -T0 data.tar"],
+  bzip2: ["bzip2 -k big.log", "bzip2 -d archive.bz2"],
+  paste: ["paste a.txt b.txt", "paste -d, cols1 cols2", "paste -s -d, list.txt"],
+  comm: ["comm a.txt b.txt", "comm -12 sorted1 sorted2", "comm -23 a b"],
+  nl: ["nl file.txt", "nl -ba src.c", "nl -w4 -s': ' notes.txt"],
+  tac: ["tac log.txt", "tac -s, data.csv"],
+  rev: ["rev file.txt", "echo hello | rev"],
+  "ssh-copy-id": ["ssh-copy-id user@host", "ssh-copy-id -i ~/.ssh/id_ed25519.pub -p 2222 user@host"],
+  sftp: ["sftp user@host", "sftp -P 2222 -i key user@host", "sftp -b batch.txt user@host"]
 };
 
 // src/scripts.ts
@@ -2587,6 +2792,14 @@ function explain(raw, opts = {}) {
           if (cmdName === "find" && EXEC_FLAGS.has(tok.text)) nestedArmed = true;
           else if (takesValue(info, tok.text)) pendingValueFor = tok.text;
           break;
+        }
+        if (tok.text.includes("=")) {
+          const namePart = tok.text.split("=")[0];
+          const g2 = flagGloss(info, namePart);
+          if (g2) {
+            add(tok.text, g2, ti, "db");
+            break;
+          }
         }
         const body = tok.text.replace(/^-/, "");
         const letters = body.split("");

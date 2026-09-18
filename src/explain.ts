@@ -165,6 +165,15 @@ export function explain(raw: string, opts: ExplainOptions = {}): ExplainResult {
           else if (takesValue(info, tok.text)) pendingValueFor = tok.text;
           break;
         }
+        // 1b) single-dash long option with =value (nslookup -type=MX, java -Dk=v)
+        if (tok.text.includes("=")) {
+          const namePart = tok.text.split("=")[0];
+          const g2 = flagGloss(info, namePart);
+          if (g2) {
+            add(tok.text, g2, ti, "db");
+            break;
+          }
+        }
         const body = tok.text.replace(/^-/, "");
         const letters = body.split("");
         const known = (l: string) => flagGloss(info, l) ?? GENERIC_FLAGS[l];
