@@ -22,7 +22,33 @@ const attr = (s) => esc(s).replace(/'/g, "&#39;");
 
 const cmds = Object.keys(DB).sort();
 
-function head(title, desc, canonical, ogImage) {
+// Build one or more schema.org JSON-LD blocks. Helps search engines
+// understand each page (breadcrumb rich results + article typing).
+function jsonLd(...objs) {
+  return objs
+    .filter(Boolean)
+    .map(
+      (o) =>
+        `<script type="application/ld+json">${JSON.stringify(o).replace(/</g, "\\u003c")}</script>`
+    )
+    .join("\n");
+}
+
+// BreadcrumbList from an ordered [name, url] list (url null for the current page).
+function breadcrumbLd(items) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map(([name, url], i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name,
+      ...(url ? { item: url } : {}),
+    })),
+  };
+}
+
+function head(title, desc, canonical, ogImage, ld) {
   const img = `${BASE}/${ogImage || "og-card.png"}`;
   return `<!doctype html>
 <html lang="en">
@@ -100,6 +126,7 @@ footer{text-align:center;color:var(--muted);padding:36px 20px 60px;font-size:.86
 .riskpill.danger{background:rgba(248,81,73,.16);color:#ff7b72}
 .riskpill.caution{background:rgba(210,153,34,.16);color:#e3b341}
 </style>
+${ld || ""}
 </head>
 <body>`;
 }
@@ -143,7 +170,26 @@ for (const cmd of cmds) {
   const desc = `${cmd}: ${info.summary}. See every flag explained plain-English, with real ${cmd} command examples broken down token by token. Offline & private.`;
   const canonical = `${BASE}/commands/${cmd}.html`;
 
-  let body = head(title, desc, canonical);
+  const ld = jsonLd(
+    {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      headline: `What does ${cmd} do?`,
+      about: { "@type": "SoftwareApplication", name: cmd, applicationCategory: "Command-line utility" },
+      description: `${cmd}: ${info.summary}. Every flag explained plain-English with real examples broken down token by token.`,
+      url: canonical,
+      inLanguage: "en",
+      author: { "@type": "Person", name: "Aurelio Nakamura" },
+      publisher: { "@type": "Organization", name: "cmdxray" },
+      isAccessibleForFree: true,
+    },
+    breadcrumbLd([
+      ["cmdxray", `${BASE}/`],
+      ["commands", `${BASE}/commands/`],
+      [cmd, null],
+    ])
+  );
+  let body = head(title, desc, canonical, undefined, ld);
   body += `<header><div class="wrap">
 <div class="crumb"><a href="${BASE}/">cmdxray</a> / <a href="./">commands</a> / ${esc(cmd)}</div>
 <h1>What does <code>${esc(cmd)}</code> do?</h1>
@@ -201,7 +247,11 @@ for (const cmd of cmds) {
   const title = `Shell command explainer — every flag, offline | cmdxray`;
   const desc = `Browse plain-English explanations of ${cmds.length} common shell commands (${cmds.slice(0, 10).join(", ")}…). Every flag explained, real examples broken down, offline & private.`;
   const canonical = `${BASE}/commands/`;
-  let body = head(title, desc, canonical);
+  const ld = jsonLd(
+    { "@context": "https://schema.org", "@type": "CollectionPage", name: "Shell commands, explained", url: canonical, isPartOf: { "@type": "WebSite", name: "cmdxray", url: `${BASE}/` } },
+    breadcrumbLd([["cmdxray", `${BASE}/`], ["commands", null]])
+  );
+  let body = head(title, desc, canonical, undefined, ld);
   body += `<header><div class="wrap">
 <div class="crumb"><a href="${BASE}/">cmdxray</a> / commands</div>
 <h1>Shell commands, explained</h1>
@@ -231,7 +281,25 @@ mkdirSync(DOUT, { recursive: true });
     const title = `Is \`${d.label}\` dangerous? What it does & how to stay safe | cmdxray`;
     const desc = `${d.label}: ${d.tagline}. What the command does, why it is dangerous, the safer alternative, and every token explained — offline.`;
     const canonical = `${BASE}/danger/${d.slug}.html`;
-    let body = head(title, desc, canonical, "danger-og-card.png");
+    const ld = jsonLd(
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        headline: `Is ${d.label} dangerous?`,
+        description: `${d.label}: ${d.tagline}. What it does, why it's dangerous, and the safer alternative.`,
+        url: canonical,
+        inLanguage: "en",
+        author: { "@type": "Person", name: "Aurelio Nakamura" },
+        publisher: { "@type": "Organization", name: "cmdxray" },
+        isAccessibleForFree: true,
+      },
+      breadcrumbLd([
+        ["cmdxray", `${BASE}/`],
+        ["dangerous commands", `${BASE}/danger/`],
+        [d.label, null],
+      ])
+    );
+    let body = head(title, desc, canonical, "danger-og-card.png", ld);
     body += `<header><div class="wrap">
 <div class="crumb"><a href="${BASE}/">cmdxray</a> / <a href="./">dangerous commands</a> / ${esc(d.slug)}</div>
 <h1><code>${esc(d.label)}</code><span class="riskpill ${risk}">${risk === "danger" ? "danger" : "caution"}</span></h1>
@@ -260,7 +328,11 @@ mkdirSync(DOUT, { recursive: true });
   const title = `Dangerous shell commands, explained (and how to stay safe) | cmdxray`;
   const desc = `A curated gallery of genuinely destructive Linux/shell commands — rm -rf /, fork bombs, curl | bash, dd to disk, git push --force — each explained plain-English with the safer alternative and cmdxray's live risk analysis.`;
   const canonical = `${BASE}/danger/`;
-  let body = head(title, desc, canonical, "danger-og-card.png");
+  const ldDangerIdx = jsonLd(
+    { "@context": "https://schema.org", "@type": "CollectionPage", name: "Dangerous shell commands, explained", url: canonical, isPartOf: { "@type": "WebSite", name: "cmdxray", url: `${BASE}/` } },
+    breadcrumbLd([["cmdxray", `${BASE}/`], ["dangerous commands", null]])
+  );
+  let body = head(title, desc, canonical, "danger-og-card.png", ldDangerIdx);
   body += `<header><div class="wrap">
 <div class="crumb"><a href="${BASE}/">cmdxray</a> / dangerous commands</div>
 <h1>Dangerous shell commands, explained</h1>
@@ -289,7 +361,25 @@ mkdirSync(ROUT, { recursive: true });
     const title = `What does \`${r.cmd}\` do? Every flag explained | cmdxray`;
     const desc = `${r.cmd} — ${r.meaning} Every flag and argument explained token by token, offline. ${risk !== "none" ? "Includes a safety note." : ""}`.trim();
     const canonical = `${BASE}/recipes/${r.slug}.html`;
-    let body = head(title, desc, canonical);
+    const ld = jsonLd(
+      {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        headline: `What does ${r.cmd} do?`,
+        description: `${r.cmd} — ${r.meaning} Every flag and argument explained token by token.`,
+        url: canonical,
+        inLanguage: "en",
+        author: { "@type": "Person", name: "Aurelio Nakamura" },
+        publisher: { "@type": "Organization", name: "cmdxray" },
+        isAccessibleForFree: true,
+      },
+      breadcrumbLd([
+        ["cmdxray", `${BASE}/`],
+        ["one-liners", `${BASE}/recipes/`],
+        [r.cmd, null],
+      ])
+    );
+    let body = head(title, desc, canonical, undefined, ld);
     body += `<header><div class="wrap">
 <div class="crumb"><a href="${BASE}/">cmdxray</a> / <a href="./">one-liners</a> / ${esc(r.slug)}</div>
 <h1><code>${esc(r.cmd)}</code>${risk !== "none" ? `<span class="riskpill ${risk}">${risk === "danger" ? "danger" : "caution"}</span>` : ""}</h1>
@@ -315,7 +405,11 @@ mkdirSync(ROUT, { recursive: true });
   const title = `Popular shell one-liners, explained | cmdxray`;
   const desc = `What do tar -xzvf, chmod 755, ps aux, grep -r, ssh -i and other common command invocations actually do? Each explained plain-English, flag by flag, offline.`;
   const canonical = `${BASE}/recipes/`;
-  let body = head(title, desc, canonical);
+  const ldRecipeIdx = jsonLd(
+    { "@context": "https://schema.org", "@type": "CollectionPage", name: "Popular shell one-liners, explained", url: canonical, isPartOf: { "@type": "WebSite", name: "cmdxray", url: `${BASE}/` } },
+    breadcrumbLd([["cmdxray", `${BASE}/`], ["one-liners", null]])
+  );
+  let body = head(title, desc, canonical, undefined, ldRecipeIdx);
   body += `<header><div class="wrap">
 <div class="crumb"><a href="${BASE}/">cmdxray</a> / one-liners</div>
 <h1>Popular one-liners, explained</h1>
