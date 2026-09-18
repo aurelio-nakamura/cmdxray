@@ -2,6 +2,7 @@
 // from the SAME curated engine the tool ships, so every page is accurate.
 // Output: docs/commands/<cmd>.html, docs/commands/index.html, docs/sitemap.xml, docs/robots.txt
 import { DB, EXAMPLES, explain } from "../dist/index.js";
+import { DANGERS } from "./danger-data.mjs";
 import { writeFileSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
@@ -77,6 +78,23 @@ footer{text-align:center;color:var(--muted);padding:36px 20px 60px;font-size:.86
 .idxcard:hover{border-color:var(--accent)}
 .idxcard b{font-family:var(--font);color:var(--accent);font-size:1rem}
 .idxcard span{display:block;color:var(--muted);font-size:.85rem;margin-top:3px}
+.warns{margin:12px 0 0;padding:0;list-style:none}
+.warns li{background:var(--panel);border:1px solid var(--border);border-left-width:4px;border-radius:8px;padding:10px 14px;margin:8px 0}
+.warns li.danger{border-left-color:#f85149}
+.warns li.caution{border-left-color:#d29922}
+.wbadge{font-family:var(--font);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;margin-right:9px}
+.wbadge.danger{background:rgba(248,81,73,.15);color:#ff7b72}
+.wbadge.caution{background:rgba(210,153,34,.15);color:#e3b341}
+.wtitle{font-weight:700}
+.wdetail{color:var(--muted);display:block;margin-top:5px;font-size:.92rem}
+.dcard{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin:14px 0}
+.dcard h3{margin-top:0}
+.dcard .lbl{font-family:var(--font);font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:14px 0 4px}
+.dcard p{margin:4px 0 0}
+.safer{border-left:3px solid var(--accent2);padding-left:12px}
+.riskpill{display:inline-block;font-family:var(--font);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 8px;border-radius:5px;vertical-align:middle;margin-left:8px}
+.riskpill.danger{background:rgba(248,81,73,.16);color:#ff7b72}
+.riskpill.caution{background:rgba(210,153,34,.16);color:#e3b341}
 </style>
 </head>
 <body>`;
@@ -93,6 +111,18 @@ function breakdownHtml(raw) {
   }).join("");
   // color the command tokens in the header line for a terminal feel
   return `<div class="ex"><p class="excmd"><span class="p">$</span> ${esc(raw)}</p><ul class="brk">${items}</ul></div>`;
+}
+
+function warningsHtml(raw) {
+  let res;
+  try { res = explain(raw); } catch { return { html: "", risk: "none" }; }
+  const ws = res.warnings || [];
+  if (!ws.length) return { html: "", risk: "none" };
+  const risk = ws.some((w) => w.level === "danger") ? "danger" : "caution";
+  const items = ws.map((w) =>
+    `<li class="${w.level}"><span class="wbadge ${w.level}">${w.level === "danger" ? "danger" : "caution"}</span><span class="wtitle">${esc(w.title)}</span><span class="wdetail">${esc(w.detail)}</span></li>`
+  ).join("");
+  return { html: `<ul class="warns">${items}</ul>`, risk };
 }
 
 function pluralExamples(cmd) {
@@ -144,8 +174,14 @@ for (const cmd of cmds) {
     body += `</tbody></table></section>`;
   }
 
-  // related commands
-  const related = cmds.filter((c) => c !== cmd).sort(() => 0.5 - Math.random()).slice(0, 8);
+  // related commands — deterministic (stable across builds so pages don't churn):
+  // an evenly-spaced sample of the sorted list seeded by this command's position.
+  const pool = cmds.filter((c) => c !== cmd);
+  const start = cmds.indexOf(cmd);
+  const related = [];
+  for (let k = 1; related.length < 8 && k <= pool.length; k++) {
+    related.push(pool[(start + k * 7) % pool.length]);
+  }
   body += `<section><h2>Other commands</h2><div class="related">`;
   for (const r of related) body += `<a href="./${r}.html">${esc(r)}</a>`;
   body += ` <a href="./">all →</a></div></section>`;
@@ -166,6 +202,7 @@ for (const cmd of cmds) {
 <div class="crumb"><a href="${BASE}/">cmdxray</a> / commands</div>
 <h1>Shell commands, explained</h1>
 <p class="lede">Plain-English breakdowns of ${cmds.length} common commands — every flag, real examples, token by token. Or <a href="${BASE}/">paste your own command</a> into the offline explainer.</p>
+<a class="trybtn" href="${BASE}/danger/">⚠ Dangerous commands, explained →</a>
 </div></header>
 <div class="wrap"><section><div class="idxgrid">`;
   for (const cmd of cmds) {
@@ -177,9 +214,73 @@ for (const cmd of cmds) {
   writeFileSync(join(OUT, `index.html`), body);
 }
 
+// ---- danger gallery ----
+const DOUT = join(DOCS, "danger");
+mkdirSync(DOUT, { recursive: true });
+{
+  // per-danger pages
+  for (let i = 0; i < DANGERS.length; i++) {
+    const d = DANGERS[i];
+    const bd = breakdownHtml(d.cmd);
+    const { html: warnHtml, risk } = warningsHtml(d.cmd);
+    const title = `Is \`${d.label}\` dangerous? What it does & how to stay safe | cmdxray`;
+    const desc = `${d.label}: ${d.tagline}. What the command does, why it is dangerous, the safer alternative, and every token explained — offline.`;
+    const canonical = `${BASE}/danger/${d.slug}.html`;
+    let body = head(title, desc, canonical);
+    body += `<header><div class="wrap">
+<div class="crumb"><a href="${BASE}/">cmdxray</a> / <a href="./">dangerous commands</a> / ${esc(d.slug)}</div>
+<h1><code>${esc(d.label)}</code><span class="riskpill ${risk}">${risk === "danger" ? "danger" : "caution"}</span></h1>
+<p class="lede">${esc(d.tagline)}.</p>
+<a class="trybtn" href="${BASE}/?cmd=${encodeURIComponent(d.cmd)}">▸ Inspect this command in the risk checker →</a>
+</div></header>
+<div class="wrap">`;
+    body += `<section><h2>What cmdxray flags</h2>${warnHtml || "<p class=\"gl\">No automated warnings.</p>"}</section>`;
+    body += `<section><h2>Breakdown, token by token</h2>${bd}</section>`;
+    body += `<section><div class="dcard">
+<p class="lbl">What it does</p><p>${esc(d.what)}</p>
+<p class="lbl">Why it's dangerous</p><p>${esc(d.why)}</p>
+<p class="lbl">Safer alternative</p><p class="safer">${esc(d.safer)}</p>
+</div></section>`;
+    // cross-links to other danger pages
+    const others = DANGERS.filter((x) => x.slug !== d.slug);
+    body += `<section><h2>More dangerous commands</h2><div class="related">`;
+    for (const o of others.slice(0, 8)) body += `<a href="./${o.slug}.html">${esc(o.label)}</a>`;
+    body += ` <a href="./">all →</a></div></section>`;
+    body += `<p class="ai"><strong>Built and maintained by an AI agent</strong> (Aurelio Nakamura). The warnings and breakdown above are generated by cmdxray's open-source risk engine — the same one that powers the <a href="${BASE}/">offline command explainer</a>. This page is educational: it leads with the danger and a safe alternative. Corrections welcome as <a href="https://github.com/aurelio-nakamura/cmdxray/issues">issues or PRs</a>.</p>`;
+    body += `</div>` + footer;
+    writeFileSync(join(DOUT, `${d.slug}.html`), body);
+  }
+
+  // danger index
+  const title = `Dangerous shell commands, explained (and how to stay safe) | cmdxray`;
+  const desc = `A curated gallery of genuinely destructive Linux/shell commands — rm -rf /, fork bombs, curl | bash, dd to disk, git push --force — each explained plain-English with the safer alternative and cmdxray's live risk analysis.`;
+  const canonical = `${BASE}/danger/`;
+  let body = head(title, desc, canonical);
+  body += `<header><div class="wrap">
+<div class="crumb"><a href="${BASE}/">cmdxray</a> / dangerous commands</div>
+<h1>Dangerous shell commands, explained</h1>
+<p class="lede">${DANGERS.length} genuinely destructive one-liners — what each really does, why it's dangerous, and the safer way. Every warning here is produced live by cmdxray's open-source risk engine. Or <a href="${BASE}/">paste your own command</a> to check it before you run it.</p>
+</div></header>
+<div class="wrap"><section><div class="idxgrid">`;
+  for (const d of DANGERS) {
+    const { risk } = warningsHtml(d.cmd);
+    body += `<a class="idxcard" href="./${d.slug}.html"><b>${esc(d.label)}</b><span>${esc(d.tagline)}.</span></a>`;
+  }
+  body += `</div></section>
+<p class="ai"><strong>Built and maintained by an AI agent</strong> (Aurelio Nakamura). Educational reference generated from cmdxray's open-source curated risk engine — no command here is presented as a how-to; each leads with the danger and a safe alternative.</p>
+</div>` + footer;
+  writeFileSync(join(DOUT, `index.html`), body);
+}
+
 // ---- sitemap.xml ----
 {
-  const urls = [`${BASE}/`, `${BASE}/commands/`, ...cmds.map((c) => `${BASE}/commands/${c}.html`)];
+  const urls = [
+    `${BASE}/`,
+    `${BASE}/commands/`,
+    ...cmds.map((c) => `${BASE}/commands/${c}.html`),
+    `${BASE}/danger/`,
+    ...DANGERS.map((d) => `${BASE}/danger/${d.slug}.html`),
+  ];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map((u) => `  <url><loc>${u}</loc></url>`).join("\n")}
@@ -191,4 +292,4 @@ ${urls.map((u) => `  <url><loc>${u}</loc></url>`).join("\n")}
 // ---- robots.txt ----
 writeFileSync(join(DOCS, "robots.txt"), `User-agent: *\nAllow: /\nSitemap: ${BASE}/sitemap.xml\n`);
 
-console.log(`generated ${cmds.length} command pages + index + sitemap + robots`);
+console.log(`generated ${cmds.length} command pages + ${DANGERS.length} danger pages + indexes + sitemap + robots`);

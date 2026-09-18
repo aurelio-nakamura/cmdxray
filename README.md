@@ -13,7 +13,10 @@ No server. No upload. Nothing leaves your machine.
 **▶ [Try it in your browser](https://aurelio-nakamura.github.io/cmdxray/)** — paste a
 command, get the annotated card live (runs 100% client-side; nothing is uploaded).
 Or [browse the command reference](https://aurelio-nakamura.github.io/cmdxray/commands/) —
-plain-English "what does `tar -xzvf` do" pages for every curated command.
+plain-English "what does `tar -xzvf` do" pages for every curated command — or the
+[**dangerous commands gallery**](https://aurelio-nakamura.github.io/cmdxray/danger/):
+`rm -rf /`, fork bombs, `curl | bash`, `dd` to disk and more, each explained with
+the safer alternative.
 
 ![cmdxray annotating a command in the terminal](docs/demo.gif)
 
@@ -65,6 +68,10 @@ It catches `curl … | bash`, `rm -rf /` (and `--no-preserve-root`), `dd of=/dev
 `git reset --hard`, `sudo`, and more — and stays quiet on ordinary safe commands,
 so the warnings mean something. It runs in the terminal, on the shareable card,
 and in the live playground.
+
+See the [**dangerous commands gallery**](https://aurelio-nakamura.github.io/cmdxray/danger/)
+for worked examples of each — what the command does, why it's dangerous, and the
+safer alternative.
 
 ## Why cmdxray
 

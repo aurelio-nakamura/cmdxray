@@ -163,4 +163,20 @@
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/yarn.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/zcat.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/zip.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/danger/</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/danger/rm-rf-slash.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/danger/rm-rf-home.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/danger/fork-bomb.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/danger/curl-pipe-sudo-bash.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/danger/wget-pipe-sh.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/danger/dd-to-disk.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/danger/mkfs-on-disk.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/danger/chmod-777-recursive.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/danger/chown-recursive-root.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/danger/redirect-to-disk.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/danger/git-push-force.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/danger/git-reset-hard.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/danger/git-clean-fdx.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/danger/eval-remote.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/danger/shutdown-now.html</loc></url>
 </urlset>
