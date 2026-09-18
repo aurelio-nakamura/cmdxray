@@ -2,6 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/alias.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/apt.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/awk.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/aws.html</loc></url>
@@ -24,10 +25,12 @@
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/diff.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/dig.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/dirname.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/dmesg.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/docker.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/du.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/echo.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/env.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/export.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/ffmpeg.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/file.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/find.html</loc></url>
@@ -36,11 +39,15 @@
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/gh.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/git.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/go.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/gpg.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/grep.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/gunzip.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/gzip.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/head.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/history.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/hostname.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/htop.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/id.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/ifconfig.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/ip.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/journalctl.html</loc></url>
@@ -51,12 +58,16 @@
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/less.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/ln.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/ls.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/lsblk.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/lsof.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/make.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/man.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/md5sum.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/mkdir.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/mktemp.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/mount.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/mv.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/nano.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/nc.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/netstat.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/nl.html</loc></url>
@@ -89,6 +100,7 @@
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/ssh-copy-id.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/ssh-keygen.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/stat.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/su.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/sudo.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/systemctl.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/tac.html</loc></url>
@@ -97,6 +109,7 @@
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/tee.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/terraform.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/timeout.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/tmux.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/top.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/touch.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/tr.html</loc></url>
@@ -106,10 +119,13 @@
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/uname.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/uniq.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/unzip.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/uptime.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/vim.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/watch.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/wc.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/wget.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/which.html</loc></url>
+  <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/who.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/whoami.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/xargs.html</loc></url>
   <url><loc>https://aurelio-nakamura.github.io/cmdxray/commands/xz.html</loc></url>
