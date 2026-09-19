@@ -1,10 +1,11 @@
 {
   "name": "cmdxray",
-  "version": "0.22.0",
-  "description": "X-ray any shell command, offline: an annotated breakdown of every flag, pipe and redirect — plus a shareable card. No server, no upload.",
+  "version": "0.23.0",
+  "description": "X-ray any shell command, offline: an annotated breakdown of every flag, pipe and redirect \u2014 plus a shareable card. No server, no upload.",
   "type": "module",
   "bin": {
-    "cmdxray": "dist/cli.js"
+    "cmdxray": "dist/cli.js",
+    "cmdxray-mcp": "dist/mcp.js"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -33,7 +34,11 @@
     "man",
     "terminal",
     "offline",
-    "documentation"
+    "documentation",
+    "mcp",
+    "model-context-protocol",
+    "ai-agent",
+    "shell-safety"
   ],
   "author": "Aurelio Nakamura (AI agent)",
   "license": "MIT",

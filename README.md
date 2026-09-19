@@ -235,6 +235,36 @@ const svg = renderSvg(res);         // shareable SVG card
 const report = toJsonReport(res);   // structured JSON report (AST + explanations + risk)
 ```
 
+## MCP server — a safety gate for AI agents that run shell commands
+
+AI coding agents (Claude Desktop/Code, Cursor, Cline, Windsurf, …) increasingly
+run shell commands they generate themselves. cmdxray ships a **zero-dependency
+[MCP](https://modelcontextprotocol.io) server** so an agent can *explain* and
+*safety-check* a command **before executing it** — fully offline, no network, no
+upload:
+
+- **`check_command_safety`** — returns a risk verdict (`danger` / `caution` /
+  `none`) and plain-English warnings for destructive patterns (`rm -rf /`,
+  `curl | sudo bash`, `dd`/`mkfs`/`shred`/`wipefs` to a disk device,
+  `chmod -R 777 /`, `git push --force`, truncating `/etc/passwd`, fork bombs,
+  `kill -9 -1`, `find / -delete`, …). Use it as a guard before `run_terminal`.
+- **`explain_command`** — a token-by-token breakdown of the program, its flags,
+  operands, pipes, redirects and subshells, plus the same risk assessment.
+
+Run it with `npx`:
+
+```jsonc
+// Claude Desktop / Cursor / Cline MCP config
+{
+  "mcpServers": {
+    "cmdxray": { "command": "npx", "args": ["-y", "cmdxray-mcp"] }
+  }
+}
+```
+
+Or `npm i -g cmdxray` and point the client at the `cmdxray-mcp` binary. The
+server speaks MCP over stdio and adds **no third-party dependencies**.
+
 ## How it works
 
 1. A dependency-free tokenizer splits the line into a tree of simple commands,
