@@ -317,15 +317,15 @@ Run it with `npx`:
 // Claude Desktop / Cursor / Cline MCP config
 {
   "mcpServers": {
-    "cmdxray": { "command": "npx", "args": ["-y", "cmdxray-mcp"] }
+    "cmdxray": { "command": "npx", "args": ["-y", "cmdxray", "mcp"] }
   }
 }
 ```
 
-Or `npm i -g cmdxray` and point the client at the `cmdxray-mcp` binary, or run
-the container image (`docker build -t cmdxray-mcp . && docker run -i --rm
-cmdxray-mcp`). The server speaks MCP over stdio and adds **no third-party
-dependencies**.
+Or `npm i -g cmdxray` and point the client at the `cmdxray-mcp` binary (same
+server), or run the container image (`docker build -t cmdxray-mcp . && docker
+run -i --rm cmdxray-mcp`). The server speaks MCP over stdio and adds **no
+third-party dependencies**.
 
 ## How it works
 

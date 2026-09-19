@@ -20,6 +20,7 @@ Usage:
   cmdxray --json <command...>     emit a structured JSON report to stdout
   cmdxray --batch-json            read a JSON array of commands from stdin, emit a JSON array of reports
   cmdxray lint <files...>         scan scripts/CI files for dangerous commands (CI/pre-commit gate)
+  cmdxray mcp                     start the MCP server over stdio (for AI agents; see README)
   cmdxray -o card.svg <command>   write the SVG card to a file
   cmdxray --share <command...>    print a shareable link to the breakdown
   echo "<cmd>" | cmdxray          read the command from stdin
@@ -190,6 +191,14 @@ function main() {
   // `cmdxray lint …` dispatches to the file/CI scanner (a distinct subcommand).
   if (argv[0] === "lint") {
     runLint(argv.slice(1));
+    return;
+  }
+
+  // `cmdxray mcp` starts the MCP server over stdio. This makes the robust
+  // `npx -y cmdxray mcp` invocation work (npx resolves the *package* cmdxray,
+  // then runs this bin) — the `cmdxray-mcp` bin still works for global installs.
+  if (argv[0] === "mcp") {
+    void import("./mcp.js"); // its main() starts the stdio server on load
     return;
   }
 

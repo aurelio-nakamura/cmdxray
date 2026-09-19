@@ -8,9 +8,11 @@ import { dirname, join } from "node:path";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SERVER = join(__dirname, "..", "dist", "mcp.js");
 
-function runSession(messages) {
+const CLI = join(__dirname, "..", "dist", "cli.js");
+
+function runSession(messages, cmd = [SERVER]) {
   return new Promise((resolve, reject) => {
-    const child = spawn("node", [SERVER], { stdio: ["pipe", "pipe", "inherit"] });
+    const child = spawn("node", cmd, { stdio: ["pipe", "pipe", "inherit"] });
     let buf = "";
     const out = [];
     child.stdout.on("data", (d) => {
@@ -90,6 +92,22 @@ test("MCP server: lint_script scans a whole script and flags every risky line", 
 
   // empty/whitespace script: friendly error
   assert.equal(by(4).result.isError, true);
+});
+
+test("`cmdxray mcp` subcommand starts the same stdio server (npx -y cmdxray mcp path)", async () => {
+  const out = await runSession(
+    [
+      { jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-06-18" } },
+      { jsonrpc: "2.0", id: 2, method: "tools/list" },
+    ],
+    [CLI, "mcp"],
+  );
+  const by = (id) => out.find((m) => m.id === id);
+  assert.equal(by(1).result.serverInfo.name, "cmdxray");
+  assert.deepEqual(
+    by(2).result.tools.map((t) => t.name).sort(),
+    ["check_command_safety", "explain_command", "lint_script"],
+  );
 });
 
 test("MCP server: unknown method returns -32601; bad args are handled", async () => {
