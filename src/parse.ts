@@ -34,7 +34,7 @@ export interface ParsedCommand {
   segments: Segment[]; // simple commands split by pipes/operators
 }
 
-const OPERATORS = new Set(["&&", "||", ";", "&"]);
+const OPERATORS = new Set(["&&", "||", ";", ";;", "&"]);
 const REDIRECTS = new Set([">", ">>", "<", "<<", "2>", "2>>", "&>", ">&", "2>&1"]);
 
 // Split a raw line into raw words, honoring single/double quotes and simple
@@ -88,6 +88,43 @@ function lex(raw: string): { text: string; quoted: boolean }[] {
       cur += ")";
       continue;
     }
+    if (c === "\\" && i + 1 < raw.length) {
+      // Backslash escapes the next character (e.g. `find … -exec … \;`), so it
+      // is a literal part of the current word, never an operator separator.
+      started = true;
+      cur += c + raw[i + 1];
+      i += 2;
+      continue;
+    }
+    // Unquoted shell control operators that START a new simple command, even
+    // when glued to adjacent words (`a|b`, `x;y`, `a&&b`). A real shell always
+    // treats these as separators regardless of surrounding whitespace, so the
+    // safety gate must too (`curl x|sudo bash` is just as dangerous as the
+    // spaced form). We deliberately do NOT split on `<`/`>` here, to keep
+    // redirect tokens like `2>&1`, `&>file` and `foo>bar` intact.
+    if (c === "|") {
+      push();
+      if (raw[i + 1] === "|") { words.push({ text: "||", quoted: false }); i += 2; }
+      else if (raw[i + 1] === "&") { words.push({ text: "|&", quoted: false }); i += 2; }
+      else { words.push({ text: "|", quoted: false }); i += 1; }
+      continue;
+    }
+    if (c === ";") {
+      push();
+      if (raw[i + 1] === ";") { words.push({ text: ";;", quoted: false }); i += 2; }
+      else { words.push({ text: ";", quoted: false }); i += 1; }
+      continue;
+    }
+    if (c === "&") {
+      // `&&` = AND-list separator. A lone `&` = background operator. But `&`
+      // also appears inside redirects (`2>&1`, `>&2`, `&>file`) — leave those
+      // glued: if the current word already ends in `>`/`<`, or this `&` begins
+      // an `&>`/`&>>` redirect, treat `&` as an ordinary character.
+      if (raw[i + 1] === "&") { push(); words.push({ text: "&&", quoted: false }); i += 2; continue; }
+      const partOfRedirect = /[<>]$/.test(cur) || raw[i + 1] === ">";
+      if (!partOfRedirect) { push(); words.push({ text: "&", quoted: false }); i += 1; continue; }
+      // else: fall through and treat `&` as a normal character (redirect)
+    }
     started = true;
     cur += c;
     i++;
@@ -101,7 +138,7 @@ function classifyWord(
   expectCommand: boolean,
 ): Token {
   const { text, quoted } = word;
-  if (!quoted && text === "|") return { text, kind: "pipe" };
+  if (!quoted && (text === "|" || text === "|&")) return { text, kind: "pipe" };
   if (!quoted && OPERATORS.has(text)) return { text, kind: "operator" };
   if (!quoted && REDIRECTS.has(text)) return { text, kind: "redirect" };
   if (!quoted && /^\$\(.*\)$/.test(text)) return { text, kind: "subshell", quoted };

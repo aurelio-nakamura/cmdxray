@@ -1,5 +1,5 @@
 // src/parse.ts
-var OPERATORS = /* @__PURE__ */ new Set(["&&", "||", ";", "&"]);
+var OPERATORS = /* @__PURE__ */ new Set(["&&", "||", ";", ";;", "&"]);
 var REDIRECTS = /* @__PURE__ */ new Set([">", ">>", "<", "<<", "2>", "2>>", "&>", ">&", "2>&1"]);
 function lex(raw) {
   const words = [];
@@ -45,6 +45,52 @@ function lex(raw) {
       cur += ")";
       continue;
     }
+    if (c === "\\" && i + 1 < raw.length) {
+      started = true;
+      cur += c + raw[i + 1];
+      i += 2;
+      continue;
+    }
+    if (c === "|") {
+      push();
+      if (raw[i + 1] === "|") {
+        words.push({ text: "||", quoted: false });
+        i += 2;
+      } else if (raw[i + 1] === "&") {
+        words.push({ text: "|&", quoted: false });
+        i += 2;
+      } else {
+        words.push({ text: "|", quoted: false });
+        i += 1;
+      }
+      continue;
+    }
+    if (c === ";") {
+      push();
+      if (raw[i + 1] === ";") {
+        words.push({ text: ";;", quoted: false });
+        i += 2;
+      } else {
+        words.push({ text: ";", quoted: false });
+        i += 1;
+      }
+      continue;
+    }
+    if (c === "&") {
+      if (raw[i + 1] === "&") {
+        push();
+        words.push({ text: "&&", quoted: false });
+        i += 2;
+        continue;
+      }
+      const partOfRedirect = /[<>]$/.test(cur) || raw[i + 1] === ">";
+      if (!partOfRedirect) {
+        push();
+        words.push({ text: "&", quoted: false });
+        i += 1;
+        continue;
+      }
+    }
     started = true;
     cur += c;
     i++;
@@ -54,7 +100,7 @@ function lex(raw) {
 }
 function classifyWord(word, expectCommand) {
   const { text, quoted } = word;
-  if (!quoted && text === "|") return { text, kind: "pipe" };
+  if (!quoted && (text === "|" || text === "|&")) return { text, kind: "pipe" };
   if (!quoted && OPERATORS.has(text)) return { text, kind: "operator" };
   if (!quoted && REDIRECTS.has(text)) return { text, kind: "redirect" };
   if (!quoted && /^\$\(.*\)$/.test(text)) return { text, kind: "subshell", quoted };
