@@ -8,7 +8,8 @@
  * generated, it can ask cmdxray whether that command is destructive
  * (rm -rf /, curl | sudo bash, dd/mkfs/shred to a disk device, chmod -R 777 /,
  * truncating /etc/passwd, fork bombs, ...) and get a plain-English verdict — a
- * safety gate for agentic shell execution.
+ * safety gate for agentic shell execution. `lint_script` extends this to a whole
+ * multi-line script, flagging every risky line before it is written or run.
  *
  * Everything runs locally and offline: no network, no upload, and (true to
  * cmdxray) no third-party dependencies. It speaks MCP over newline-delimited
@@ -18,6 +19,7 @@ import { createInterface } from "node:readline";
 import { createRequire } from "node:module";
 import { explain } from "./explain.js";
 import { toJsonReport, type JsonReport } from "./json.js";
+import { lintText, type LintFinding } from "./lint.js";
 
 const require = createRequire(import.meta.url);
 let VERSION = "0.0.0";
@@ -76,6 +78,28 @@ function safetyToMarkdown(report: JsonReport): string {
   return out.join("\n");
 }
 
+function scriptToMarkdown(findings: LintFinding[]): string {
+  const danger = findings.filter((f) => f.level === "danger").length;
+  const caution = findings.filter((f) => f.level === "caution").length;
+  const out: string[] = [];
+  if (findings.length === 0) {
+    out.push(
+      "✅ No known destructive patterns detected in this script. (Absence of a warning is not a guarantee — still review anything you don't fully understand.)",
+    );
+    return out.join("\n");
+  }
+  out.push(
+    danger
+      ? `🛑 DANGER — this script contains ${danger} destructive command(s)${caution ? ` and ${caution} risky one(s)` : ""}. Do NOT run it without explicit human review.`
+      : `⚠️ CAUTION — this script contains ${caution} risky command(s); review before running.`,
+  );
+  out.push("");
+  for (const f of findings) {
+    out.push(`- line ${f.line} ${f.level === "danger" ? "🛑" : "⚠️"} ${f.title}: \`${f.command}\` — ${f.detail}`);
+  }
+  return out.join("\n");
+}
+
 const TOOLS = [
   {
     name: "explain_command",
@@ -109,6 +133,22 @@ const TOOLS = [
       additionalProperties: false,
     },
   },
+  {
+    name: "lint_script",
+    description:
+      "Safety-scan a WHOLE shell script (multi-line text) BEFORE writing or running it. Runs the same offline danger engine as check_command_safety over every logical line (comments/shebangs stripped, backslash-continuations joined) and returns each destructive or risky command with its line number: rm -rf /, curl | sudo bash, dd/mkfs/shred to a device, chmod -R 777 /, git push --force, CI ${{ }}-injection sinks, and more. Ideal for an AI agent to pre-scan a script it just generated before saving or executing it.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        script: {
+          type: "string",
+          description: "The full shell-script text to scan (may contain many lines).",
+        },
+      },
+      required: ["script"],
+      additionalProperties: false,
+    },
+  },
 ];
 
 interface ToolResult {
@@ -118,6 +158,29 @@ interface ToolResult {
 }
 
 function callTool(name: string, args: Record<string, unknown>): ToolResult {
+  if (name === "lint_script") {
+    const script = typeof args.script === "string" ? args.script : "";
+    if (!script.trim()) {
+      return {
+        content: [{ type: "text", text: "Error: `script` (a non-empty string) is required." }],
+        isError: true,
+      };
+    }
+    const findings = lintText(script, "<script>");
+    return {
+      content: [{ type: "text", text: scriptToMarkdown(findings) }],
+      structuredContent: {
+        risk: findings.some((f) => f.level === "danger")
+          ? "danger"
+          : findings.some((f) => f.level === "caution")
+            ? "caution"
+            : "none",
+        danger: findings.filter((f) => f.level === "danger").length,
+        caution: findings.filter((f) => f.level === "caution").length,
+        findings,
+      },
+    };
+  }
   const command = typeof args.command === "string" ? args.command : "";
   if (!command.trim()) {
     return {

