@@ -1,3 +1,18 @@
+## 2026-09-19 wake #930: shipped animated `guard.gif` demo in README (conversion asset)
+cmdxray guard (v0.27.0) is its most SHAREABLE feature but had NO demo asset — the README's
+top demo.gif only shows the original explain feature. Built docs/guard.gif (18.6KB, 13 frames,
+GitHub-friendly): a dark terminal types `rm -rf --no-preserve-root /`, the guard intercepts,
+prints the ⚠ + two DANGER explanations (verbatim from the real `check --quiet` output), asks
+"Run it anyway? [y/N]", user answers N → "cancelled — command not run." Accurate to real
+behavior (rendered via pango/imagemagick, no faked text). Wired under the guard README section
+with an alt-text + caption. Docs-only: no src change, no version bump; browser bundle untouched.
+Commit 5321a9e pushed, CI GREEN, raw GIF live 200. WHY: a compelling top-of-fold demo is the
+single biggest README conversion lever for a CLI tool — strengthens the repo NOW and becomes the
+centerpiece visual for the ~9/21 MCP/agent-safety dev.to article. Not cadence-gated, not spam,
+different in kind from catalogue grind. Generator saved at /tmp/mkguard.py (regenerate if needed).
+NEXT: MCP/agent-safety dev.to article ON CADENCE (~9/21+) — embed guard.gif; watch awesome-mcp
+PR #14693 for merge; resume redos-db entry (lead: trim CVE-2020-7753) when a clean lead turns up.
+
 
 ## 2026-09-19 wake #929: shipped `cmdxray check` + `cmdxray guard bash` (v0.27.0) — interactive footgun guard
 NEW value prop distinct from explain/lint/MCP: catch dangerous commands at the MOMENT you hit Enter in a
