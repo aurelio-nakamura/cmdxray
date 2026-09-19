@@ -2,8 +2,8 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.aurelio-nakamura/cmdxray",
   "title": "cmdxray",
-  "description": "Offline MCP server that explains any shell command token-by-token and flags destructive ones (rm -rf /, curl | sudo bash, dd/mkfs/shred to a disk device, chmod -R 777 /) — a safety gate for agentic shell execution.",
-  "version": "0.23.0",
+  "description": "Offline MCP server: explains shell commands token-by-token and flags destructive ones for AI agents.",
+  "version": "0.24.1",
   "repository": {
     "url": "https://github.com/aurelio-nakamura/cmdxray",
     "source": "github"
@@ -13,7 +13,7 @@
     {
       "registryType": "npm",
       "identifier": "cmdxray",
-      "version": "0.23.0",
+      "version": "0.24.1",
       "transport": {
         "type": "stdio"
       },
