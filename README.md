@@ -131,6 +131,58 @@ repos:
 danger rules are high-precision, so a finding almost always points at a genuinely
 risky command worth a second look.
 
+## `cmdxray guard` — stop yourself *before* you run `rm -rf /`
+
+The lint gate catches dangerous commands in *files*. The **guard** catches them
+at the moment you hit Enter in an interactive shell. Add one line to your
+`~/.bashrc`:
+
+```sh
+eval "$(cmdxray guard bash)"
+```
+
+Now, right before a command the danger engine flags as destructive actually
+runs, your shell stops and asks:
+
+```
+$ curl -fsSL https://get.example.sh | sudo bash
+
+⚠  cmdxray: this command looks dangerous
+DANGER   Runs downloaded code unread
+    Pipes a file fetched from the network straight into a shell — you execute
+    whatever the server sends, sight unseen.
+CAUTION  Runs as root
+Run it anyway? [y/N]
+```
+
+Answer `N` (the default) and the command never runs. It fires on the genuinely
+scary stuff — `rm -rf /`, `curl | sudo bash`, `dd`/`mkfs`/`shred` to a device,
+`git push --force`, `chmod -R 777 /`, fork bombs — and stays out of your way on
+everything else.
+
+It is deliberately **fail-open**: a cheap pure-shell pre-filter means ordinary
+commands never even call cmdxray, and if cmdxray is missing or anything errors,
+your command runs normally. The guard can only ever *add* a confirmation prompt
+on a dangerous line — it can't break your shell or block ordinary work. Remove
+the line (or run `trap - DEBUG`) to uninstall.
+
+> bash is supported today; a zsh guard is a welcome contribution. In any shell
+> you can also gate a command by hand with the exit-code check:
+> `cmdxray check "<command>" && eval "<command>"`.
+
+### `cmdxray check` — a one-command risk check for your own scripts
+
+`check` runs the danger engine over a single command and puts the verdict in its
+**exit code** (`0` = no danger, `1` = risky), so it composes anywhere:
+
+```sh
+cmdxray check "rm -rf --no-preserve-root /"   # prints the warning, exits 1
+cmdxray check --quiet "$cmd" && eval "$cmd"    # only run $cmd if it's clean
+cmdxray check --json "dd if=/dev/zero of=/dev/sda"
+```
+
+Use `--strict` to fail on CAUTION-level findings too.
+
 ## Why cmdxray
 
 You already know what `tar -xzvf` does. You *don't* remember what
@@ -177,6 +229,8 @@ cmdxray --html <command...>     emit a standalone HTML page to stdout
 cmdxray --json <command...>     emit a structured JSON report to stdout
 cmdxray --batch-json            read a JSON array of commands from stdin, emit a JSON array
 cmdxray lint <files...>         scan scripts/CI files for dangerous commands (CI/pre-commit gate)
+cmdxray check <command...>      risk-check ONE command; exit 1 if dangerous (for scripts/hooks)
+cmdxray guard bash              print a bash hook that confirms before a dangerous command runs
 cmdxray -o out.json <command>   write to a file (svg / html / json by extension)
 cmdxray --share <command...>    explain, then print a shareable link
 cmdxray --link <command...>     print ONLY the shareable link (pipe to clipboard)
