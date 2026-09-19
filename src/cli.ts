@@ -6,6 +6,7 @@ import { explain } from "./explain.js";
 import { renderTerminal, renderSvg, renderHtml } from "./card.js";
 import { toJsonReport } from "./json.js";
 import { runBatch } from "./batch.js";
+import { lintFiles, lintStdin, type LintResult, type LintFinding } from "./lint.js";
 import type { CommandInfo } from "./db.js";
 
 const PLAYGROUND = "https://aurelio-nakamura.github.io/cmdxray/";
@@ -18,6 +19,7 @@ Usage:
   cmdxray --html <command...>     emit a standalone HTML page to stdout
   cmdxray --json <command...>     emit a structured JSON report to stdout
   cmdxray --batch-json            read a JSON array of commands from stdin, emit a JSON array of reports
+  cmdxray lint <files...>         scan scripts/CI files for dangerous commands (CI/pre-commit gate)
   cmdxray -o card.svg <command>   write the SVG card to a file
   cmdxray --share <command...>    print a shareable link to the breakdown
   echo "<cmd>" | cmdxray          read the command from stdin
@@ -36,6 +38,51 @@ Options:
   -h, --help   show this help
 
 Everything runs locally. Nothing is uploaded.`;
+
+const LINT_HELP = `cmdxray lint — scan files for dangerous shell commands, offline.
+
+Usage:
+  cmdxray lint <file...>       scan one or more files (shell scripts, Dockerfiles,
+                               CI YAML, Makefiles, git hooks) for risky commands
+  cmdxray lint                 read a script from stdin
+  cat deploy.sh | cmdxray lint
+
+Options:
+  --strict       exit non-zero on CAUTION findings too (default: only DANGER fails)
+  --exit-zero    always exit 0 (report findings without failing the build)
+  --json         emit findings as JSON (for programmatic use)
+  --quiet        print only findings (suppress the "scanned N files" summary)
+  --no-color     disable ANSI colors
+  --no-man       do not consult local man pages for unknown commands
+
+Exit codes: 0 = clean, 1 = risky command found, 2 = usage error.
+A heuristic, line-oriented scan powered by cmdxray's offline danger engine
+(rm -rf /, curl | sudo bash, chmod -R 777 /, dd/mkfs/shred to a device,
+git push --force, CI \${{ }} injection sinks, ...). Everything runs locally.`;
+
+// Render lint findings for the terminal. Groups nothing — prints one line per
+// finding in the familiar `file:line: LEVEL  title` linter format, followed by
+// the offending command and a one-line reason, so it reads well in CI logs.
+function renderLint(result: LintResult, color: boolean, quiet: boolean): string {
+  const c = (code: string, s: string) => (color ? `\u001b[${code}m${s}\u001b[0m` : s);
+  const out: string[] = [];
+  for (const f of result.findings) {
+    const loc = f.line > 0 ? `${f.file}:${f.line}` : f.file;
+    const badge = f.level === "danger" ? c("1;31", "DANGER ") : c("1;33", "CAUTION");
+    out.push(`${c("1", loc)}: ${badge}  ${f.title}`);
+    if (f.command) out.push(`    ${c("2", "> " + f.command)}`);
+    out.push(`    ${c("2", f.detail)}`);
+    out.push("");
+  }
+  if (!quiet) {
+    const parts = [`scanned ${result.filesScanned} file(s), ${result.linesScanned} command line(s)`];
+    if (result.danger) parts.push(c("1;31", `${result.danger} danger`));
+    if (result.caution) parts.push(c("1;33", `${result.caution} caution`));
+    if (!result.danger && !result.caution) parts.push(c("1;32", "no risky commands found"));
+    out.push(parts.join(" — "));
+  }
+  return out.join("\n");
+}
 
 // Build a shareable playground deep-link for a command. The link opens the
 // in-browser playground with the command pre-loaded and its card rendered.
@@ -74,8 +121,78 @@ function makeManLookup(): (cmd: string) => CommandInfo | null {
   };
 }
 
+// `cmdxray lint …` — a self-contained subcommand (a CI / pre-commit gate).
+// Kept separate from the explainer's argv handling because its trailing tokens
+// are FILE PATHS, not a command line to be explained.
+function runLint(rest: string[]): void {
+  let json = false;
+  let strict = false;
+  let exitZero = false;
+  let quiet = false;
+  let color = true;
+  let useMan = true;
+  const files: string[] = [];
+  for (const a of rest) {
+    if (a === "-h" || a === "--help") {
+      console.log(LINT_HELP);
+      return;
+    } else if (a === "--json") json = true;
+    else if (a === "--strict") strict = true;
+    else if (a === "--exit-zero") exitZero = true;
+    else if (a === "--quiet") quiet = true;
+    else if (a === "--no-color") color = false;
+    else if (a === "--no-man") useMan = false;
+    else if (a.startsWith("-") && a !== "-") {
+      console.error(`cmdxray lint: unknown option ${a}\n`);
+      console.error(LINT_HELP);
+      process.exitCode = 2;
+      return;
+    } else files.push(a);
+  }
+
+  const manLookup = useMan ? makeManLookup() : undefined;
+  let result: LintResult;
+  if (files.length === 0) {
+    if (process.stdin.isTTY) {
+      console.error("cmdxray lint: no files given and nothing on stdin.\n");
+      console.error(LINT_HELP);
+      process.exitCode = 2;
+      return;
+    }
+    let input = "";
+    try {
+      input = readFileSync(0, "utf8");
+    } catch {
+      console.error("cmdxray lint: could not read from stdin.");
+      process.exitCode = 2;
+      return;
+    }
+    result = lintStdin(input, { manLookup });
+  } else {
+    result = lintFiles(files, { manLookup });
+  }
+
+  if (json) {
+    process.stdout.write(JSON.stringify(result, null, 2) + "\n");
+  } else {
+    const rendered = renderLint(result, color, quiet);
+    if (rendered) process.stdout.write(rendered + "\n");
+  }
+
+  if (exitZero) return;
+  const failed = strict ? result.danger + result.caution : result.danger;
+  if (failed > 0) process.exitCode = 1;
+}
+
 function main() {
   const argv = process.argv.slice(2);
+
+  // `cmdxray lint …` dispatches to the file/CI scanner (a distinct subcommand).
+  if (argv[0] === "lint") {
+    runLint(argv.slice(1));
+    return;
+  }
+
   let format: "term" | "svg" | "html" | "json" = "term";
   let outFile: string | null = null;
   let color: boolean = true;

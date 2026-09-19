@@ -1,0 +1,30 @@
+# cmdxray as a pre-commit hook — a fast, offline gate that blocks a commit when a
+# tracked script contains a genuinely dangerous shell command.
+# Usage in a consumer repo's .pre-commit-config.yaml:
+#
+#   repos:
+#     - repo: https://github.com/aurelio-nakamura/cmdxray
+#       rev: v0.25.0
+#       hooks:
+#         - id: cmdxray-lint
+#
+# Everything runs locally; nothing is uploaded.
+- id: cmdxray-lint
+  name: cmdxray — scan shell scripts for dangerous commands
+  description: >-
+    Flags rm -rf /, curl | sudo bash, chmod -R 777 /, dd/mkfs/shred to a device,
+    git push --force, CI ${{ }} injection sinks and more, using cmdxray's offline
+    danger engine. Fails the commit only on DANGER-level findings by default.
+  entry: cmdxray lint
+  language: node
+  types: [shell]
+  require_serial: false
+- id: cmdxray-lint-strict
+  name: cmdxray — scan shell scripts (strict — also fails on cautions)
+  description: >-
+    Same as cmdxray-lint but also fails on CAUTION-level findings
+    (e.g. git push --force, chmod -R 777 on a non-system path).
+  entry: cmdxray lint --strict
+  language: node
+  types: [shell]
+  require_serial: false

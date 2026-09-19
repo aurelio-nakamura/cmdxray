@@ -77,6 +77,60 @@ See the [**dangerous commands gallery**](https://aurelio-nakamura.github.io/cmdx
 for worked examples of each — what the command does, why it's dangerous, and the
 safer alternative.
 
+## `cmdxray lint` — a CI / pre-commit gate for dangerous commands
+
+The same danger engine can scan **files** — shell scripts, Dockerfiles, CI YAML
+`run:` steps, Makefiles, git hooks — and fail the build when something genuinely
+destructive slips in. It's offline, dependency-free, and reports in the familiar
+`file:line` linter format:
+
+```sh
+cmdxray lint deploy.sh scripts/*.sh
+cat install.sh | cmdxray lint            # or read from stdin
+```
+
+```
+deploy.sh:6: DANGER   Runs downloaded code unread
+    > curl https://example.com/install.sh | sudo bash
+    Pipes a file fetched from the network straight into a shell — you run whatever the server sends, unread.
+deploy.sh:8: DANGER   Wipes critical paths, no prompt
+    > rm -rf --no-preserve-root /
+    Recursively force-deletes system-critical paths with no confirmation and no recovery.
+
+scanned 1 file(s), 9 command line(s) — 2 danger
+```
+
+Exit code is `1` when a **DANGER** is found (so it fails CI), `0` when clean.
+`--strict` also fails on cautions (`git push --force`, `chmod -R 777`), `--exit-zero`
+reports without failing, and `--json` emits machine-readable findings. It even
+catches [GitHub Actions `${{ }}` injection sinks](#cicd-template-injection-detection)
+in workflow `run:` blocks.
+
+### As a pre-commit hook
+
+Add cmdxray to any repo's `.pre-commit-config.yaml` — no install step, it builds
+from source:
+
+```yaml
+repos:
+  - repo: https://github.com/aurelio-nakamura/cmdxray
+    rev: v0.25.0
+    hooks:
+      - id: cmdxray-lint          # fails only on DANGER
+      # - id: cmdxray-lint-strict # also fails on CAUTION
+```
+
+### In GitHub Actions
+
+```yaml
+- name: Scan scripts for dangerous commands
+  run: npx -y cmdxray lint $(git ls-files '*.sh')
+```
+
+`lint` is a **heuristic, line-oriented** scan (not a full shell parser), but the
+danger rules are high-precision, so a finding almost always points at a genuinely
+risky command worth a second look.
+
 ## Why cmdxray
 
 You already know what `tar -xzvf` does. You *don't* remember what
@@ -122,6 +176,7 @@ cmdxray --svg <command...>      emit a shareable SVG card to stdout
 cmdxray --html <command...>     emit a standalone HTML page to stdout
 cmdxray --json <command...>     emit a structured JSON report to stdout
 cmdxray --batch-json            read a JSON array of commands from stdin, emit a JSON array
+cmdxray lint <files...>         scan scripts/CI files for dangerous commands (CI/pre-commit gate)
 cmdxray -o out.json <command>   write to a file (svg / html / json by extension)
 cmdxray --share <command...>    explain, then print a shareable link
 cmdxray --link <command...>     print ONLY the shareable link (pipe to clipboard)
