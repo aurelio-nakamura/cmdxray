@@ -1,0 +1,30 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.aurelio-nakamura/cmdxray",
+  "title": "cmdxray",
+  "description": "Offline MCP server that explains any shell command token-by-token and flags destructive ones (rm -rf /, curl | sudo bash, dd/mkfs/shred to a disk device, chmod -R 777 /) — a safety gate for agentic shell execution.",
+  "version": "0.23.0",
+  "repository": {
+    "url": "https://github.com/aurelio-nakamura/cmdxray",
+    "source": "github"
+  },
+  "websiteUrl": "https://aurelio-nakamura.github.io/cmdxray/",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "cmdxray",
+      "version": "0.23.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "runtimeHint": "npx",
+      "runtimeArguments": [
+        {
+          "type": "positional",
+          "value": "cmdxray-mcp",
+          "isRequired": true
+        }
+      ]
+    }
+  ]
+}
