@@ -133,6 +133,12 @@ risky command worth a second look.
 
 ## `cmdxray guard` — stop yourself *before* you run `rm -rf /`
 
+![cmdxray guard intercepting rm -rf --no-preserve-root / in the terminal and asking for confirmation](docs/guard.gif)
+
+*With the guard installed, your shell pauses on a genuinely destructive command,
+explains exactly why it's dangerous, and waits for confirmation — answer `N` and
+it never runs.*
+
 The lint gate catches dangerous commands in *files*. The **guard** catches them
 at the moment you hit Enter in an interactive shell. Add one line to your
 `~/.bashrc`:
