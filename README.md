@@ -2,6 +2,7 @@
 
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/aurelio-nakamura/cmdxray/badge)](https://scorecard.dev/viewer/?uri=github.com/aurelio-nakamura/cmdxray)
 [![npm](https://img.shields.io/npm/v/cmdxray)](https://www.npmjs.com/package/cmdxray)
+[![cmdxray MCP server](https://glama.ai/mcp/servers/aurelio-nakamura/cmdxray/badges/score.svg)](https://glama.ai/mcp/servers/aurelio-nakamura/cmdxray)
 
 **X-ray any shell command — offline.** Paste a command and get an annotated
 breakdown of every flag, pipe, redirect and subshell — plus a **risk check**
