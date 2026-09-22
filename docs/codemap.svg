@@ -1,0 +1,315 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="946" viewBox="0 0 900 946" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif" role="img" aria-label="Codebase map of cmdxray">
+<style>
+    .bg{fill:#ffffff}
+    .frame{stroke:#d0d7de}
+    .dir{fill:none;stroke:#d0d7de;stroke-width:1}
+    .fileln{stroke:#ffffff;stroke-opacity:.55}
+    .txt{fill:#57606a}
+    .title{fill:#1f2328}
+    .mark{fill:#57606a}
+    @media (prefers-color-scheme: dark){
+      .bg{fill:#0d1117}
+      .frame{stroke:#30363d}
+      .dir{stroke:#30363d}
+      .fileln{stroke:#0d1117;stroke-opacity:.5}
+      .txt{fill:#8b949e}
+      .title{fill:#e6edf3}
+      .mark{fill:#8b949e}
+    }
+  </style>
+<title>cmdxray — codebase map by repocarto</title>
+<rect class="bg frame" x="0.5" y="0.5" width="899" height="945" rx="8"/>
+<circle class="dir" cx="532.5" cy="677.0" r="15.1"/>
+<circle class="dir" cx="356.2" cy="382.7" r="299.6"/>
+<circle class="dir" cx="477.4" cy="744.4" r="50.4"/>
+<circle class="dir" cx="715.3" cy="640.4" r="105.9"/>
+<circle class="dir" cx="589.5" cy="766.7" r="54.4"/>
+<circle class="dir" cx="532.5" cy="677.0" r="13.9"/>
+<circle class="dir" cx="227.2" cy="375.0" r="156.3"/>
+<circle class="dir" cx="420.7" cy="176.4" r="66.8"/>
+<circle class="dir" cx="583.0" cy="396.2" r="66.4"/>
+<circle class="fileln" cx="526.2" cy="671.2" r="4.9" fill="#cb171e" stroke-width="0.5"><title>.github/workflows/ci.yml</title></circle>
+<circle class="fileln" cx="537.7" cy="671.2" r="5.6" fill="#cb171e" stroke-width="0.5"><title>.github/workflows/release.yml</title></circle>
+<circle class="fileln" cx="531.0" cy="683.1" r="6.9" fill="#cb171e" stroke-width="1"><title>.github/workflows/scorecard.yml</title></circle>
+<circle class="fileln" cx="551.3" cy="677.0" r="2.1" fill="#f14e32" stroke-width="0.5"><title>.gitignore</title></circle>
+<circle class="fileln" cx="553.8" cy="685.2" r="5.8" fill="#cb171e" stroke-width="0.5"><title>.pre-commit-hooks.yaml</title></circle>
+<circle class="fileln" cx="556.1" cy="666.4" r="8.5" fill="#6a9fb5" stroke-width="1"><title>CONTRIBUTING.md</title></circle>
+<circle class="fileln" cx="546.1" cy="695.4" r="5.9" fill="#384d54" stroke-width="0.5"><title>Dockerfile</title></circle>
+<circle class="fileln" cx="534.8" cy="698.7" r="4.9" fill="#cccccc" stroke-width="0.5"><title>LICENSE</title></circle>
+<circle class="fileln" cx="521.3" cy="699.0" r="7.5" fill="#6a9fb5" stroke-width="1"><title>PLAN.md</title></circle>
+<circle class="fileln" cx="583.5" cy="684.2" r="21.4" fill="#6a9fb5" stroke-width="1"><title>README.md</title></circle>
+<circle class="fileln" cx="543.7" cy="657.4" r="5.5" fill="#6a9fb5" stroke-width="0.5"><title>SECURITY.md</title></circle>
+<circle class="fileln" cx="388.6" cy="315.5" r="1.5" fill="#9aa0a6" stroke-width="0.5"><title>docs/0668ee34eecb4e1acc0dc265a730fd72.txt</title></circle>
+<circle class="fileln" cx="462.7" cy="315.5" r="66.5" fill="#f1e05a" stroke-width="1"><title>docs/cmdxray.browser.js</title></circle>
+<circle class="fileln" cx="216.7" cy="375.8" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/alias.html</title></circle>
+<circle class="fileln" cx="237.8" cy="375.8" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/apt.html</title></circle>
+<circle class="fileln" cx="227.2" cy="394.1" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/at.html</title></circle>
+<circle class="fileln" cx="227.2" cy="357.6" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/awk.html</title></circle>
+<circle class="fileln" cx="248.3" cy="357.6" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/aws.html</title></circle>
+<circle class="fileln" cx="206.1" cy="394.1" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/base64.html</title></circle>
+<circle class="fileln" cx="248.3" cy="394.1" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/basename.html</title></circle>
+<circle class="fileln" cx="206.1" cy="357.6" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/bzip2.html</title></circle>
+<circle class="fileln" cx="258.9" cy="375.8" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/cargo.html</title></circle>
+<circle class="fileln" cx="195.6" cy="375.8" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/cat.html</title></circle>
+<circle class="fileln" cx="269.5" cy="394.1" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/chattr.html</title></circle>
+<circle class="fileln" cx="185.0" cy="357.6" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/chmod.html</title></circle>
+<circle class="fileln" cx="237.8" cy="339.3" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/chown.html</title></circle>
+<circle class="fileln" cx="237.8" cy="412.4" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/column.html</title></circle>
+<circle class="fileln" cx="216.7" cy="339.3" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/comm.html</title></circle>
+<circle class="fileln" cx="216.7" cy="412.4" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/cp.html</title></circle>
+<circle class="fileln" cx="227.2" cy="321.0" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/crontab.html</title></circle>
+<circle class="fileln" cx="227.2" cy="430.7" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/curl.html</title></circle>
+<circle class="fileln" cx="185.0" cy="394.1" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/cut.html</title></circle>
+<circle class="fileln" cx="269.5" cy="357.6" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/date.html</title></circle>
+<circle class="fileln" cx="258.9" cy="412.4" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/dd.html</title></circle>
+<circle class="fileln" cx="195.6" cy="412.4" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/df.html</title></circle>
+<circle class="fileln" cx="195.6" cy="339.3" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/diff.html</title></circle>
+<circle class="fileln" cx="258.9" cy="339.3" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/dig.html</title></circle>
+<circle class="fileln" cx="280.0" cy="412.4" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/dirname.html</title></circle>
+<circle class="fileln" cx="174.5" cy="339.3" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/dmesg.html</title></circle>
+<circle class="fileln" cx="280.0" cy="339.3" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/docker.html</title></circle>
+<circle class="fileln" cx="174.5" cy="412.4" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/du.html</title></circle>
+<circle class="fileln" cx="174.2" cy="375.8" r="9.8" fill="#e34c26" stroke-width="1"><title>docs/commands/echo.html</title></circle>
+<circle class="fileln" cx="280.0" cy="375.8" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/env.html</title></circle>
+<circle class="fileln" cx="248.3" cy="430.7" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/export.html</title></circle>
+<circle class="fileln" cx="290.6" cy="394.1" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/ffmpeg.html</title></circle>
+<circle class="fileln" cx="206.1" cy="430.7" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/file.html</title></circle>
+<circle class="fileln" cx="206.1" cy="321.0" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/find.html</title></circle>
+<circle class="fileln" cx="248.3" cy="321.0" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/firewall-cmd.html</title></circle>
+<circle class="fileln" cx="237.8" cy="449.0" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/fold.html</title></circle>
+<circle class="fileln" cx="216.7" cy="302.7" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/free.html</title></circle>
+<circle class="fileln" cx="216.7" cy="449.0" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/gcloud.html</title></circle>
+<circle class="fileln" cx="237.8" cy="302.7" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/getfacl.html</title></circle>
+<circle class="fileln" cx="290.6" cy="357.6" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/gh.html</title></circle>
+<circle class="fileln" cx="163.7" cy="394.3" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/git.html</title></circle>
+<circle class="fileln" cx="185.0" cy="321.0" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/go.html</title></circle>
+<circle class="fileln" cx="163.7" cy="357.4" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/gpg.html</title></circle>
+<circle class="fileln" cx="269.5" cy="321.0" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/grep.html</title></circle>
+<circle class="fileln" cx="269.5" cy="430.7" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/groupadd.html</title></circle>
+<circle class="fileln" cx="185.0" cy="430.7" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/gunzip.html</title></circle>
+<circle class="fileln" cx="301.1" cy="412.4" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/gzip.html</title></circle>
+<circle class="fileln" cx="301.1" cy="339.3" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/head.html</title></circle>
+<circle class="fileln" cx="290.6" cy="430.7" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/history.html</title></circle>
+<circle class="fileln" cx="163.9" cy="321.0" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/hostname.html</title></circle>
+<circle class="fileln" cx="290.6" cy="321.0" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/hostnamectl.html</title></circle>
+<circle class="fileln" cx="163.9" cy="430.7" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/htop.html</title></circle>
+<circle class="fileln" cx="301.1" cy="375.8" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/id.html</title></circle>
+<circle class="fileln" cx="153.0" cy="376.0" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/ifconfig.html</title></circle>
+<circle class="fileln" cx="312.0" cy="394.1" r="9.9" fill="#e34c26" stroke-width="1"><title>docs/commands/index.html</title></circle>
+<circle class="fileln" cx="142.6" cy="357.7" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/ip.html</title></circle>
+<circle class="fileln" cx="195.6" cy="302.7" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/iptables.html</title></circle>
+<circle class="fileln" cx="258.9" cy="302.7" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/join.html</title></circle>
+<circle class="fileln" cx="258.9" cy="449.0" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/journalctl.html</title></circle>
+<circle class="fileln" cx="195.6" cy="449.0" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/jq.html</title></circle>
+<circle class="fileln" cx="227.2" cy="284.4" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/kill.html</title></circle>
+<circle class="fileln" cx="227.2" cy="467.2" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/killall.html</title></circle>
+<circle class="fileln" cx="153.1" cy="412.5" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/kubectl.html</title></circle>
+<circle class="fileln" cx="153.1" cy="339.1" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/ldd.html</title></circle>
+<circle class="fileln" cx="206.1" cy="284.4" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/less.html</title></circle>
+<circle class="fileln" cx="248.3" cy="284.4" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/ln.html</title></circle>
+<circle class="fileln" cx="248.3" cy="467.2" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/ls.html</title></circle>
+<circle class="fileln" cx="206.1" cy="467.2" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/lsblk.html</title></circle>
+<circle class="fileln" cx="311.7" cy="357.6" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/lscpu.html</title></circle>
+<circle class="fileln" cx="142.4" cy="394.3" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/lsmod.html</title></circle>
+<circle class="fileln" cx="311.7" cy="430.7" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/lsof.html</title></circle>
+<circle class="fileln" cx="311.7" cy="321.0" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/lspci.html</title></circle>
+<circle class="fileln" cx="280.0" cy="449.0" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/lsusb.html</title></circle>
+<circle class="fileln" cx="322.2" cy="339.3" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/ltrace.html</title></circle>
+<circle class="fileln" cx="174.5" cy="449.0" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/make.html</title></circle>
+<circle class="fileln" cx="174.5" cy="302.7" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/man.html</title></circle>
+<circle class="fileln" cx="280.0" cy="302.7" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/md5sum.html</title></circle>
+<circle class="fileln" cx="132.0" cy="339.4" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/mkdir.html</title></circle>
+<circle class="fileln" cx="153.4" cy="302.7" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/mktemp.html</title></circle>
+<circle class="fileln" cx="301.1" cy="302.7" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/modprobe.html</title></circle>
+<circle class="fileln" cx="301.1" cy="449.0" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/mount.html</title></circle>
+<circle class="fileln" cx="153.4" cy="449.0" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/mv.html</title></circle>
+<circle class="fileln" cx="322.6" cy="375.6" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/nano.html</title></circle>
+<circle class="fileln" cx="131.9" cy="375.9" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/nc.html</title></circle>
+<circle class="fileln" cx="121.3" cy="394.2" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/netstat.html</title></circle>
+<circle class="fileln" cx="216.7" cy="266.1" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/nice.html</title></circle>
+<circle class="fileln" cx="237.8" cy="485.5" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/nl.html</title></circle>
+<circle class="fileln" cx="237.8" cy="266.1" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/nohup.html</title></circle>
+<circle class="fileln" cx="216.7" cy="485.5" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/npm.html</title></circle>
+<circle class="fileln" cx="142.6" cy="430.8" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/nslookup.html</title></circle>
+<circle class="fileln" cx="142.6" cy="320.8" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/openssl.html</title></circle>
+<circle class="fileln" cx="322.6" cy="412.6" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/passwd.html</title></circle>
+<circle class="fileln" cx="131.9" cy="412.6" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/paste.html</title></circle>
+<circle class="fileln" cx="185.0" cy="284.4" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/ping.html</title></circle>
+<circle class="fileln" cx="269.5" cy="284.4" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/pip.html</title></circle>
+<circle class="fileln" cx="269.5" cy="467.2" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/pkill.html</title></circle>
+<circle class="fileln" cx="185.0" cy="467.2" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/pnpm.html</title></circle>
+<circle class="fileln" cx="195.6" cy="266.1" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/printf.html</title></circle>
+<circle class="fileln" cx="258.9" cy="266.1" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/ps.html</title></circle>
+<circle class="fileln" cx="258.9" cy="485.5" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/python.html</title></circle>
+<circle class="fileln" cx="195.6" cy="485.5" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/realpath.html</title></circle>
+<circle class="fileln" cx="333.1" cy="357.3" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/renice.html</title></circle>
+<circle class="fileln" cx="121.3" cy="357.6" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/rev.html</title></circle>
+<circle class="fileln" cx="333.3" cy="393.8" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/rm.html</title></circle>
+<circle class="fileln" cx="332.8" cy="321.0" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/rsync.html</title></circle>
+<circle class="fileln" cx="121.5" cy="321.1" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/scp.html</title></circle>
+<circle class="fileln" cx="322.2" cy="302.7" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/screen.html</title></circle>
+<circle class="fileln" cx="322.2" cy="449.0" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/sed.html</title></circle>
+<circle class="fileln" cx="110.8" cy="412.5" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/seq.html</title></circle>
+<circle class="fileln" cx="343.7" cy="412.2" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/sftp.html</title></circle>
+<circle class="fileln" cx="290.6" cy="467.2" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/sha1sum.html</title></circle>
+<circle class="fileln" cx="163.9" cy="284.4" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/sha256sum.html</title></circle>
+<circle class="fileln" cx="290.6" cy="284.4" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/sha512sum.html</title></circle>
+<circle class="fileln" cx="163.9" cy="467.2" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/shuf.html</title></circle>
+<circle class="fileln" cx="142.8" cy="284.4" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/sleep.html</title></circle>
+<circle class="fileln" cx="311.7" cy="284.4" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/sort.html</title></circle>
+<circle class="fileln" cx="311.7" cy="467.2" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/split.html</title></circle>
+<circle class="fileln" cx="142.8" cy="467.2" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/ss.html</title></circle>
+<circle class="fileln" cx="227.2" cy="247.9" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/ssh-copy-id.html</title></circle>
+<circle class="fileln" cx="227.2" cy="503.8" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/ssh-keygen.html</title></circle>
+<circle class="fileln" cx="333.1" cy="430.9" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/ssh.html</title></circle>
+<circle class="fileln" cx="121.5" cy="431.0" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/stat.html</title></circle>
+<circle class="fileln" cx="110.8" cy="375.9" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/strace.html</title></circle>
+<circle class="fileln" cx="100.2" cy="394.2" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/strings.html</title></circle>
+<circle class="fileln" cx="343.9" cy="375.5" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/su.html</title></circle>
+<circle class="fileln" cx="248.3" cy="503.8" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/sudo.html</title></circle>
+<circle class="fileln" cx="206.1" cy="503.8" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/systemctl.html</title></circle>
+<circle class="fileln" cx="206.1" cy="247.9" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/systemd-analyze.html</title></circle>
+<circle class="fileln" cx="248.3" cy="247.9" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/tac.html</title></circle>
+<circle class="fileln" cx="132.0" cy="302.6" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/tail.html</title></circle>
+<circle class="fileln" cx="130.7" cy="449.9" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/tar.html</title></circle>
+<circle class="fileln" cx="343.7" cy="339.1" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/taskset.html</title></circle>
+<circle class="fileln" cx="110.8" cy="339.3" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/tee.html</title></circle>
+<circle class="fileln" cx="174.5" cy="266.1" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/terraform.html</title></circle>
+<circle class="fileln" cx="280.0" cy="266.1" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/timedatectl.html</title></circle>
+<circle class="fileln" cx="280.0" cy="485.5" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/timeout.html</title></circle>
+<circle class="fileln" cx="174.5" cy="485.5" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/tmux.html</title></circle>
+<circle class="fileln" cx="185.0" cy="247.9" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/top.html</title></circle>
+<circle class="fileln" cx="269.5" cy="503.8" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/touch.html</title></circle>
+<circle class="fileln" cx="185.0" cy="503.8" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/tr.html</title></circle>
+<circle class="fileln" cx="269.5" cy="247.9" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/traceroute.html</title></circle>
+<circle class="fileln" cx="343.3" cy="302.7" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/tree.html</title></circle>
+<circle class="fileln" cx="110.9" cy="302.8" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/ufw.html</title></circle>
+<circle class="fileln" cx="100.3" cy="430.8" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/umount.html</title></circle>
+<circle class="fileln" cx="354.2" cy="430.5" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/uname.html</title></circle>
+<circle class="fileln" cx="100.2" cy="357.6" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/uniq.html</title></circle>
+<circle class="fileln" cx="354.4" cy="357.2" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/unzip.html</title></circle>
+<circle class="fileln" cx="332.8" cy="467.2" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/uptime.html</title></circle>
+<circle class="fileln" cx="332.8" cy="284.4" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/useradd.html</title></circle>
+<circle class="fileln" cx="354.4" cy="393.8" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/usermod.html</title></circle>
+<circle class="fileln" cx="89.7" cy="339.3" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/vim.html</title></circle>
+<circle class="fileln" cx="89.7" cy="412.5" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/watch.html</title></circle>
+<circle class="fileln" cx="364.8" cy="412.2" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/wc.html</title></circle>
+<circle class="fileln" cx="301.1" cy="485.5" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/wget.html</title></circle>
+<circle class="fileln" cx="153.4" cy="266.1" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/which.html</title></circle>
+<circle class="fileln" cx="301.1" cy="266.1" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/who.html</title></circle>
+<circle class="fileln" cx="153.4" cy="485.5" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/whoami.html</title></circle>
+<circle class="fileln" cx="132.2" cy="266.1" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/xargs.html</title></circle>
+<circle class="fileln" cx="322.2" cy="266.1" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/xz.html</title></circle>
+<circle class="fileln" cx="322.2" cy="485.5" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/yarn.html</title></circle>
+<circle class="fileln" cx="132.2" cy="485.5" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/zcat.html</title></circle>
+<circle class="fileln" cx="216.7" cy="229.6" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/commands/zip.html</title></circle>
+<circle class="fileln" cx="383.9" cy="263.6" r="20.0" fill="#a074c4" stroke-width="1"><title>docs/danger-og-card.png</title></circle>
+<circle class="fileln" cx="409.7" cy="176.3" r="9.9" fill="#e34c26" stroke-width="1"><title>docs/danger/chmod-000-recursive.html</title></circle>
+<circle class="fileln" cx="431.3" cy="176.3" r="9.9" fill="#e34c26" stroke-width="1"><title>docs/danger/chmod-777-recursive.html</title></circle>
+<circle class="fileln" cx="420.5" cy="195.0" r="9.9" fill="#e34c26" stroke-width="1"><title>docs/danger/chown-recursive-root.html</title></circle>
+<circle class="fileln" cx="420.5" cy="157.6" r="9.9" fill="#e34c26" stroke-width="1"><title>docs/danger/crontab-remove.html</title></circle>
+<circle class="fileln" cx="442.1" cy="157.6" r="9.9" fill="#e34c26" stroke-width="1"><title>docs/danger/curl-pipe-sudo-bash.html</title></circle>
+<circle class="fileln" cx="398.9" cy="195.0" r="9.9" fill="#e34c26" stroke-width="1"><title>docs/danger/dd-to-disk.html</title></circle>
+<circle class="fileln" cx="442.1" cy="195.0" r="9.9" fill="#e34c26" stroke-width="1"><title>docs/danger/eval-remote.html</title></circle>
+<circle class="fileln" cx="398.9" cy="157.6" r="9.9" fill="#e34c26" stroke-width="1"><title>docs/danger/find-delete-root.html</title></circle>
+<circle class="fileln" cx="452.9" cy="176.3" r="9.9" fill="#e34c26" stroke-width="1"><title>docs/danger/fork-bomb.html</title></circle>
+<circle class="fileln" cx="388.1" cy="176.3" r="9.9" fill="#e34c26" stroke-width="1"><title>docs/danger/git-clean-fdx.html</title></circle>
+<circle class="fileln" cx="463.7" cy="195.0" r="9.9" fill="#e34c26" stroke-width="1"><title>docs/danger/git-push-force.html</title></circle>
+<circle class="fileln" cx="377.3" cy="157.6" r="9.9" fill="#e34c26" stroke-width="1"><title>docs/danger/git-reset-hard.html</title></circle>
+<circle class="fileln" cx="431.3" cy="139.1" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/danger/index.html</title></circle>
+<circle class="fileln" cx="431.3" cy="213.7" r="9.9" fill="#e34c26" stroke-width="1"><title>docs/danger/kill-all-processes.html</title></circle>
+<circle class="fileln" cx="409.7" cy="138.9" r="9.9" fill="#e34c26" stroke-width="1"><title>docs/danger/mkfs-on-disk.html</title></circle>
+<circle class="fileln" cx="409.7" cy="213.7" r="9.9" fill="#e34c26" stroke-width="1"><title>docs/danger/redirect-to-disk.html</title></circle>
+<circle class="fileln" cx="420.8" cy="120.4" r="9.9" fill="#e34c26" stroke-width="1"><title>docs/danger/rm-rf-home.html</title></circle>
+<circle class="fileln" cx="420.5" cy="232.4" r="9.9" fill="#e34c26" stroke-width="1"><title>docs/danger/rm-rf-slash.html</title></circle>
+<circle class="fileln" cx="377.3" cy="195.0" r="9.9" fill="#e34c26" stroke-width="1"><title>docs/danger/shred-device.html</title></circle>
+<circle class="fileln" cx="463.7" cy="157.6" r="9.9" fill="#e34c26" stroke-width="1"><title>docs/danger/shutdown-now.html</title></circle>
+<circle class="fileln" cx="452.7" cy="138.8" r="9.9" fill="#e34c26" stroke-width="1"><title>docs/danger/truncate-passwd.html</title></circle>
+<circle class="fileln" cx="452.9" cy="213.7" r="9.9" fill="#e34c26" stroke-width="1"><title>docs/danger/wget-pipe-sh.html</title></circle>
+<circle class="fileln" cx="388.1" cy="213.7" r="9.9" fill="#e34c26" stroke-width="1"><title>docs/danger/wipefs-device.html</title></circle>
+<circle class="fileln" cx="487.5" cy="232.3" r="13.1" fill="#a074c4" stroke-width="1"><title>docs/demo.gif</title></circle>
+<circle class="fileln" cx="497.2" cy="247.5" r="3.5" fill="#ff9900" stroke-width="0.5"><title>docs/example.svg</title></circle>
+<circle class="fileln" cx="512.0" cy="248.1" r="10.1" fill="#a074c4" stroke-width="1"><title>docs/guard.gif</title></circle>
+<circle class="fileln" cx="537.1" cy="263.3" r="16.9" fill="#e34c26" stroke-width="1"><title>docs/index.html</title></circle>
+<circle class="fileln" cx="559.6" cy="301.1" r="23.4" fill="#a074c4" stroke-width="1"><title>docs/og-card.png</title></circle>
+<circle class="fileln" cx="582.8" cy="396.3" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/recipes/awk-print-1.html</title></circle>
+<circle class="fileln" cx="604.0" cy="396.3" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/recipes/chmod-755.html</title></circle>
+<circle class="fileln" cx="593.4" cy="414.6" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/recipes/chmod-x.html</title></circle>
+<circle class="fileln" cx="593.4" cy="378.0" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/recipes/curl-O.html</title></circle>
+<circle class="fileln" cx="614.5" cy="378.0" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/recipes/dd-image.html</title></circle>
+<circle class="fileln" cx="572.3" cy="414.6" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/recipes/docker-run-it.html</title></circle>
+<circle class="fileln" cx="614.5" cy="414.6" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/recipes/du-sh.html</title></circle>
+<circle class="fileln" cx="572.3" cy="378.0" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/recipes/find-name.html</title></circle>
+<circle class="fileln" cx="625.1" cy="396.3" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/recipes/git-log-oneline.html</title></circle>
+<circle class="fileln" cx="561.7" cy="396.3" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/recipes/grep-r.html</title></circle>
+<circle class="fileln" cx="635.7" cy="414.6" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/recipes/index.html</title></circle>
+<circle class="fileln" cx="551.2" cy="378.0" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/recipes/kill-9.html</title></circle>
+<circle class="fileln" cx="604.0" cy="359.7" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/recipes/ln-s.html</title></circle>
+<circle class="fileln" cx="604.0" cy="432.9" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/recipes/lsof-i.html</title></circle>
+<circle class="fileln" cx="582.8" cy="359.7" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/recipes/netstat-tulpn.html</title></circle>
+<circle class="fileln" cx="582.8" cy="432.9" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/recipes/ps-aux.html</title></circle>
+<circle class="fileln" cx="593.4" cy="341.5" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/recipes/rsync-avz.html</title></circle>
+<circle class="fileln" cx="593.4" cy="451.1" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/recipes/scp.html</title></circle>
+<circle class="fileln" cx="551.2" cy="414.6" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/recipes/sed-i.html</title></circle>
+<circle class="fileln" cx="635.6" cy="378.0" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/recipes/ss-tulpn.html</title></circle>
+<circle class="fileln" cx="625.1" cy="432.9" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/recipes/ssh-i.html</title></circle>
+<circle class="fileln" cx="561.7" cy="432.9" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/recipes/tail-f.html</title></circle>
+<circle class="fileln" cx="561.7" cy="359.7" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/recipes/tar-czvf.html</title></circle>
+<circle class="fileln" cx="625.1" cy="359.7" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/recipes/tar-xzvf.html</title></circle>
+<circle class="fileln" cx="540.6" cy="359.7" r="9.7" fill="#e34c26" stroke-width="1"><title>docs/recipes/xargs-rm.html</title></circle>
+<circle class="fileln" cx="512.6" cy="371.0" r="2.1" fill="#9aa0a6" stroke-width="0.5"><title>docs/robots.txt</title></circle>
+<circle class="fileln" cx="493.9" cy="399.0" r="15.3" fill="#0060ac" stroke-width="1"><title>docs/sitemap.xml</title></circle>
+<circle class="fileln" cx="508.3" cy="686.8" r="8.8" fill="#cbcb41" stroke-width="1"><title>package.json</title></circle>
+<circle class="fileln" cx="458.9" cy="736.6" r="15.1" fill="#f1e05a" stroke-width="1"><title>scripts/danger-data.mjs</title></circle>
+<circle class="fileln" cx="484.8" cy="736.6" r="8.7" fill="#e34c26" stroke-width="1"><title>scripts/danger-og-card.html</title></circle>
+<circle class="fileln" cx="481.8" cy="770.2" r="22.2" fill="#f1e05a" stroke-width="1"><title>scripts/gen-pages.mjs</title></circle>
+<circle class="fileln" cx="476.4" cy="726.2" r="3.6" fill="#89e051" stroke-width="0.5"><title>scripts/indexnow_submit.sh</title></circle>
+<circle class="fileln" cx="471.5" cy="708.7" r="13.0" fill="#f1e05a" stroke-width="1"><title>scripts/recipes-data.mjs</title></circle>
+<circle class="fileln" cx="558.2" cy="699.7" r="5.8" fill="#cbcb41" stroke-width="0.5"><title>server.json</title></circle>
+<circle class="fileln" cx="670.7" cy="661.8" r="7.7" fill="#3178c6" stroke-width="1"><title>src/batch.ts</title></circle>
+<circle class="fileln" cx="694.1" cy="661.8" r="13.8" fill="#3178c6" stroke-width="1"><title>src/card.ts</title></circle>
+<circle class="fileln" cx="672.0" cy="695.5" r="23.2" fill="#3178c6" stroke-width="1"><title>src/cli.ts</title></circle>
+<circle class="fileln" cx="672.9" cy="631.5" r="20.1" fill="#3178c6" stroke-width="1"><title>src/danger.ts</title></circle>
+<circle class="fileln" cx="753.5" cy="615.4" r="55.3" fill="#3178c6" stroke-width="1"><title>src/db.ts</title></circle>
+<circle class="fileln" cx="640.9" cy="660.5" r="19.5" fill="#3178c6" stroke-width="1"><title>src/explain.ts</title></circle>
+<circle class="fileln" cx="707.9" cy="685.1" r="11.1" fill="#3178c6" stroke-width="1"><title>src/guard.ts</title></circle>
+<circle class="fileln" cx="713.2" cy="668.7" r="4.8" fill="#3178c6" stroke-width="0.5"><title>src/index.ts</title></circle>
+<circle class="fileln" cx="635.8" cy="692.4" r="10.1" fill="#3178c6" stroke-width="1"><title>src/json.ts</title></circle>
+<circle class="fileln" cx="733.4" cy="686.4" r="12.4" fill="#3178c6" stroke-width="1"><title>src/lint.ts</title></circle>
+<circle class="fileln" cx="633.2" cy="620.8" r="17.6" fill="#3178c6" stroke-width="1"><title>src/mcp.ts</title></circle>
+<circle class="fileln" cx="709.5" cy="713.4" r="14.9" fill="#3178c6" stroke-width="1"><title>src/parse.ts</title></circle>
+<circle class="fileln" cx="677.0" cy="589.0" r="19.0" fill="#3178c6" stroke-width="1"><title>src/scripts.ts</title></circle>
+<circle class="fileln" cx="586.0" cy="756.1" r="11.0" fill="#f1e05a" stroke-width="1"><title>test/batch.test.js</title></circle>
+<circle class="fileln" cx="610.1" cy="756.1" r="11.1" fill="#f1e05a" stroke-width="1"><title>test/cli.test.js</title></circle>
+<circle class="fileln" cx="598.0" cy="769.2" r="5.3" fill="#f1e05a" stroke-width="0.5"><title>test/danger-gallery.test.js</title></circle>
+<circle class="fileln" cx="597.9" cy="733.2" r="12.7" fill="#f1e05a" stroke-width="1"><title>test/danger.test.js</title></circle>
+<circle class="fileln" cx="580.4" cy="786.0" r="17.0" fill="#f1e05a" stroke-width="1"><title>test/explain.test.js</title></circle>
+<circle class="fileln" cx="612.6" cy="781.1" r="12.0" fill="#f1e05a" stroke-width="1"><title>test/guard.test.js</title></circle>
+<circle class="fileln" cx="621.3" cy="737.2" r="9.0" fill="#f1e05a" stroke-width="1"><title>test/json.test.js</title></circle>
+<circle class="fileln" cx="574.9" cy="737.6" r="8.8" fill="#f1e05a" stroke-width="1"><title>test/lint.test.js</title></circle>
+<circle class="fileln" cx="604.7" cy="805.5" r="11.6" fill="#f1e05a" stroke-width="1"><title>test/mcp.test.js</title></circle>
+<circle class="fileln" cx="632.1" cy="765.6" r="10.9" fill="#f1e05a" stroke-width="1"><title>test/negative-controls.test.js</title></circle>
+<circle class="fileln" cx="565.4" cy="762.3" r="8.8" fill="#f1e05a" stroke-width="1"><title>test/positive-controls.test.js</title></circle>
+<circle class="fileln" cx="633.6" cy="747.6" r="5.7" fill="#f1e05a" stroke-width="0.5"><title>test/recipes-gallery.test.js</title></circle>
+<circle class="fileln" cx="554.0" cy="743.7" r="11.2" fill="#f1e05a" stroke-width="1"><title>test/scripts.test.js</title></circle>
+<circle class="fileln" cx="603.0" cy="704.2" r="4.2" fill="#cbcb41" stroke-width="0.5"><title>tsconfig.json</title></circle>
+<text class="txt" x="356.2" y="80.1" text-anchor="middle" font-size="15.0" font-weight="600">docs</text>
+<text class="txt" x="477.4" y="691.0" text-anchor="middle" font-size="14.8" font-weight="600">scripts</text>
+<text class="txt" x="715.3" y="531.5" text-anchor="middle" font-size="15.0" font-weight="600">src</text>
+<text class="txt" x="589.5" y="709.2" text-anchor="middle" font-size="15.0" font-weight="600">test</text>
+<text class="title" x="14" y="26" font-size="16" font-weight="700">cmdxray</text>
+<text class="mark" x="888" y="22" text-anchor="end" font-size="12" opacity="0.85">🗺 repocarto</text>
+<circle cx="19" cy="923" r="5" fill="#e34c26"/>
+<text class="txt" x="29" y="927" font-size="12">HTML</text>
+<circle cx="73.8" cy="923" r="5" fill="#f1e05a"/>
+<text class="txt" x="83.8" y="927" font-size="12">JavaScript</text>
+<circle cx="171.8" cy="923" r="5" fill="#3178c6"/>
+<text class="txt" x="181.8" y="927" font-size="12">TypeScript</text>
+<circle cx="269.8" cy="923" r="5" fill="#a074c4"/>
+<text class="txt" x="279.8" y="927" font-size="12">Image</text>
+<circle cx="331.8" cy="923" r="5" fill="#6a9fb5"/>
+<text class="txt" x="341.8" y="927" font-size="12">Markdown</text>
+<circle cx="415.4" cy="923" r="5" fill="#0060ac"/>
+<text class="txt" x="425.4" y="927" font-size="12">XML</text>
+<text class="mark" x="888" y="927" text-anchor="end" font-size="11" opacity="0.8">github.com/aurelio-nakamura/repocarto</text>
+</svg>

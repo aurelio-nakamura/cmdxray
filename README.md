@@ -416,6 +416,16 @@ pinned as the database grows. See
 [CONTRIBUTING.md](CONTRIBUTING.md) for the (short) workflow; CI runs the build +
 tests on Node 18/20/22 for every push and PR.
 
+## Codebase map
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/aurelio-nakamura/cmdxray/main/docs/codemap.svg" alt="Codebase map of cmdxray" width="640">
+</p>
+
+<sub>Every file is a circle — size = lines of code, color = language, nesting = folders.
+Generated offline with [repocarto](https://github.com/aurelio-nakamura/repocarto),
+a zero-dependency codebase-map tool I also maintain.</sub>
+
 ## License
 
 MIT.
