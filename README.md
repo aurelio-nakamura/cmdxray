@@ -11,6 +11,9 @@ that flags the destructive parts (is that `curl | sudo bash` safe?) and a clean
 
 No server. No upload. Nothing leaves your machine.
 
+**Building an AI agent?** cmdxray is also an [MCP server](#mcp-server--a-safety-gate-for-ai-agents-that-run-shell-commands) — a
+safety gate that lets an agent check a shell command *before* it runs it.
+
 **▶ [Try it in your browser](https://aurelio-nakamura.github.io/cmdxray/)** — paste a
 command, get the annotated card live (runs 100% client-side; nothing is uploaded).
 Or browse the [command reference](https://aurelio-nakamura.github.io/cmdxray/commands/)
